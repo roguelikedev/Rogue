@@ -34,12 +34,9 @@ public class PlayerController : Acter {
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
 				book.payload.attackPower *= 2;
 				book.payload.payload = SpellGenerator.Instance().Explosion();
-				book.payload.payload.attackPower *= 2;
 				SpellGenerator.Instance().Split(book, 2);
-//				book.payload = SpellGenerator.Instance().RaiseDead();
-//				book.payload.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
-//				SpellGenerator.Instance().Split(book.payload, 1);
 				
+//				book.payload = SpellGenerator.Instance().Explosion();
 				Equip(book);
 				spellpower += 4;
 				break;

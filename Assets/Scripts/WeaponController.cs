@@ -150,7 +150,7 @@ public class WeaponController : ItemController {
 		
 		var sg = other.GetComponent<ShieldGolem>();
 		if (sg != null && !attackVictims.Contains(victim)) {
-			if (sg.friendly != parent.friendly || friendlyFireActive) AudioSource.PlayClipAtPoint(sg.clang, transform.position);
+			if (friendlyFireActive || sg.friendly != parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position);
 			attackVictims.Add(victim);
 		}
 		

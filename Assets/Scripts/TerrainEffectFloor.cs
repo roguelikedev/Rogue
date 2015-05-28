@@ -14,7 +14,7 @@ public class TerrainEffectFloor : MonoBehaviour {
 	}
 
 	protected virtual void _OnTriggerEnter(Collider other) {
-		if (other.tag != "Throwable Weapon") return;
+		if (! other.name.Contains("Brick")) return;
 		var item = other.GetComponentInParent<WeaponController>();
 		if (item == null) {
 			Debug.LogError("mistagged (shouldn't be Throwable Weapon) " + item);

@@ -22,6 +22,7 @@ public class SpellGenerator : MonoBehaviour {
 	public WeaponController blankBook;
 	public WeaponController blankSpell;
 	public WeaponController blankWand;
+	public FireballController fireball;
 	public static SpellGenerator Instance() {
 		return GameObject.FindObjectOfType<SpellGenerator>();
 	}
@@ -216,19 +217,20 @@ public class SpellGenerator : MonoBehaviour {
 		return mortar;
 	}
 	public WeaponController Explosion () {
-		var explosion = Instantiate(blankSpell);
-		explosion.GetComponent<Animator>().runtimeAnimatorController = Instantiate(expand.runtimeAnimatorController);
-		explosion.GetComponent<SpriteRenderer>().sprite = explosionSprite;
+		var explosion = Instantiate(fireball);
+		explosion.name = "fireball";		// fucking GUI doesn't support lower case
 		
-		explosion.friendlyFireActive = true;
-		explosion.attackPower *= 2;
-		explosion.firePayloadOnTimeout = true;
-		explosion.firedNoise = explosionSound;
-		explosion.transform.rotation = Quaternion.identity;
-
-		explosion.name = "fireball";
-		explosion.damageType = WeaponController.DMG_FIRE;
-		return explosion;
+//		explosion.GetComponent<Animator>().runtimeAnimatorController = Instantiate(expand.runtimeAnimatorController);
+//		explosion.GetComponent<SpriteRenderer>().sprite = explosionSprite;
+//		
+//		explosion.friendlyFireActive = true;
+//		explosion.attackPower *= 2;
+//		explosion.firePayloadOnTimeout = true;
+//		explosion.firedNoise = explosionSound;
+//		explosion.transform.rotation = Quaternion.identity;
+//		explosion.damageType = WeaponController.DMG_FIRE;
+		
+		return explosion as WeaponController;
 	}
 	/// <summary> Split the payload of rval. </summary>
 	public WeaponController Split (WeaponController rval, int count) {

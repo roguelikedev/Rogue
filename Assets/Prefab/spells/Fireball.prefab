@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &438150
 Transform:
   m_ObjectHideFlags: 1
@@ -28,7 +28,7 @@ Transform:
   m_GameObject: {fileID: 153460}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -72,27 +72,33 @@ MonoBehaviour:
   m_GameObject: {fileID: 153460}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e5692215b5d71d44b17b27cb45e0ed3, type: 3}
+  m_Script: {fileID: 11500000, guid: 4d98a2c2bf2d02745879ad837c16ba9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  depth: 0
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
+  deleteOnLanding: 0
   lifetime: -1
   bodySlot: 0
   damageType: 2
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 0
-  firePayloadOnTimeout: 0
-  thrownForceMultiplier: 0
+  firePayloadOnTimeout: 1
+  thrownHorizontalMultiplier: 0
+  thrownVerticalMultiplier: 0
   friendlyFireActive: 1
   attackVictims: []
   attackActive: 0
   armorClass: 0
-  attackPower: 2
-  depth: 0
+  attackPower: 5
   impactNoise: {fileID: 0}
   firedNoise: {fileID: 8300000, guid: 83e32df7720209e4ebeaa606ce0e0bd3, type: 3}
+  constantNoise: {fileID: 0}
+  audioSource: {fileID: 0}
   charges: -1
+  speedCoefficient: 1
 --- !u!136 &13623010
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -102,8 +108,8 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: .25
-  m_Height: .5
+  m_Radius: 1
+  m_Height: 1
   m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!212 &21296580

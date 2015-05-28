@@ -138,15 +138,16 @@ MonoBehaviour:
   bodySlot: 0
   damageType: 0
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 0
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 1
   thrownVerticalMultiplier: 1
-  friendlyFireActive: 0
+  friendlyFireActive: 1
   attackVictims: []
   attackActive: 0
   armorClass: 0
-  attackPower: 4
+  attackPower: 5
   impactNoise: {fileID: 0}
   firedNoise: {fileID: 0}
   constantNoise: {fileID: 0}

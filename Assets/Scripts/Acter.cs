@@ -651,7 +651,8 @@ public abstract class Acter : MonoBehaviour {
 			return;
 		}
 		EquippedWeapon.attackVictims.Clear();
-		if (EquippedWeapon.tag == "Throwable Weapon") {
+		if (EquippedWeapon.name.Contains("Brick")) {
+			Debug.LogError("main hand bricks are broken!");
 			ThrowWeapon(DropWeapon(EquippedWeapon));
 			Equip(bareHands);
 		}
@@ -667,7 +668,9 @@ public abstract class Acter : MonoBehaviour {
 			return;
 		}
 		if (EquippedSecondaryWeapon.thrownHorizontalMultiplier != 0) {
-			ThrowWeapon(DropWeapon(EquippedSecondaryWeapon));
+			var brick = DropWeapon(EquippedSecondaryWeapon);
+			brick.transform.localPosition = Vector3.zero;		// world coordinate is added in ThrowWeapon
+			ThrowWeapon(brick);
 		}
 		else if (EquippedSecondaryWeapon.payload != null) {
 			var p = Instantiate(EquippedSecondaryWeapon.payload);
@@ -686,6 +689,7 @@ public abstract class Acter : MonoBehaviour {
 	public bool Heal(float qty) {
 		if (hitPoints == MaxHitPoints && fireDamageTaken == 0) return false;
 		if (State == ST_DEAD) return false;
+		
 		hitPoints = Mathf.Min(MaxHitPoints, hitPoints + qty);
 		fireDamageTaken = Mathf.Max(fireDamageTaken - qty, 0);
 		return true;
