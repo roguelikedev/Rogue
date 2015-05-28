@@ -7,8 +7,7 @@ public class EstusController : WeaponController {
 	{
 		if (payload == null) {
 			payload = SpellGenerator.Instance().Heal();
-			payload.attackPower = 1;	
-//			payload.firedNoise = impactNoise;
+			payload.attackPower = 1;
 		}
 		base._FixedUpdate ();
 	}

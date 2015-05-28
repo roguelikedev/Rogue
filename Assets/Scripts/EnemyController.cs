@@ -101,7 +101,7 @@ public class EnemyController : Acter, IDepthSelectable
 		return targetLocn;
 	}
 
-	Vector3 DirectionToTarget() {
+	protected virtual Vector3 DirectionToTarget() {
 		Vector3 targetLocn = transform.position;
 		targetLocn = DirectionFromTrap();
 		if (targetLocn == transform.position) targetLocn = DirectionToFoe();

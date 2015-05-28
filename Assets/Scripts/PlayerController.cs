@@ -25,6 +25,7 @@ public class PlayerController : Acter {
 				GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
+				bow.payload.payload.payload = SpellGenerator.Instance().Explosion();
 				Equip(bow);
 				speed += 50;
 				break;
@@ -155,7 +156,6 @@ public class PlayerController : Acter {
 		else {
 			announcer.StatsChanged("strength", meleeMultiplier, armorClass);
 		}
-		
 		
 		if (!_FixedUpdate()) return;
 		if (MainClass == "") return;

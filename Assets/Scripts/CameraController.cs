@@ -45,7 +45,7 @@ public class CameraController : MonoBehaviour {
 	
 	public void NoteText(string text) {
 		var t = new List<string>(notes.text.Split('\n'));
-		while (t.Count > 5) t.RemoveAt(0);
+		while (t.Count > 9) t.RemoveAt(0);
 		t.Add(text);
 		notes.text = string.Join("\n", t.ToArray());
 		notesOutline.text = notes.text;

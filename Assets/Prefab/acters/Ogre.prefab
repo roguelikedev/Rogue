@@ -363,7 +363,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 127754}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1.5, z: 0}
+  m_LocalPosition: {x: 0, y: -1.10000002, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 483308}
@@ -477,7 +477,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 34.3692207, y: 5.6243639, z: 5.962883}
+  m_LocalPosition: {x: 22.4347839, y: 8.22918701, z: 5.91181755}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 498328}
@@ -563,11 +563,7 @@ MonoBehaviour:
   grappling: {fileID: 0}
   selfGameObject: {fileID: 198304}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
-  skinColor:
-    r: 1
-    g: .713725507
-    b: .568627477
-    a: 1
+  skinColor: {r: 1, g: .713725507, b: .568627477, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
   anim: {fileID: 9598328}
   weapon: {fileID: 13683918}
@@ -617,8 +613,8 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: .600000024
-  m_Height: 2.20000005
+  m_Radius: 1.5
+  m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!136 &13685136

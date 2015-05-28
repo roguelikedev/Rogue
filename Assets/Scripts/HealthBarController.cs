@@ -4,9 +4,11 @@ using System.Collections.Generic;
 
 public class HealthBarController : MonoBehaviour {
 	public Acter player;
-	Vector3 offset;
+	protected Vector3 offset;
 	public SpriteRenderer sprite;
 	List<SpriteRenderer> buddies = new List<SpriteRenderer>();
+	
+	
 	// Use this for initialization
 	void Awake () {
 		offset = transform.position;
@@ -53,9 +55,11 @@ public class HealthBarController : MonoBehaviour {
 		// follow the acter here instead of in a LateUpdate() to avoid dangling pointers -- they SetCurrentHP every frame anyway
 		transform.position = player.transform.position + offset;
 		for (int lcv = 0; lcv < buddies.Count; ++lcv) {
-			var xOffset = (lcv % (int)hpPerColor) * 0.5f;// + lcv * 0.05f;
+			var xOffset = (lcv % (int)hpPerColor) * sprite.bounds.extents.x * 2;// + lcv * 0.05f;
+//			print (xOffset + " before scaling");
+//			xOffset *= sprite.bounds.extents.x - .24f);
+//			print (xOffset + " post scaling");
 			buddies[lcv].transform.position = transform.position + new Vector3(xOffset, 0);//lcv * 0.5f, 0);
 		}
-		
 	}
 }

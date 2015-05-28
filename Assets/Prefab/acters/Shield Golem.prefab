@@ -239,8 +239,9 @@ GameObject:
   - 54: {fileID: 5498328}
   - 95: {fileID: 9598328}
   - 114: {fileID: 11498326}
+  - 136: {fileID: 13637760}
   m_Layer: 0
-  m_Name: Carrot Titan
+  m_Name: Shield Golem
   m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -477,7 +478,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.9983521, y: 8.00903702, z: 1.92334032}
+  m_LocalPosition: {x: 11.8171368, y: 12.2695332, z: -3.6394701}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 498328}
@@ -493,7 +494,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198328}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -.25, y: .699999988, z: 0}
+  m_LocalPosition: {x: -1.23000002, y: -.49000001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 498304}
@@ -549,11 +550,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 198304}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1d63331a091a33c47a307c911884d03f, type: 3}
+  m_Script: {fileID: 11500000, guid: ff090ae95d685254f8e18db8f8385d0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 200
-  racialBaseHitPoints: 1
+  speed: 150
+  racialBaseHitPoints: 6
   meleeMultiplier: 10
   spellpower: 0
   level: 0
@@ -563,7 +564,7 @@ MonoBehaviour:
   grappling: {fileID: 0}
   selfGameObject: {fileID: 198304}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
-  skinColor: {r: 1, g: .713725507, b: .568627477, a: 1}
+  skinColor: {r: .435294151, g: .56078434, b: .68235296, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
   anim: {fileID: 9598328}
   weapon: {fileID: 13683918}
@@ -574,11 +575,14 @@ MonoBehaviour:
   damageAnnouncer: {fileID: 11415696, guid: 371818138a5790e48aeb6645f2489a0d, type: 2}
   friendly: 0
   huge: 1
-  depth: 17
-  racialLevel: 6
+  depth: 10
+  racialLevel: 7
   commonness: 10
   fleeDistance: 0
   isUnliving: 0
+  baseActionDelay: 50
+  baseMovementFrames: 50
+  clang: {fileID: 8300000, guid: 845c14a089b1da841816fed84bad5477, type: 3}
 --- !u!135 &13598662
 SphereCollider:
   m_ObjectHideFlags: 1
@@ -589,8 +593,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: .660000026
-  m_Center: {x: 0, y: -3, z: 0}
+  m_Radius: 1.20000005
+  m_Center: {x: 0, y: -2.5, z: 0}
 --- !u!136 &13634736
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -600,10 +604,23 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 1
+  m_Radius: .75
   m_Height: 5.5
   m_Direction: 1
-  m_Center: {x: 0, y: -1.5, z: 0}
+  m_Center: {x: .600000024, y: -1.5, z: 0}
+--- !u!136 &13637760
+CapsuleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 198304}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 1.5
+  m_Height: 7
+  m_Direction: 1
+  m_Center: {x: -1.5, y: -.5, z: 0}
 --- !u!136 &13683918
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -2055,7 +2072,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: b780fe329580efe49805b58d294b7f31, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 790589e2e12a12d4ea073d865be09f8c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:

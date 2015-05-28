@@ -24,6 +24,7 @@ public abstract class Acter : MonoBehaviour {
 	public const string C_FIGHT = "fighter", C_WIZARD = "wizard", C_ROGUE = "rogue", C_BRUTE = "brute";
 	public bool isAquatic = false;
 	public bool freeAction = false;
+	int CLVL_SOFT_CAP = 9;
 	
 	
 	public void GainLevel(string whichClass) {
@@ -33,23 +34,24 @@ public abstract class Acter : MonoBehaviour {
 				if (hpFromLevels < racialBaseHitPoints * 2) {
 					hpFromLevels++;
 				}
-				if (hpFromLevels < racialBaseHitPoints) {
-					meleeMultiplier += 0.25f;
+				if (level < CLVL_SOFT_CAP) {
+					meleeMultiplier++;
 				}
-				meleeMultiplier += 0.25f;
 				break;
 			case C_ROGUE:
 				if (hpFromLevels < racialBaseHitPoints) {
 					hpFromLevels++;
+					meleeMultiplier += .75f;
 				}
-				meleeMultiplier += 0.25f;
 				speed += 90 / (level + 1);
 				break;
 			case C_WIZARD:
 				if (hpFromLevels < racialBaseHitPoints) {
 					hpFromLevels += 0.5f;
 				}
-				spellpower++;
+				if (level < CLVL_SOFT_CAP) {
+					spellpower += .75f;
+				}
 				break;
 			default:
 				Debug.LogError("no such class: " + whichClass);
@@ -611,23 +613,22 @@ public abstract class Acter : MonoBehaviour {
 		if (!HasSlotEquipped(w.bodySlot)) return true;
 		// armor
 		if (w.armorClass > 0) {
-			return GetSlot(w.SlotAffinity) == null
-				|| GetArmor(GetSlot(w.SlotAffinity)) == null
-					|| w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass
-					;
+			if (GetSlot(w.SlotAffinity) == null) return true;
+			if (GetArmor(GetSlot(w.SlotAffinity)) == null) return true;
+			print (w + " vs " + GetArmor(GetSlot(w.SlotAffinity)));
+			return (w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass);
+//			return GetSlot(w.SlotAffinity) == null
+//				|| GetArmor(GetSlot(w.SlotAffinity)) == null
+//					|| w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass
+//					;
 		}
 		// weapons
 		if (w.isSpellbook) return true;
-		if (w.tag == "offhandweapon") {
-			if (EquippedSecondaryWeapon == null) return true;
-			return w.name != EquippedSecondaryWeapon.name || w.Depth >= EquippedSecondaryWeapon.Depth;
-		}
-		
-		if (w.name != EquippedWeapon.name) {
-			return true;
-		}
-		else if (w.Depth > EquippedWeapon.Depth) return true;
-		return false;
+		var comparedWeapon = w.tag == "offhandweapon" ? EquippedSecondaryWeapon : EquippedWeapon;
+		if (comparedWeapon == null) return true;
+		if (comparedWeapon.name != w.name) return true;
+		else if (w.charges > comparedWeapon.charges) return true;
+		return w.Depth > EquippedWeapon.Depth;
 	}
 	#endregion
 	#region combat
@@ -788,7 +789,8 @@ public abstract class Acter : MonoBehaviour {
 			return;	// handled in WeaponDidCollide() to avoid tramp variable
 		}
 		if (type == WeaponController.DMG_HEAL) {
-			Heal(quantity);
+			if (Heal(quantity))	damageAnnouncer.AnnounceHealed();
+			
 			return;
 		}
 		
@@ -835,7 +837,9 @@ public abstract class Acter : MonoBehaviour {
 				existingAllies.ForEach(a => controlledCR += a.ChallengeRating);
 				if (controlledCR >= spellpower) {
 					sufficientControl = false;
-					CameraController.Instance.NoteText(Name + " couldn't zombify " + other.Name + ", insufficient spellpower");
+					if (other.State == ST_DEAD) {
+						CameraController.Instance.NoteText(Name + " couldn't zombify " + other.Name + ", insufficient spellpower");
+					}
 				}
 			}
 			if (sufficientControl && other.Zombify()) {
@@ -843,6 +847,8 @@ public abstract class Acter : MonoBehaviour {
 				var enemy = other.GetComponent<EnemyController>();
 				if (enemy != null && enemy.friendly) enemy.fleeDistance = 1;
 			}
+			
+			
 			// fall through to allow "raise dead damage" to ghosts
 		}
 		if (weaponController.damageType == WeaponController.DMG_PHYS && other.isBlocking) {

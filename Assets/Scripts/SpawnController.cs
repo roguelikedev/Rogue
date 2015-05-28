@@ -28,6 +28,7 @@ public class SpawnController : MonoBehaviour {
 	public EnemyController enemyGhoul;
 	public EnemyController enemyCarrotTitan;
 	public EnemyController enemyIronLich;
+	public EnemyController enemyShieldGolem;
 	
 	public WeaponController itemBrick;
 	public WeaponController itemBow;
@@ -243,16 +244,18 @@ public class SpawnController : MonoBehaviour {
 				boom = what.payload;
 			}
 			
-			var leaf = boom;
-			var control = 0;
-			while (leaf != null) {
-				if (leaf.damageType != WeaponController.DMG_HEAL) leaf.friendlyFireActive = false;
-				leaf = leaf.payload;
-				if (control > 100) {
-					Debug.LogError("infinite loop");
-					break;
-				}
-			}
+			boom.MapChildren(wc => wc.friendlyFireActive = false);
+			
+//			var leaf = boom;
+//			var control = 0;
+//			while (leaf != null) {
+//				if (leaf.damageType != WeaponController.DMG_HEAL) leaf.friendlyFireActive = false;
+//				leaf = leaf.payload;
+//				if (control > 100) {
+//					Debug.LogError("infinite loop");
+//					break;
+//				}
+//			}
 			var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
 //			foreach(var emitter in possibleEmitters) {
 			ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
@@ -446,30 +449,32 @@ public class SpawnController : MonoBehaviour {
 			EnemyController whichMob = ChooseMob(depth, areaType);
 			if (whichMob == enemyIronLich) isCaptain = true;
 			
-			var hugeness = Random.Range(-1, 1.5f);
-			if (hugeness > 1.25f) {
-				var tmp = whichMob.transform.localScale;
-				tmp.x *= hugeness; tmp.y *= hugeness; tmp.z *= hugeness;
-				whichMob.transform.localScale = tmp;
-				whichMob.racialBaseHitPoints += hugeness;
-				whichMob.Heal(whichMob.MaxHitPoints);
-				whichMob.meleeMultiplier = Mathf.Max(whichMob.meleeMultiplier * hugeness, whichMob.meleeMultiplier + hugeness);
-				whichMob.name = "Huge " + whichMob.name;
-				whichMob.racialLevel = (int)(whichMob.racialLevel * hugeness);
+			var remainingEL = encounterLevel - whichMob.racialLevel;
+			if (remainingEL > depth) {
+				var hugeness = Random.Range(-1, 1.5f);
+				if (hugeness > 1.25f) {
+					var tmp = whichMob.transform.localScale;
+					tmp.x *= hugeness; tmp.y *= hugeness; tmp.z *= hugeness;
+					whichMob.transform.localScale = tmp;
+					whichMob.racialBaseHitPoints += hugeness;
+					whichMob.Heal(whichMob.MaxHitPoints);
+					whichMob.meleeMultiplier = Mathf.Max(whichMob.meleeMultiplier * hugeness, whichMob.meleeMultiplier + hugeness);
+					whichMob.name = "Huge " + whichMob.name;
+					whichMob.racialLevel = (int)(whichMob.racialLevel * hugeness);
+				}
+				
+				var levels = (int) (isCaptain ? Mathf.Min(remainingEL, whichMob.racialLevel * 2) : Random.Range(0, remainingEL));
+				
+				AddLevels(whichMob, levels);
+				if (isCaptain) {
+					whichMob.GetComponentInChildren<DamageAnnouncer>().SetElite();
+					whichMob.name = "Champion " + whichMob.name;
+					isCaptain = false;
+				}
 			}
-			encounterLevel += whichMob.racialLevel;
 			
-			var levels = Random.Range(0, depth);
-			if (isCaptain) levels += Mathf.Min(depth, whichMob.racialLevel * 2);
-			AddLevels(whichMob, levels);
-			encounterLevel += whichMob.level;
-			if (isCaptain) {
-				whichMob.GetComponentInChildren<DamageAnnouncer>().SetElite();
-				whichMob.name = "Champion " + whichMob.name;
-			}
 			AddEquipment(whichMob, isCaptain);
-			isCaptain = false;
-			
+			encounterLevel += whichMob.ChallengeRating;
 			whichMob.transform.position = RandomLocation();
 		}
 	}

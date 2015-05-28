@@ -142,15 +142,23 @@ public class WeaponController : ItemController {
 		if (other.name.Contains("Tile") && deleteOnHitting) {
 			FirePayload(other);
 		}
-		if (other.name != "torso") return;
 		
 		Acter victim = other.GetComponentInParent<Acter>();
 		if (victim == null) return;
 		
+		var parent = IsProjectile ? thrownBy : GetComponentInParent<Acter>();
+		
+		var sg = other.GetComponent<ShieldGolem>();
+		if (sg != null && !attackVictims.Contains(victim)) {
+			if (sg.friendly != parent.friendly || friendlyFireActive) AudioSource.PlayClipAtPoint(sg.clang, transform.position);
+			attackVictims.Add(victim);
+		}
+		
+		if (other.name != "torso") return;
+		
 		if (attackVictims.Contains(victim)) return;
 		attackVictims.Add(victim);
 		
-		var parent = IsProjectile ? thrownBy : GetComponentInParent<Acter>();
 		if (parent == null) {
 			if (friendlyFireActive) {
 				victim.TakeDamage(attackPower, damageType);
@@ -177,6 +185,9 @@ public class WeaponController : ItemController {
 		var leaf = payload;
 		while (leaf != null) {
 			Lambda(leaf);
+			foreach (var mp in leaf.multiPayload) {
+				mp.MapChildren(Lambda);
+			}
 			leaf = leaf.payload;
 		}
 	}

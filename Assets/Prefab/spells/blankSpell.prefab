@@ -181,6 +181,7 @@ MonoBehaviour:
   bodySlot: 0
   damageType: 0
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 0
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 0

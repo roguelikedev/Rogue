@@ -21,6 +21,7 @@ public class TerrainController : MonoBehaviour {
 	public Texture stone;
 	public Texture skulls;
 	public Material forest;
+	public Material cathedral;
 	public int trapRarity;
 	bool showTraps;
 	public EnchanterStatue enchanterStatue;
@@ -181,6 +182,7 @@ public class TerrainController : MonoBehaviour {
 				break;
 		}
 
+		if (currentAreaType >= D_CHRISTMAS) tile = room.tiles[0].GetComponent<Rigidbody>();//.GetComponent<MeshRenderer>().material.mainTexture;
 		var nextRoom = GenerateAtIndex(x, tile, floorTexture, currentAreaType);
 		rooms.Add(nextRoom);
 		if (showTraps) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
@@ -353,6 +355,7 @@ public class TerrainController : MonoBehaviour {
 				break;
 			default: break;
 		}
+		if (areaType >= D_CHRISTMAS) farWall.GetComponent<MeshRenderer>().material = cathedral;
 		
 		if (areaType == D_ARMORY) {
 			#region FIXME: WHYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
