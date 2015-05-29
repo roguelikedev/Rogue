@@ -6,7 +6,7 @@ public class GhostController : EnemyController {
 	{
 		switch(type) {
 			case WeaponController.DMG_HEAL:
-				base.TakeDamage(quantity, WeaponController.DMG_DEATH);
+				base.TakeDamage(quantity / GLOBAL_DMG_SCALING, WeaponController.DMG_DEATH);
 				break;
 			case WeaponController.DMG_RAISE:
 				base.TakeDamage(MaxHitPoints, WeaponController.DMG_DEATH);

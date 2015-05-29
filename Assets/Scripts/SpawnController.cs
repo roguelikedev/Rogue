@@ -148,6 +148,9 @@ public class SpawnController : MonoBehaviour {
 					bestMatches.Add(enemySuccubus);
 					bestMatches.Add(enemyGhoul);
 					break;
+				case TerrainController.D_FOREST:
+					bestMatches.Add(enemyCarrotTitan);
+					break;
 				default:
 					break;
 			}
@@ -195,10 +198,10 @@ public class SpawnController : MonoBehaviour {
 			}
 			wand.charges = Random.Range(4, 10);
 			whichMob.Equip(wand);
-			equipmentLevel += wand.depth;
+			equipmentLevel += wand.Depth;
 		}
 		
-		while (whichMob.level > equipmentLevel)
+		while (whichMob.ChallengeRating > equipmentLevel)
 		{
 			var poss = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), whichMob.ChallengeRating)
 					.ConvertAll(i => i as WeaponController);
@@ -213,7 +216,7 @@ public class SpawnController : MonoBehaviour {
 				continue;
 			}
 			var what = Instantiate(prefab);
-			equipmentLevel += what.depth;
+			equipmentLevel += what.Depth;
 			whichMob.Equip(what);
 		}
 	}
@@ -273,12 +276,11 @@ public class SpawnController : MonoBehaviour {
 			var box = what.GetComponent<BoxCollider>();
 			emitter.transform.localPosition = box.center;
 			emitter.transform.localScale = new Vector3(box.size.magnitude, 1, 1);
-			emitter.emissionRate *= box.size.magnitude;
-//			emitter.startLifetime *= Mathf.Min(1, what.depth/10 + .5);
+//			emitter.startSize *= (box.size.magnitude / 27);
+//			emitter.emissionRate *= box.size.magnitude;
 			var c = emitter.startColor;
-			c.a = .2f + what.depth / 20;
+			c.a *= .25f + what.Depth / 20;
 			emitter.startColor = c;
-//			emitter.GetComponent<Renderer>().material.color = new Color(1,0,1);
 		}
 		
 		return what;
@@ -339,7 +341,7 @@ public class SpawnController : MonoBehaviour {
 			}
 			else if (itemInstance.GetComponent<EstusController>() == null)  EnchantEquipment(itemInstance, depth);
 			rval.contents.Add(itemInstance);
-			lcv += itemInstance.depth;
+			lcv += itemInstance.Depth;
 		}
 		if (Random.Range(0,3) != 0) rval.contents.Add(MakeTrinket(depth));
 //		rval.contents.Add(Instantiate(boot));

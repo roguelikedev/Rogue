@@ -143,52 +143,6 @@ Transform:
   - {fileID: 293782529}
   m_Father: {fileID: 913825204}
   m_RootOrder: 1
---- !u!1001 &69007933
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 39.9148712
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 14.1919308
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 98.1093674
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 438150, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 153460, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: cb60fbef156fb9845870bfd507810260, type: 2}
-  m_IsPrefabParent: 0
 --- !u!1 &119555090
 GameObject:
   m_ObjectHideFlags: 0
@@ -303,7 +257,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: trapfinding
+  m_Text: katak the rogue
 --- !u!222 &121766630
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1519,7 +1473,7 @@ Transform:
   - {fileID: 1924174124}
   - {fileID: 249661889}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
 --- !u!114 &165839880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1628,7 +1582,7 @@ Transform:
   - {fileID: 913825204}
   - {fileID: 156045264}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
 --- !u!114 &198576041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2352,7 +2306,7 @@ RectTransform:
   - {fileID: 1635857573}
   - {fileID: 1952422596}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 6
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -2573,7 +2527,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
 --- !u!1 &583455975
 GameObject:
   m_ObjectHideFlags: 0
@@ -2821,7 +2775,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 5
 --- !u!114 &779965478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2913,6 +2867,7 @@ MonoBehaviour:
   rippingSound: {fileID: 8300000, guid: 0f6738c6fa0ae664eb7cf59c694d5229, type: 3}
   moanSound: {fileID: 8300000, guid: adc9e28343e879849b2b9383e1ec72bf, type: 3}
   fireSound: {fileID: 8300000, guid: 9e229802ee14a74418ccf40b9486a54a, type: 3}
+  chimeSound: {fileID: 8300000, guid: 403ff2a076142a842bbb55b3f4b967a3, type: 3}
   blankBook: {fileID: 11482274, guid: 39f83794b075ac0438bd9b69f190b2ac, type: 2}
   blankSpell: {fileID: 11408120, guid: 9a01aa0e4e98b7b46af89a0ade5e11aa, type: 2}
   blankWand: {fileID: 11482274, guid: fe170e236483ecf49b94561608e71bd4, type: 2}
@@ -2989,7 +2944,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 7
 --- !u!1 &822194313
 GameObject:
   m_ObjectHideFlags: 0
@@ -3032,7 +2987,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: book of life
+  m_Text: friends
 --- !u!222 &822194315
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3907,7 +3862,7 @@ Transform:
   - {fileID: 1660166374}
   - {fileID: 1408648088}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
 --- !u!95 &1286502522
 Animator:
   serializedVersion: 3

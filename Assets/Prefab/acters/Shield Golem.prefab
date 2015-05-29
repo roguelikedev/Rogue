@@ -575,7 +575,7 @@ MonoBehaviour:
   damageAnnouncer: {fileID: 11415696, guid: 371818138a5790e48aeb6645f2489a0d, type: 2}
   friendly: 0
   huge: 1
-  depth: 10
+  depth: 15
   racialLevel: 7
   commonness: 10
   fleeDistance: 0

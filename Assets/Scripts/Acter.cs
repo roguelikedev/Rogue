@@ -25,6 +25,7 @@ public abstract class Acter : MonoBehaviour {
 	public bool isAquatic = false;
 	public bool freeAction = false;
 	int CLVL_SOFT_CAP = 9;
+	public const float GLOBAL_DMG_SCALING = 0.5f;
 	
 	
 	public void GainLevel(string whichClass) {
@@ -74,7 +75,7 @@ public abstract class Acter : MonoBehaviour {
 	protected void BeginRegenerate(float qtyPerSecond) {
 		OnFixedUpdate += () => {
 			if (State != ST_DEAD) {
-				hitPoints += qtyPerSecond / 60;
+				hitPoints += (qtyPerSecond / 60) * GLOBAL_DMG_SCALING;
 				if (hitPoints > MaxHitPoints - fireDamageTaken) hitPoints = MaxHitPoints - fireDamageTaken;
 			}
 		};
@@ -264,6 +265,7 @@ public abstract class Acter : MonoBehaviour {
 				break;
 			case ST_HURT:
 				isBlocking = false;
+				GetComponent<Animator>().speed = 1;
 				anim.Play(ST_HURT);
 				if (pendingSpell != null) {
 					StopCoroutine(pendingSpell);
@@ -689,9 +691,8 @@ public abstract class Acter : MonoBehaviour {
 	public bool Heal(float qty) {
 		if (hitPoints == MaxHitPoints && fireDamageTaken == 0) return false;
 		if (State == ST_DEAD) return false;
-		
-		hitPoints = Mathf.Min(MaxHitPoints, hitPoints + qty);
-		fireDamageTaken = Mathf.Max(fireDamageTaken - qty, 0);
+		TakeDamage(qty, WeaponController.DMG_HEAL);
+		damageAnnouncer.AnnounceHealed();
 		return true;
 	}
 	const int SPEED_WHEN_PARALYZED = 1;
@@ -792,14 +793,20 @@ public abstract class Acter : MonoBehaviour {
 		if (type == WeaponController.DMG_RAISE) {
 			return;	// handled in WeaponDidCollide() to avoid tramp variable
 		}
+		
+		quantity *= GLOBAL_DMG_SCALING;
 		if (type == WeaponController.DMG_HEAL) {
-			if (Heal(quantity))	damageAnnouncer.AnnounceHealed();
+			if (hitPoints == MaxHitPoints && fireDamageTaken == 0) return;
+			if (State == ST_DEAD) return;
 			
+			hitPoints = Mathf.Min(MaxHitPoints, hitPoints + quantity);
+			fireDamageTaken = Mathf.Max(fireDamageTaken - quantity, 0);
 			return;
 		}
 		
 		blood.Play ();
-		if (type != WeaponController.DMG_DEATH) quantity /= armorClass;
+		
+		if (type != WeaponController.DMG_DEATH) quantity /= (armorClass * (type == WeaponController.DMG_FIRE ? 2 : 1));
 		hitPoints -= quantity;
 		if (type == WeaponController.DMG_FIRE) fireDamageTaken += quantity;
 		

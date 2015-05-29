@@ -241,7 +241,9 @@ public class TerrainController : MonoBehaviour {
 		if (rooms.Exists(r => r.xIndex == index)) return null;
 		print ("make index " + index + " depth " + Depth);
 		if (texture == null) {
-			texture = floorType.GetComponent<MeshRenderer>().sharedMaterial.GetTexture("_MainTex");
+			var tmp = floorType.GetComponent<MeshRenderer>();
+			if (tmp == null) tmp = tmp.GetComponentInChildren<MeshRenderer>();
+			texture = tmp.sharedMaterial.GetTexture("_MainTex");
 		}
 		
 		var room = new Room();

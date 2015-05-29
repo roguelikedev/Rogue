@@ -19,6 +19,7 @@ public class SpellGenerator : MonoBehaviour {
 	public AudioClip rippingSound;
 	public AudioClip moanSound;
 	public AudioClip fireSound;
+	public AudioClip chimeSound;
 	public WeaponController blankBook;
 	public WeaponController blankSpell;
 	public WeaponController blankWand;
@@ -200,6 +201,8 @@ public class SpellGenerator : MonoBehaviour {
 		
 		rval.lifetime = 20;
 		rval.damageType = WeaponController.DMG_HEAL;
+		
+		rval.firedNoise = chimeSound;
 //		rval.attackPower = .1f;
 		rval.friendlyFireActive = true;
 		rval.name = "healing";

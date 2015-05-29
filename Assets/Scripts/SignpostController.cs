@@ -43,7 +43,7 @@ public class SignpostController : ItemController {
 //			Bubble.color -= fade;
 		}
 		if (info == "") {
-			switch(Random.Range(0,24)) {
+			switch(Random.Range(0,26)) {
 				case 0:
 					info = "you're doomed";
 					break;
@@ -117,6 +117,12 @@ public class SignpostController : ItemController {
 					break;
 				case 22:
 					info = "only physical\ndamage will\ncause stagger";
+					break;
+				case 23:
+					info = "katak cannot find\nhis back shoe";
+					break;
+				case 24:
+					info = "katak cannot find\namulet of trapfinding";
 					break;
 				default: break;		// player says "illegible"
 			}

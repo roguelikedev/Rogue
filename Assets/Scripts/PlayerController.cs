@@ -23,6 +23,7 @@ public class PlayerController : Acter {
 		switch (which) {
 			case C_ROGUE:
 				GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
+				freeAction = true;
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
 				bow.payload.payload.payload = SpellGenerator.Instance().Explosion();
@@ -49,6 +50,8 @@ public class PlayerController : Acter {
 				spellpower += 4;
 				meleeMultiplier += 0.5f;
 				Equip (Instantiate(SpawnController.Instance.itemShillalegh));
+				var carrot = Instantiate (SpawnController.Instance.enemyCarrotTitan);
+				carrot.friendly = true;
 				break;
 			case C_BRUTE:
 				BeginRegenerate(1);

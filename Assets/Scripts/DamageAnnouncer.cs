@@ -22,7 +22,7 @@ public class DamageAnnouncer : MonoBehaviour {
 	public AudioClip chimeSound;
 	
 	public void AnnounceHealed() {
-		AudioSource.PlayClipAtPoint(chimeSound, transform.position, CameraController.Instance.Volume);
+//		AudioSource.PlayClipAtPoint(chimeSound, transform.position, CameraController.Instance.Volume);
 	}
 	
 	public void AnnounceDeath() {
