@@ -8,9 +8,28 @@ public class SignpostController : ItemController {
 	int timeToFadeout = int.MinValue;
 	public WeaponController brick;
 	public WeaponController payload;
+	EnemyController spawnIn;
+	public int fixedSpeech;
 
 
 	public void Speak() {		// FIXME:  DRY
+		if (spawnIn != null) {
+			var punish = fixedSpeech == -1 && PlayerController.Instance.MainClass == Acter.C_GESTALT;
+			if (punish) {
+				spawnIn = SpawnController.Instance.enemyDemon;
+				info = "die, murderer";
+				Speech.fontSize = 200;
+			}
+			var e = Instantiate(spawnIn);
+			e.gameObject.SetActive(true);
+			e.transform.position = transform.position + new Vector3(0, 2, 0);
+			spawnIn = null;
+			if (punish) {
+				SpawnController.Instance.AddLevels(e, PlayerController.Instance.level * 4);
+				SpawnController.Instance.AddEquipment(e, true);
+			}
+		}
+	
 		if (info == "") {
 			PlayerController.Instance.Speak("illegible");
 		}
@@ -43,9 +62,16 @@ public class SignpostController : ItemController {
 //			Bubble.color -= fade;
 		}
 		if (info == "") {
-			switch(Random.Range(0,26)) {
-				case 0:
-					info = "you're doomed";
+			var sw = fixedSpeech != 0 ? fixedSpeech : Random.Range(0, 27);
+			switch(sw) {
+				case -1:
+					info = "left click";
+					spawnIn = SpawnController.Instance.enemyCHUD;
+					break;
+				case -2:
+					info = "T gives it to her\nspace gets it\nright click uses it";
+					payload = SpawnController.Instance.itemEstusFlask;
+					spawnIn = SpawnController.Instance.enemyWoman;
 					break;
 				case 1:
 					info = "fire damage\ndoesn't\nregenerate";
@@ -91,8 +117,15 @@ public class SignpostController : ItemController {
 					info = "heavy armor\nslows movement";
 					break;
 				case 14:
-					info = "stay strong";
-					payload = SpellGenerator.Instance().Heal();
+					if (PlayerController.Instance.friendless) {
+						info = "die, you\nmurderer";
+						payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_DEATH);
+						payload.attackPower = 10;
+					}
+					else {
+						info = "stay strong";
+						payload = SpellGenerator.Instance().Heal();
+					}
 					break;
 				case 15:
 					info = "beware of a\nghoul's touch";
@@ -124,9 +157,21 @@ public class SignpostController : ItemController {
 				case 24:
 					info = "katak cannot find\namulet of trapfinding";
 					break;
+				// case 25
+					// goto default
+				case 26:
+					info = "you're doomed";
+					break;
 				default: break;		// player says "illegible"
 			}
 		}
+		if (PlayerController.Instance.friendless) {
+			if (fixedSpeech == -2) {
+				info = "you are friendless\nyou murderer";
+				payload = null;
+			}
+		}
+		
 		base._FixedUpdate ();
 	}
 }

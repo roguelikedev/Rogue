@@ -9,6 +9,8 @@ public class PlayerController : Acter {
 	public override string MainClass { get { return mainClass; } }
 	TextMesh SpeechBubble { get { return GetComponentInChildren<TextMesh>(); } }
 	public static PlayerController Instance { get { return GameObject.FindObjectOfType<PlayerController>(); } }
+	public bool friendless;
+	public WeaponController murderMask;
 	
 	void Start () {
 		xpToLevel = baseXPToLevel;
@@ -17,12 +19,13 @@ public class PlayerController : Acter {
 	
 	public void SetClass(string which) {
 		if (which == "priest") mainClass = C_WIZARD;
+		else if (which == "murderer") mainClass = C_GESTALT;
 		else mainClass = which;
 		GameObject.FindObjectOfType<Canvas>().gameObject.SetActive(false);
 		WeaponController book;
 		switch (which) {
 			case C_ROGUE:
-				GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
+				TerrainController.Instance.ShowTraps = true;
 				freeAction = true;
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
@@ -33,12 +36,15 @@ public class PlayerController : Acter {
 			case C_WIZARD:
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
+//				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_FIRE);
 				book.payload.attackPower *= 2;
 				book.payload.payload = SpellGenerator.Instance().Explosion();
-				SpellGenerator.Instance().Split(book, 2);
-				
-//				book.payload = SpellGenerator.Instance().Explosion();
+//				SpellGenerator.Instance().Split(book, 4);
+				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
+				
+				Equip (Instantiate(SpawnController.Instance.itemBroom));
+				
 				spellpower += 4;
 				break;
 			case "priest":
@@ -50,8 +56,8 @@ public class PlayerController : Acter {
 				spellpower += 4;
 				meleeMultiplier += 0.5f;
 				Equip (Instantiate(SpawnController.Instance.itemShillalegh));
-				var carrot = Instantiate (SpawnController.Instance.enemyCarrotTitan);
-				carrot.friendly = true;
+				var pet = Instantiate (SpawnController.Instance.enemyTreant);
+				pet.friendly = true;
 				break;
 			case C_BRUTE:
 				BeginRegenerate(1);
@@ -63,9 +69,9 @@ public class PlayerController : Acter {
 				meleeMultiplier++;
 				break;
 			case C_FIGHT:
-				var machet = Instantiate(SpawnController.Instance.itemMachete);
-				machet.payload = SpellGenerator.Instance().Heal();
-				Equip (machet);
+				var weapon = Instantiate(SpawnController.Instance.itemBarMace);
+				weapon.payload = SpellGenerator.Instance().Heal();
+				Equip (weapon);
 //				Equip (Instantiate(SpawnController.Instance.itemMachete));
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
@@ -73,6 +79,18 @@ public class PlayerController : Acter {
 				Equip (Instantiate(SpawnController.Instance.itemSkirt));
 				Equip (Instantiate(SpawnController.Instance.itemShield));
 				meleeMultiplier++;
+				break;
+			case "murderer":
+				freeAction = friendless = isAquatic = true;
+				var murderWeapon = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemMachete);
+				murderWeapon.payload = SpellGenerator.Instance().Heal();
+				murderWeapon.payload.firedNoise = SpellGenerator.Instance().rippingSound;
+				murderWeapon.payload.payload = SpellGenerator.Instance().RaiseDead();
+				Equip(murderWeapon);
+				Equip(Instantiate(murderMask));
+				speed += 200;
+				SpawnController.Instance.stinginess++;
+				TerrainController.Instance.statuesDestroyed--;
 				break;
 			default: break;
 		}
@@ -156,6 +174,7 @@ public class PlayerController : Acter {
 		else {
 			announcer.StatsChanged("strength", meleeMultiplier, armorClass);
 		}
+		if (MainClass == C_GESTALT) poiseBreakCounter = 0;
 		
 		if (!_FixedUpdate()) return;
 		if (MainClass == "") return;

@@ -15,7 +15,7 @@ GameObject:
   - 114: {fileID: 11482274}
   m_Layer: 0
   m_Name: Hiltless
-  m_TagString: Untagged
+  m_TagString: slashing weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -78,6 +78,7 @@ MonoBehaviour:
   bodySlot: 0
   damageType: 1
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 0
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 0

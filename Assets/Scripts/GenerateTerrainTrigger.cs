@@ -11,6 +11,7 @@ public class GenerateTerrainTrigger : MonoBehaviour {
 	void OnTriggerEnter(Collider other) {
 //		if (other.GetComponentInParent<PlayerController>() == null || waitingOnDestroy) return;
 		if (other.GetComponentInParent<PlayerController>() == null) return;
+//		GameObject.FindObjectOfType<TerrainController>() .GenerateTerrainAtIndexCallback(index, room);
 		terrainController.GenerateTerrainAtIndexCallback(index, room);
 //		waitingOnDestroy = true;
 //		Destroy(gameObject);

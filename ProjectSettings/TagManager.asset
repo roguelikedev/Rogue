@@ -21,6 +21,7 @@ TagManager:
   - offhandweapon
   - grapple zone
   - spell
+  - slashing weapon
   layers:
   - Default
   - TransparentFX

@@ -102,6 +102,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   danger: {fileID: 21216394, guid: 08d9c8f1890cbb94a81b9bb62d968474, type: 2}
+  damage: .25
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

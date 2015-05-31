@@ -26,7 +26,7 @@ public class SpawnController : MonoBehaviour {
 	public EnemyController enemyDemon;
 	public EnemyController enemySuccubus;
 	public EnemyController enemyGhoul;
-	public EnemyController enemyCarrotTitan;
+	public EnemyController enemyTreant;
 	public EnemyController enemyIronLich;
 	public EnemyController enemyShieldGolem;
 	
@@ -149,7 +149,7 @@ public class SpawnController : MonoBehaviour {
 					bestMatches.Add(enemyGhoul);
 					break;
 				case TerrainController.D_FOREST:
-					bestMatches.Add(enemyCarrotTitan);
+					bestMatches.Add(enemyTreant);
 					break;
 				default:
 					break;
@@ -164,12 +164,14 @@ public class SpawnController : MonoBehaviour {
 	}
 	
 	// FIXME: checking wantstoequip() here is all that prevents grapplecontrollers from grappling half a screen away
-	void AddEquipment (EnemyController whichMob, bool christmas) {
+	// FIXME: it doesn't
+	public void AddEquipment (EnemyController whichMob, bool christmas) {
 		var equipmentLevel = 0;
 		
 		if (christmas) {
 			var poss = new List<WeaponController>();
 			for (int safety = 0; safety < 1000 && poss.Count == 0; ++safety) {
+				print (safety);
 				poss.AddRange(ChooseByDepth(AllPrimaryAndSecondaryWeapons.ConvertAll(i => i as IDepthSelectable)
 					, whichMob.ChallengeRating)
 					.ConvertAll(i => i as WeaponController));
@@ -221,7 +223,7 @@ public class SpawnController : MonoBehaviour {
 		}
 	}
 	
-	void AddLevels (EnemyController whichMob, int quantity) {
+	public void AddLevels (EnemyController whichMob, int quantity) {
 		for (int lcv = 0; lcv < quantity; ++lcv) {
 			whichMob.GainLevel(whichMob.MainClass);
 		}
@@ -247,7 +249,7 @@ public class SpawnController : MonoBehaviour {
 				boom = what.payload;
 			}
 			
-			boom.MapChildren(wc => wc.friendlyFireActive = false);
+//			boom.MapChildren(wc => wc.friendlyFireActive = false);
 			
 //			var leaf = boom;
 //			var control = 0;
@@ -288,7 +290,7 @@ public class SpawnController : MonoBehaviour {
 	
 	public ItemController MakeSpecialItem () {
 		var poss = AllEquipment.ConvertAll(i => i as ItemController);
-		poss.RemoveAll(i => i.name.Contains("wand") || i.name.Contains("book"));
+		poss.RemoveAll(i => i.name.Contains("wand") || i.name.Contains("book") || i.GetComponent<WeaponController>().IsArmor);
 		poss = ChooseByDepth(poss.ConvertAll(i => i as IDepthSelectable), 27).ConvertAll(i => i as ItemController);
 		poss.Add(amulet);
 		var rval = poss[Random.Range(0, poss.Count)];
@@ -327,7 +329,9 @@ public class SpawnController : MonoBehaviour {
 		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
 		possibilities.Add(itemEstusFlask as WeaponController);
 		possibilities.Clear();
-		possibilities.Add(SpellGenerator.Instance().blankBook);
+		if (PlayerController.Instance.spellpower > 1) {
+			possibilities.Add(SpellGenerator.Instance().blankBook);
+		}
 		for (int lcv = 0; lcv <= depth;) {
 			print (lcv + " / " + depth);
 			if (possibilities.Count == 0) break;
@@ -337,19 +341,13 @@ public class SpawnController : MonoBehaviour {
 			var itemInstance = Instantiate(item);
 			if (itemInstance.name.Contains("book")) {
 				SpellGenerator.Generate((int)depth + 1, itemInstance);
-				print (itemInstance.Description);
+//				print (itemInstance.Description);
 			}
 			else if (itemInstance.GetComponent<EstusController>() == null)  EnchantEquipment(itemInstance, depth);
 			rval.contents.Add(itemInstance);
 			lcv += itemInstance.Depth;
 		}
 		if (Random.Range(0,3) != 0) rval.contents.Add(MakeTrinket(depth));
-//		rval.contents.Add(Instantiate(boot));
-//		var _ = Instantiate(boot);
-//		_.waterWalking = false;
-//		_.freeAction = true;
-//		rval.contents.Add(_);
-		
 		
 		rval.contents.ForEach(i => {
 			i.gameObject.SetActive(false);
@@ -414,10 +412,12 @@ public class SpawnController : MonoBehaviour {
 		}
 		#endregion
 		
-		if (areaType == TerrainController.D_CHRISTMAS) {
+		if (areaType == TerrainController.D_CHRISTMAS || areaType == TerrainController.D_TROVE) {
 			for (int lcv = 0; lcv < 10 / stinginess; ++lcv) {
 				var s = Random.Range(0, stinginess);
-				if (s == stinginess - 1) MakeTreasureChest(depth).transform.position = RandomLocation();
+				if (s == stinginess - 1 || areaType == TerrainController.D_TROVE) {
+					MakeTreasureChest(depth).transform.position = RandomLocation();
+				}
 				else MakeEquipmentBox(depth).transform.position = RandomLocation();
 			}
 			return;
@@ -446,7 +446,7 @@ public class SpawnController : MonoBehaviour {
 		}
 		
 		float encounterLevel = 0;
-		bool isCaptain = Random.Range(0, 5) == 0;
+		bool isCaptain = Random.Range(0, 5) == 0;		// huge enemies are always captains
 		while (encounterLevel <= depth) {
 			EnemyController whichMob = ChooseMob(depth, areaType);
 			if (whichMob == enemyIronLich) isCaptain = true;
@@ -463,9 +463,11 @@ public class SpawnController : MonoBehaviour {
 					whichMob.meleeMultiplier = Mathf.Max(whichMob.meleeMultiplier * hugeness, whichMob.meleeMultiplier + hugeness);
 					whichMob.name = "Huge " + whichMob.name;
 					whichMob.racialLevel = (int)(whichMob.racialLevel * hugeness);
+					isCaptain = true;
 				}
 				
-				var levels = (int) (isCaptain ? Mathf.Min(remainingEL, whichMob.racialLevel * 2) : Random.Range(0, remainingEL));
+				var levels = (int) (isCaptain ? Mathf.Min(remainingEL, whichMob.racialLevel * 2)
+											  : Random.Range(0, Mathf.Max(remainingEL, whichMob.ChallengeRating)));
 				
 				AddLevels(whichMob, levels);
 				if (isCaptain) {

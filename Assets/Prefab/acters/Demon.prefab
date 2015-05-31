@@ -580,6 +580,7 @@ MonoBehaviour:
   fleeDistance: 0
   isUnliving: 1
   inverseAuraRefreshRate: 6
+  auraDamage: 1
 --- !u!135 &13581592
 SphereCollider:
   m_ObjectHideFlags: 1

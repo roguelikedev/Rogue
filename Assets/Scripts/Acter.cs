@@ -18,10 +18,10 @@ public abstract class Acter : MonoBehaviour {
 	protected float armorClass = 1;
 	public float meleeMultiplier = 1;
 	protected float poiseBreakCounter = 0;
-	protected float Poise { get { return armorClass / 5 + racialBaseHitPoints; } }
+	public float Poise { get { return armorClass / 5 + racialBaseHitPoints; } }
 	public float spellpower = 1;
 	public int level = 0;
-	public const string C_FIGHT = "fighter", C_WIZARD = "wizard", C_ROGUE = "rogue", C_BRUTE = "brute";
+	public const string C_FIGHT = "fighter", C_WIZARD = "wizard", C_ROGUE = "rogue", C_BRUTE = "brute", C_GESTALT = "hybrid";
 	public bool isAquatic = false;
 	public bool freeAction = false;
 	int CLVL_SOFT_CAP = 9;
@@ -53,6 +53,12 @@ public abstract class Acter : MonoBehaviour {
 				if (level < CLVL_SOFT_CAP) {
 					spellpower += .75f;
 				}
+				break;
+			case C_GESTALT:
+				GainLevel(C_ROGUE);
+				GainLevel(C_WIZARD);
+				GainLevel(C_FIGHT);
+				level -= 3;
 				break;
 			default:
 				Debug.LogError("no such class: " + whichClass);
@@ -150,7 +156,13 @@ public abstract class Acter : MonoBehaviour {
 			if (!bodyParts.ContainsKey(spr)) bodyParts.Add(spr, spr.sortingOrder);
 		}
 		if (friendly && PlayerController.Instance != null && this != PlayerController.Instance) {
-			PlayerController.Instance.Speak("nice to meet you");
+			bool danger = false;
+			if (PlayerController.Instance.MainClass == C_WIZARD && PlayerController.Instance.EquippedSecondaryWeapon != null) {
+				PlayerController.Instance.EquippedSecondaryWeapon.MapChildren(w => {
+					if (w.name.Contains("fireball")) danger = true;
+				});
+			}
+			PlayerController.Instance.Speak(danger ? "if i blow you up\ni'm sorry" : "nice to meet you");
 		}
 	}
 	public void ChangeSkinColor() {
@@ -242,7 +254,7 @@ public abstract class Acter : MonoBehaviour {
 					}
 					else {
 //						if (largeWeapon || huge) anim.Play("downward_attack");
-						if (largeWeapon || huge) anim.CrossFade("downward_attack", 0.1f);
+						if (largeWeapon || huge || EquippedWeapon.tag == "slashing weapon") anim.CrossFade("downward_attack", 0.1f);
 						else anim.Play(ST_ATTACK);
 					}
 				}
@@ -313,9 +325,10 @@ public abstract class Acter : MonoBehaviour {
 	}
 	#endregion
 	#region movement
-	public virtual void EnterTerrainCallback(string terrType) {
+	public virtual void EnterTerrainCallback(string terrType) { EnterTerrainCallback(terrType, 0); }
+	public virtual void EnterTerrainCallback(string terrType, float damage) {
 		if (terrType == "thorns" && racialBaseHitPoints != 0) {
-			TakeDamage(0.1f, WeaponController.DMG_PHYS);
+			TakeDamage(damage, WeaponController.DMG_PHYS);
 			return;
 		}
 		if (terrainCollisions.ContainsKey(terrType))
@@ -347,10 +360,12 @@ public abstract class Acter : MonoBehaviour {
 		
 		var _speed = speed;
 		if (isScrambling && grappledBy.Count == 0) _speed *= 1.5f;
-		foreach (WeaponController armor in equippedArmor.Values) {
-			var slowness = 1 - armor.speedCoefficient;
-			slowness /= meleeMultiplier;
-			_speed *= 1 - slowness;
+		if (MainClass != C_GESTALT) {
+			foreach (WeaponController armor in equippedArmor.Values) {
+				var slowness = 1 - armor.speedCoefficient;
+				slowness /= meleeMultiplier;
+				_speed *= 1 - slowness;
+			}
 		}
 		if (terrainCollisions.ContainsKey("water") && terrainCollisions["water"] > 0 && !isAquatic) _speed /= 2;
 		direction *= _speed * Time.deltaTime;
@@ -611,6 +626,7 @@ public abstract class Acter : MonoBehaviour {
 	public bool WantsToEquip (WeaponController w) {
 		if (w.IsEquipped) return false;
 		if (MainClass == C_BRUTE && !w.IsArmor && !w.IsMeleeWeapon && w.GetComponent<EstusController>() == null) return false;
+		if (MainClass == C_GESTALT && !w.IsArmor && !w.IsOffhand) return false;
 		
 		if (!HasSlotEquipped(w.bodySlot)) return true;
 		// armor
@@ -626,7 +642,7 @@ public abstract class Acter : MonoBehaviour {
 		}
 		// weapons
 		if (w.isSpellbook) return true;
-		var comparedWeapon = w.tag == "offhandweapon" ? EquippedSecondaryWeapon : EquippedWeapon;
+		var comparedWeapon = w.IsOffhand ? EquippedSecondaryWeapon : EquippedWeapon;
 		if (comparedWeapon == null) return true;
 		if (comparedWeapon.name != w.name) return true;
 		else if (w.charges > comparedWeapon.charges) return true;
@@ -669,6 +685,7 @@ public abstract class Acter : MonoBehaviour {
 			Debug.LogError("expected AttackActiveFramesDidBegin to be canceled due to attack interrupted");
 			return;
 		}
+		if (EquippedSecondaryWeapon == null) return;			// no idea
 		if (EquippedSecondaryWeapon.thrownHorizontalMultiplier != 0) {
 			var brick = DropWeapon(EquippedSecondaryWeapon);
 			brick.transform.localPosition = Vector3.zero;		// world coordinate is added in ThrowWeapon
@@ -747,41 +764,46 @@ public abstract class Acter : MonoBehaviour {
 	}
 	IEnumerator CastSpell() {
 		if (EquippedSecondaryWeapon.tag != "offhandweapon") {
-			Debug.LogError("attempted to cast a spell with " + EquippedWeapon);
+			Debug.LogError("attempted to cast a spell with " + EquippedSecondaryWeapon);
 		}
-		anim.Play(ST_CAST);
-		float castTime = EquippedSecondaryWeapon.Depth / Mathf.Pow(spellpower, 1.5f);
-		var isWand = EquippedSecondaryWeapon.name.Contains("wand");
-		if (isWand) castTime = 0;
-		yield return new WaitForSeconds(castTime);
-		
-		anim.CrossFade("spell_complete", 0.5f);
-		yield return new WaitForSeconds(0.5f);
-		
-		if (!isWand) {
-			EquippedSecondaryWeapon.MapChildren(w => w.tag = "spell");
+		if (EquippedSecondaryWeapon.payload == null) {
+			Debug.LogError(EquippedSecondaryWeapon + " has no payload");
 		}
-		Action<WeaponController> Fire = wc => {
-			wc = Instantiate(wc);
-			wc.gameObject.SetActive(true);
-			ThrowWeapon(wc, EquippedSecondaryWeapon.transform);
-			if (wc.tag == "spell") {
-				wc.ApplySpellpower();
+		else {
+			anim.Play(ST_CAST);
+			float castTime = EquippedSecondaryWeapon.Depth / Mathf.Pow(spellpower, 1.5f);
+			var isWand = EquippedSecondaryWeapon.name.Contains("wand");
+			if (isWand) castTime = 0;
+			yield return new WaitForSeconds(castTime);
+			
+			anim.CrossFade("spell_complete", 0.5f);
+			yield return new WaitForSeconds(0.5f);
+			
+			if (!isWand) {
+				EquippedSecondaryWeapon.MapChildren(w => w.tag = "spell");
 			}
-		};
-		Fire(EquippedSecondaryWeapon.payload);
-		foreach (var mp in EquippedSecondaryWeapon.multiPayload) {
-			Fire(mp);
+			Action<WeaponController> Fire = wc => {
+				wc = Instantiate(wc);
+				wc.gameObject.SetActive(true);
+				ThrowWeapon(wc, EquippedSecondaryWeapon.transform);
+				if (wc.tag == "spell") {
+					wc.ApplySpellpower();
+				}
+			};
+			Fire(EquippedSecondaryWeapon.payload);
+			foreach (var mp in EquippedSecondaryWeapon.multiPayload) {
+				Fire(mp);
+			}
+	//		var p = Instantiate(EquippedSecondaryWeapon.payload);
+	//		p.gameObject.SetActive(true);
+	//		ThrowWeapon(p, EquippedSecondaryWeapon.transform);
+	//		if (p.tag == "spell") {
+	//			p.ApplySpellpower();
+	//		}
+			if (isWand) EquippedSecondaryWeapon.charges--;
+			ExitState();
+			pendingSpell = null;
 		}
-//		var p = Instantiate(EquippedSecondaryWeapon.payload);
-//		p.gameObject.SetActive(true);
-//		ThrowWeapon(p, EquippedSecondaryWeapon.transform);
-//		if (p.tag == "spell") {
-//			p.ApplySpellpower();
-//		}
-		if (isWand) EquippedSecondaryWeapon.charges--;
-		ExitState();
-		pendingSpell = null;
 	}
 	#endregion
 	public virtual void TakeDamage(float quantity, int type)

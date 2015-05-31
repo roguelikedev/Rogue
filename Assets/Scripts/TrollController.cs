@@ -6,11 +6,12 @@ public class TrollController : EnemyController {
 	
 	void Start() {
 		BeginRegenerate(regenRate);
+		armorClass += 2;
 	}
 	
 	protected override bool _FixedUpdate ()
 	{
-		if (hitPoints < racialBaseHitPoints / 2) fleeDistance = 4;
+		if (hitPoints < racialBaseHitPoints) fleeDistance = 4;
 		if (hitPoints >= racialBaseHitPoints) fleeDistance = 0;
 		return base._FixedUpdate ();
 	}

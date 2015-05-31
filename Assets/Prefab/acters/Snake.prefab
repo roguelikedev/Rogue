@@ -362,7 +362,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 127754}
-  m_LocalRotation: {x: 0, y: 0, z: -.50000006, w: .866025388}
+  m_LocalRotation: {x: 0, y: 0, z: -.342020422, w: .939692497}
   m_LocalPosition: {x: -0, y: -.889999986, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -477,7 +477,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 35.5001526, y: 2.44135451, z: -15.8687325}
+  m_LocalPosition: {x: 15.7109222, y: 6.88033772, z: .373382568}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 484652}
@@ -574,7 +574,7 @@ MonoBehaviour:
   damageAnnouncer: {fileID: 11415696, guid: 371818138a5790e48aeb6645f2489a0d, type: 2}
   friendly: 0
   huge: 0
-  depth: 4
+  depth: 3
   racialLevel: 1
   commonness: 10
   fleeDistance: 0

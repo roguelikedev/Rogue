@@ -235,6 +235,25 @@ public class SpellGenerator : MonoBehaviour {
 		
 		return explosion as WeaponController;
 	}
+	/// <summary> Split the payload of rval and apply velocity on Z axis. </summary>
+	public WeaponController Fan (WeaponController rval, int count) {
+		if (rval.payload == null) return rval;
+		var baseOffset = 1f;
+		for (int lcv = 0; lcv < count; ++lcv) {
+			var clone = Instantiate(rval.payload);
+			var offset = baseOffset;
+			if (lcv % 2 == 0) offset *= -1;
+			offset *= (1 + lcv / 2);
+//			clone.transform.position = new Vector3(0, 0, offset);
+			clone.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY;
+			clone.thrownParralaxModifier = offset;
+//			clone.GetComponent<Rigidbody>().velocity = clone.GetComponent<Rigidbody>().velocity + new Vector3 (0,0,offset);
+			rval.multiPayload.Add(clone);
+		}
+		rval.payload.name = "fan(" + count + ")" + rval.payload.name;
+		
+		return rval;
+	}
 	/// <summary> Split the payload of rval. </summary>
 	public WeaponController Split (WeaponController rval, int count) {
 		if (rval.payload == null) return rval;
@@ -328,7 +347,8 @@ public class SpellGenerator : MonoBehaviour {
 		
 		if (Random.Range(0, 4) == 0) {
 			var splits = Random.Range(1, depth);
-			Split(parent, splits);
+			if (Random.Range(0,2) == 0) Split(parent, splits);
+			else Fan(parent, splits);
 			leaf.depth *= splits;
 		}
 		for (int lcv = leaf.depth; lcv < depth; ) {
@@ -342,7 +362,8 @@ public class SpellGenerator : MonoBehaviour {
 			leaf.payload = RandomSpell();
 			if (lcv < depth / 2 && Random.Range(0, 4) == 0) {
 				var splits = Random.Range(1, depth / lcv);
-				Split(leaf, splits);
+				if (Random.Range(0,2) == 0) Split(leaf, splits);
+				else Fan(leaf, splits);
 				leaf.depth *= splits;
 			}
 			lcv += leaf.depth;			

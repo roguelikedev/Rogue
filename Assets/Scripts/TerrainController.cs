@@ -25,6 +25,7 @@ public class TerrainController : MonoBehaviour {
 	public int trapRarity;
 	bool showTraps;
 	public EnchanterStatue enchanterStatue;
+	public static TerrainController Instance { get { return GameObject.FindObjectOfType<TerrainController>(); } }
 	public bool ShowTraps {
 		get {
 			return showTraps;
@@ -43,7 +44,7 @@ public class TerrainController : MonoBehaviour {
 		}
 	}
 	bool hasSpawnedEmpty = false;
-	int Depth
+	public int Depth
 	{
 		get {
 			if (!hasSpawnedEmpty) return 0;
@@ -63,7 +64,8 @@ public class TerrainController : MonoBehaviour {
 	const int TILES_PER_ROOM = 5;
 	const int MAX_ROOMS = 3;
 	public const int D_FOREST = 0, D_WATER = 1, D_CAVE = 2, D_THORNS = 3, D_TOMB = 4, D_CHRISTMAS = 5, D_ARMORY = 6
-					, D_TEMPLE = 7, D_SHOP = 8, D_ALTAR = 9;
+					, D_MERCY = 7, D_TROG = 8, D_ENCHANT = 9, D_TROVE = 10;
+	List<int> visitedSpecialRooms = new List<int>();
 	const int D_FINAL = 9;		// this is +1'd before use
 	#endregion	
 	#region Room	
@@ -168,14 +170,17 @@ public class TerrainController : MonoBehaviour {
 			case D_ARMORY:
 				areaName = "Old Armory";
 				break;
-			case D_TEMPLE:
+			case D_MERCY:
 				areaName = "Temple of Mercy";
 				break;
-			case D_SHOP:
+			case D_TROG:
 				areaName = "Blood Vendor";
 				break;
-			case D_ALTAR:
+			case D_ENCHANT:
 				areaName = "Enchanted Altar";
+				break;
+			case D_TROVE:
+				areaName = "Treasure Trove";
 				break;
 			default:
 				Debug.LogError("generate terrain to right failed in switch statement");
@@ -212,20 +217,26 @@ public class TerrainController : MonoBehaviour {
 				case D_ARMORY:
 					speech = "i feel shrewd";
 					break;
-				case D_TEMPLE:
+				case D_MERCY:
 					speech = "this isn't so bad";
 					break;
-				case D_SHOP:
+				case D_TROG:
 					speech = "i smell blood";
 					break;
-				case D_ALTAR:
+				case D_ENCHANT:
 					speech = "i sense power";
+					break;
+				case D_TROVE:
+					speech = "the glint of gold";
 					break;
 				default:
 					Debug.LogError("generate terrain to right failed in switch statement");
 					break;
 			}
 			if (speech != "") {
+				if (PlayerController.Instance.MainClass == Acter.C_GESTALT) {
+					speech = "   ...";
+				}
 				PlayerController.Instance.Speak(speech);
 			}
 		}
@@ -235,6 +246,48 @@ public class TerrainController : MonoBehaviour {
 		CleanUp(x);
 	}
 	
+	int ChooseNextRoomType (int areaType) {
+		int rval;
+		while (true) {
+			if (areaType >= D_CHRISTMAS) {
+				rval = Random.Range(D_FOREST, D_CHRISTMAS);
+			}
+			else if (Random.Range(0,4) > 0) rval = areaType;
+			else if (Random.Range(0, SpawnController.Instance.stinginess) != 0) rval = Random.Range(D_FOREST, D_CHRISTMAS);
+			else {
+				int specialType;
+				switch(areaType) {
+					case D_CAVE:
+						specialType = D_MERCY;
+						break;
+					case D_THORNS:
+						specialType = D_TROG;
+						break;
+					case D_WATER:
+						specialType = D_ARMORY;
+						break;
+					case D_TOMB:
+						specialType = D_TROVE;
+						break;
+					case D_FOREST:
+						specialType = D_ENCHANT;
+						break;
+					default:
+						specialType = D_CHRISTMAS;					
+						break;
+				}
+				if (visitedSpecialRooms.Contains(specialType)) specialType = Random.Range(0, 3) > 0 ? D_CHRISTMAS : specialType;
+				visitedSpecialRooms.Add(specialType);
+				rval = specialType;
+			}
+			if (rval == D_WATER && Depth < Mathf.Sqrt(spawnController.enemyTentacleMonster.Depth)) continue;
+			if (rval == D_FOREST && Depth < Mathf.Sqrt(spawnController.enemyTreant.Depth)) continue;
+			if (rval == D_TOMB && Depth < Mathf.Sqrt(spawnController.enemySuccubus.Depth)) continue;
+			else break;
+		}
+		return rval;
+	}
+	
 	const int Z_MIN = -1, Z_MAX = 1;
 	Room GenerateAtIndex(int index, Rigidbody floorType, Texture texture, int areaType)
 	{
@@ -242,30 +295,55 @@ public class TerrainController : MonoBehaviour {
 		print ("make index " + index + " depth " + Depth);
 		if (texture == null) {
 			var tmp = floorType.GetComponent<MeshRenderer>();
-			if (tmp == null) tmp = tmp.GetComponentInChildren<MeshRenderer>();
+			if (tmp == null) tmp = floorType.GetComponentInChildren<MeshRenderer>();
 			texture = tmp.sharedMaterial.GetTexture("_MainTex");
 		}
 		
 		var room = new Room();
-		while (true) {
-			if (areaType >= D_CHRISTMAS) {
-				room.nextRoomType = Random.Range(0, D_CHRISTMAS);
-			}
-			else if (Random.Range(0, SpawnController.Instance.stinginess) == 0) {
-				room.nextRoomType = Random.Range(0, 3) > 0 ? areaType : Random.Range(0, D_FINAL + 1);
-			}
-			else {
-				room.nextRoomType = Random.Range(0, 3) > 0 ? areaType : Random.Range(0, D_CHRISTMAS);
-			}
-			if ((room.nextRoomType == D_WATER || room.nextRoomType == D_TOMB) && Depth < 2) continue;
-			else break;
-		}
+		room.nextRoomType = ChooseNextRoomType(areaType);
+//		while (true) {
+//			if (areaType < D_CHRISTMAS && Random.Range(0, SpawnController.Instance.stinginess) == 0) {
+//				if (Random.Range(0, 3) > 0) room.nextRoomType = areaType;
+//				else {
+//					var specialType = D_CHRISTMAS;
+//					switch(areaType) {
+//						case D_CAVE:
+//							specialType = D_MERCY;
+//							break;
+//						case D_THORNS:
+//							specialType = D_TROG;
+//							break;
+//						case D_WATER:
+//							specialType = D_ARMORY;
+//							break;
+//						case D_TOMB:
+//							specialType = D_ENCHANT;
+//							break;
+//	//					case D_FOREST:
+//	//						goto case default;
+//						default:
+//							specialType = D_CHRISTMAS;					
+//							break;
+//					}
+//					if (visitedSpecialRooms.Contains(specialType)) specialType = Random.Range(0, 3) > 0 ? D_CHRISTMAS : specialType;
+//					visitedSpecialRooms.Add(specialType);
+//					room.nextRoomType = specialType;
+//				}
+//			}
+//			else {
+//				room.nextRoomType = Random.Range(0, 3) > 0 ? areaType : Random.Range(0, D_CHRISTMAS);
+//			}
+//			if (room.nextRoomType == D_WATER && Depth < 2) continue;
+//			if (room.nextRoomType == D_FOREST && Depth < 3) continue;
+//			if (room.nextRoomType == D_TOMB && Depth < 4) continue;
+//			else break;
+//		}
 										
 		room.terrainType = areaType;
 		room.xIndex = index;
 		int xmin = index * TILES_PER_ROOM;
 		int xmax = xmin + TILES_PER_ROOM;
-		bool hasRamp = Random.Range(0,3) == 0 && areaType < D_CHRISTMAS;
+		bool hasRamp = Random.Range(0,3) == 0 && areaType < D_CHRISTMAS && hasSpawnedEmpty;
 		int leftRampIndex = Random.Range(xmin, xmax - 1);
 		int rightRampIndex = Random.Range(leftRampIndex + 1, xmax);
 		
@@ -359,6 +437,7 @@ public class TerrainController : MonoBehaviour {
 		}
 		if (areaType >= D_CHRISTMAS) farWall.GetComponent<MeshRenderer>().material = cathedral;
 		
+		// note that D_CHRISTMAS itself is incongruously handled by spawncontroller
 		if (areaType == D_ARMORY) {
 			#region FIXME: WHYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 			var items = new List<ItemController>();
@@ -389,7 +468,6 @@ public class TerrainController : MonoBehaviour {
 				items[2].OnPickup = _ => {};
 			};
 			
-			
 //			foreach(var i in items) {			// FIXME:  WHYYYYYYYYYYYYYYYYYYYYYYYYYYYYY
 //				i.OnPickUp += () => {
 //					for (int lcv = items.Count - 1; lcv >= 0; --lcv) {
@@ -404,10 +482,10 @@ public class TerrainController : MonoBehaviour {
 //			}
 			#endregion
 		}
-		else if (areaType == D_TEMPLE) {
+		else if (areaType == D_MERCY) {
 			Instantiate(spawnController.statue, new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 0), Quaternion.identity);
 		}
-		else if (areaType == D_SHOP) {
+		else if (areaType == D_TROG) {
 			var item = spawnController.MakeSpecialItem();
 			item.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 4, 0);
 			item.OnPickup += a => {
@@ -421,7 +499,7 @@ public class TerrainController : MonoBehaviour {
 			item.name = "Cursed " + item.name;
 			Instantiate(trogAltar).transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 1.6f, 0);
 		}
-		else if (areaType == D_ALTAR) {
+		else if (areaType == D_ENCHANT) {
 			var altar = Instantiate(enchanterStatue);
 			altar.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 1.6f, 0);
 			altar.depth = Depth;

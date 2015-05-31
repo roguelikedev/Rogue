@@ -3,6 +3,10 @@ using System.Collections;
 
 public class EstusController : WeaponController {
 
+	void Start () {
+		charges = Mathf.Max(5, Random.Range(0, TerrainController.Instance.Depth));
+	}
+
 	protected override void _FixedUpdate ()
 	{
 		if (payload == null) {

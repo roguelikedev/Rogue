@@ -3,7 +3,7 @@ using System.Collections;
 
 public class IronLichController : DemonController {
 	void Start() {
-		InitializeAura(WeaponController.DMG_DEATH, 1);
+		InitializeAura(WeaponController.DMG_DEATH, auraDamage);
 		damageAura.GetComponent<CapsuleCollider>().radius *= 2;
 		var book = Instantiate(SpellGenerator.Instance().blankBook);
 		book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);

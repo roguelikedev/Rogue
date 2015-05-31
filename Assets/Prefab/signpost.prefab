@@ -176,6 +176,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depth: 0
   brick: {fileID: 11407686, guid: 3fbe9b7af5f260742ad69f0207bcdca2, type: 2}
+  payload: {fileID: 0}
+  fixedSpeech: 0
 --- !u!136 &13635094
 CapsuleCollider:
   m_ObjectHideFlags: 1

@@ -478,7 +478,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.8171368, y: 12.2695332, z: -3.6394701}
+  m_LocalPosition: {x: 15.0090723, y: 6.55189896, z: 10.1445894}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 498328}
@@ -494,7 +494,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198328}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.23000002, y: -.49000001, z: 0}
+  m_LocalPosition: {x: -1.70000005, y: -.49000001, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 498304}
@@ -575,7 +575,7 @@ MonoBehaviour:
   damageAnnouncer: {fileID: 11415696, guid: 371818138a5790e48aeb6645f2489a0d, type: 2}
   friendly: 0
   huge: 1
-  depth: 15
+  depth: 12
   racialLevel: 7
   commonness: 10
   fleeDistance: 0
@@ -604,10 +604,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: .75
+  m_Radius: 1
   m_Height: 5.5
   m_Direction: 1
-  m_Center: {x: .600000024, y: -1.5, z: 0}
+  m_Center: {x: .5, y: -1.5, z: 0}
 --- !u!136 &13637760
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -620,7 +620,7 @@ CapsuleCollider:
   m_Radius: 1.5
   m_Height: 7
   m_Direction: 1
-  m_Center: {x: -1.5, y: -.5, z: 0}
+  m_Center: {x: -2, y: -.5, z: 0}
 --- !u!136 &13683918
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -644,9 +644,9 @@ CapsuleCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   m_Radius: 1.5
-  m_Height: 3
+  m_Height: 5
   m_Direction: 1
-  m_Center: {x: -1.39999998, y: 0, z: 0}
+  m_Center: {x: -1, y: 0, z: 0}
 --- !u!198 &19886134
 ParticleSystem:
   m_ObjectHideFlags: 1

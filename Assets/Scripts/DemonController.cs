@@ -4,11 +4,12 @@ using System.Collections;
 public class DemonController : EnemyController {
 	protected WeaponController damageAura;
 	public int inverseAuraRefreshRate;
+	public float auraDamage;
 	
 	protected void InitializeAura(int damageType, float power) {
 		damageAura = SpellGenerator.Instance().Pillar(damageType);
 		damageAura.lifetime = -1;
-		damageAura.attackPower = power;
+		damageAura.attackPower += power;
 		damageAura.transform.parent = transform;
 		damageAura.transform.localPosition = Vector3.zero;
 		var ctr = damageAura.GetComponent<CapsuleCollider>().center;
@@ -20,18 +21,20 @@ public class DemonController : EnemyController {
 	}
 	
 	void Start() {
-		InitializeAura(WeaponController.DMG_FIRE, 1);
+		InitializeAura(WeaponController.DMG_FIRE, auraDamage);
 	}
 	
 	protected override bool _FixedUpdate ()
 	{
-		damageAura.attackActive = true;
-		damageAura.transform.position = transform.position;
-		if (damageAura.GetComponentInChildren<ParticleSystem>() != null) {
-			damageAura.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vector3.zero;
+		if (damageAura) {
+			damageAura.attackActive = true;
+			damageAura.transform.position = transform.position;
+			if (damageAura.GetComponentInChildren<ParticleSystem>() != null) {
+				damageAura.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vector3.zero;
+			}
+			
+			if ((int)Random.Range(0, inverseAuraRefreshRate) == 0) damageAura.attackVictims.Clear();
 		}
-		
-		if ((int)Random.Range(0, inverseAuraRefreshRate) == 0) damageAura.attackVictims.Clear();
 		return base._FixedUpdate ();
 	}
 }

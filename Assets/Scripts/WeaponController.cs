@@ -7,11 +7,12 @@ using System.Collections.Generic;
 
 public class WeaponController : ItemController {
 	#region variables and constants
-	public Acter thrownBy = null;
 	public bool IsProjectile { get { return thrownBy != null; } }
 	public bool IsArmor { get { return armorClass != 0; } }
 	public bool IsMeleeWeapon { get { return attackPower != 0 && !IsProjectile; } }
+	public bool IsOffhand { get { return tag == "offhandweapon"; } }
 	public override int Depth { get { return base.Depth + (payload == null ? 0 : payload.Depth); } }
+	public Acter thrownBy = null;
 	public bool deleteOnHitting = false;
 	public bool deleteOnLanding = false;
 	public int lifetime = -1;
@@ -38,6 +39,7 @@ public class WeaponController : ItemController {
 	public bool firePayloadOnTimeout = false;
 	public float thrownHorizontalMultiplier = 0;
 	public float thrownVerticalMultiplier = 0;
+	public float thrownParralaxModifier = 0;
 	public bool friendlyFireActive = false;
 	public List<Acter> attackVictims = new List<Acter>();
 	public bool attackActive = false;
@@ -51,7 +53,6 @@ public class WeaponController : ItemController {
 	public float speedCoefficient = 1;		// attack speed for weapons, movement speed for armours
 	#endregion
 	#region life cycle
-//	void Awake() { multiPayload.Clear(); }
 	
 	void Start() {
 		if (firedNoise != null) {
@@ -127,7 +128,6 @@ public class WeaponController : ItemController {
 				audioSource.clip = constantNoise;
 				audioSource.Play();
 			}
-			
 		}
 		base._FixedUpdate();
 	}
@@ -223,7 +223,8 @@ public class WeaponController : ItemController {
 			Debug.LogError(this + " shouldn't be thrown!");
 			return;
 		}
-		var velocity = new Vector3(50 * thrownHorizontalMultiplier / GetComponent<Rigidbody>().mass, 5f * thrownVerticalMultiplier);
+		var velocity = new Vector3(50 * thrownHorizontalMultiplier / GetComponent<Rigidbody>().mass
+								, 5f * thrownVerticalMultiplier, 25f * thrownParralaxModifier);
 		if (!thrownBy.FacingRight) velocity.x *= -1;
 		GetComponent<Rigidbody>().velocity = velocity;
 		
@@ -234,37 +235,34 @@ public class WeaponController : ItemController {
 	}
 	
 	void Fire(Collider impactPoint, WeaponController p) {
-		if (impactPoint.name.Contains("Wall")) return;
+//		if (impactPoint.name.Contains("Wall")) return;
 		if (impactNoise != null) AudioSource.PlayClipAtPoint(impactNoise, transform.position, CameraController.Instance.Volume);
-//		if (payload != null) {
-//			var p = Instantiate(payload);
-			var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
-			
-			if (deleteOnHitting) {
-				impactPoint = GetComponent<CapsuleCollider>();
+		var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
+		
+		if (deleteOnHitting) {
+			impactPoint = GetComponent<CapsuleCollider>();
+		}
+		if (impactPoint == null) {
+			p.transform.position = transform.position + p.transform.localPosition;
+		}
+		else p.transform.position = impactPoint.transform.position + p.transform.localPosition;
+		
+		var wp = p.GetComponent<WeaponController>();
+		if (wp != null) {
+			wp.attackActive = true;
+			wp.thrownBy = IsProjectile ? thrownBy : GetComponentInParent<Acter>();
+			if (wp.thrownHorizontalMultiplier != 0) {
+				wp.Throw();
 			}
-			if (impactPoint == null) {
-				p.transform.position = transform.position + p.transform.localPosition;
+			if (unburyFireball) {
+				wp.transform.position = wp.transform.position + new Vector3(0,3,0);
 			}
-			else p.transform.position = impactPoint.transform.position + p.transform.localPosition;
-			
-			var wp = p.GetComponent<WeaponController>();
-			if (wp != null) {
-				wp.attackActive = true;
-				wp.thrownBy = IsProjectile ? thrownBy : GetComponentInParent<Acter>();
-				if (wp.thrownHorizontalMultiplier != 0) {
-					wp.Throw();
-				}
-				if (unburyFireball) {
-					wp.transform.position = wp.transform.position + new Vector3(0,3,0);
-				}
-			}
-			if (wp.tag == "spell") {
-				wp.ApplySpellpower();
-			}
-			
-			p.gameObject.SetActive(true);
-//		}
+		}
+		if (wp.tag == "spell") {
+			wp.ApplySpellpower();
+		}
+		
+		p.gameObject.SetActive(true);
 		attackActive = false;
 		
 		if (deleteOnHitting) {

@@ -181,6 +181,7 @@ public class EnemyController : Acter, IDepthSelectable
 	}
 	
 	void FixedUpdate() {
+		if (PlayerController.Instance.friendless) friendly = false;
 		if (isThreateningPlayer && !shouldUseMainHand && State != ST_ATTACK) {
 			if (isThreateningPlayer) PlayerController.Instance.ShouldScramble = false;
 			isThreateningPlayer = false;
