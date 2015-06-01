@@ -186,7 +186,6 @@ public class PlayerController : Acter {
 		v.x = Input.GetAxis ("Horizontal");
 		v.z = Input.GetAxis ("Vertical");
 						
-		
 		if (v.x != 0 || v.z != 0) {
 			if (EnterStateAndAnimation(ST_WALK)) Move(v);
 		}
