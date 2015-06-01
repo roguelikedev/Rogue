@@ -134,6 +134,8 @@ public class WeaponController : ItemController {
 	
 	// attack
 	void OnTriggerStay(Collider other) {
+//		if (GetComponentInParent<Acter>() is PlayerController && damageType == DMG_PHYS) print (other);
+		
 		if (!attackActive) return;
 		if (other.tag == "breakable" && attackPower > 0) {
 			other.GetComponentInParent<Breakable>().Break(this);
@@ -150,14 +152,18 @@ public class WeaponController : ItemController {
 		
 		var sg = other.GetComponent<ShieldGolem>();
 		if (sg != null && !attackVictims.Contains(victim)) {
-			if (friendlyFireActive || sg.friendly != parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position);
+			if (friendlyFireActive || sg.friendly != parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position
+					, CameraController.Instance.Volume);
 			attackVictims.Add(victim);
 		}
 		
 		if (other.name != "torso") return;
 		
+//		if (parent is PlayerController && damageType == DMG_PHYS) print (victim);
+		
 		if (attackVictims.Contains(victim)) return;
 		attackVictims.Add(victim);
+		
 		
 		if (parent == null) {
 			if (friendlyFireActive) {
@@ -235,7 +241,6 @@ public class WeaponController : ItemController {
 	}
 	
 	void Fire(Collider impactPoint, WeaponController p) {
-//		if (impactPoint.name.Contains("Wall")) return;
 		if (impactNoise != null) AudioSource.PlayClipAtPoint(impactNoise, transform.position, CameraController.Instance.Volume);
 		var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
 		
@@ -251,7 +256,7 @@ public class WeaponController : ItemController {
 		if (wp != null) {
 			wp.attackActive = true;
 			wp.thrownBy = IsProjectile ? thrownBy : GetComponentInParent<Acter>();
-			if (wp.thrownHorizontalMultiplier != 0) {
+			if (wp.thrownHorizontalMultiplier != 0 || wp.thrownParralaxModifier != 0) {
 				wp.Throw();
 			}
 			if (unburyFireball) {
@@ -263,7 +268,7 @@ public class WeaponController : ItemController {
 		}
 		
 		p.gameObject.SetActive(true);
-		attackActive = false;
+//		attackActive = false;		FIXME: why was this here?
 		
 		if (deleteOnHitting) {
 			Destroy(gameObject);	

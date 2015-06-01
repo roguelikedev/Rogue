@@ -28,7 +28,7 @@ public class SpellGenerator : MonoBehaviour {
 		return GameObject.FindObjectOfType<SpellGenerator>();
 	}
 	
-	#region components
+	#region modular spells
 	WeaponController Defaults(int damageType, float radius, float height) {
 		var rval = Instantiate(blankSpell);
 		var cc = rval.GetComponent<CapsuleCollider>();
@@ -171,21 +171,23 @@ public class SpellGenerator : MonoBehaviour {
 		
 		return rval;
 	}
-	public WeaponController RaiseDead() { 
-		var rval = Defaults(WeaponController.DMG_RAISE, 1, 1);  // set radius manually so that particle system looks right
-
-		var cc = rval.GetComponent<CapsuleCollider>();
-		cc.radius = 4f;
-		
-		rval.thrownHorizontalMultiplier = 0;
-		rval.lifetime = 25;
-		rval.firePayloadOnTimeout = true;
-		rval.firedNoise = moanSound;
-		rval.depth = 1;
-		rval.attackPower = 0;
-		
-		rval.name += " dead";
-		return rval;
+	public WeaponController Mortar(int damageType) {
+		var mortar = Defaults(damageType, 1, 1);
+		mortar.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+		mortar.GetComponent<Rigidbody>().mass = 2.5f;
+		mortar.attackPower *= 4f;
+		mortar.thrownHorizontalMultiplier = .6f;
+		mortar.thrownVerticalMultiplier = 10;
+		mortar.name += "mortar";
+		mortar.deleteOnLanding = true;
+		return mortar;
+	}
+	#endregion
+	#region fixed element spells
+	public WeaponController Explosion () {
+		var explosion = Instantiate(fireball);
+		explosion.name = "fireball";		// fucking GUI doesn't support lower case
+		return explosion as WeaponController;
 	}
 	public WeaponController Heal () {
 		var rval = Instantiate(blankSpell);
@@ -203,38 +205,29 @@ public class SpellGenerator : MonoBehaviour {
 		rval.damageType = WeaponController.DMG_HEAL;
 		
 		rval.firedNoise = chimeSound;
-//		rval.attackPower = .1f;
+		//		rval.attackPower = .1f;
 		rval.friendlyFireActive = true;
 		rval.name = "healing";
 		return rval;
 	}
-	public WeaponController Mortar(int damageType) {
-		var mortar = Defaults(damageType, 1, 1);
-		mortar.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-		mortar.GetComponent<Rigidbody>().mass = 2.5f;
-		mortar.attackPower *= 4f;
-		mortar.thrownHorizontalMultiplier = .6f;
-		mortar.thrownVerticalMultiplier = 10;
-		mortar.name += "mortar";
-		mortar.deleteOnLanding = true;
-		return mortar;
-	}
-	public WeaponController Explosion () {
-		var explosion = Instantiate(fireball);
-		explosion.name = "fireball";		// fucking GUI doesn't support lower case
+	public WeaponController RaiseDead() { 
+		var rval = Defaults(WeaponController.DMG_RAISE, 1, 1);  // set radius manually so that particle system looks right
 		
-//		explosion.GetComponent<Animator>().runtimeAnimatorController = Instantiate(expand.runtimeAnimatorController);
-//		explosion.GetComponent<SpriteRenderer>().sprite = explosionSprite;
-//		
-//		explosion.friendlyFireActive = true;
-//		explosion.attackPower *= 2;
-//		explosion.firePayloadOnTimeout = true;
-//		explosion.firedNoise = explosionSound;
-//		explosion.transform.rotation = Quaternion.identity;
-//		explosion.damageType = WeaponController.DMG_FIRE;
+		var cc = rval.GetComponent<CapsuleCollider>();
+		cc.radius = 4f;
 		
-		return explosion as WeaponController;
+		rval.thrownHorizontalMultiplier = 0;
+		rval.lifetime = 25;
+		rval.firePayloadOnTimeout = true;
+		rval.firedNoise = moanSound;
+		rval.depth = 1;
+		rval.attackPower = 0;
+		
+		rval.name += " dead";
+		return rval;
 	}
+	#endregion
+	#region metamagic
 	/// <summary> Split the payload of rval and apply velocity on Z axis. </summary>
 	public WeaponController Fan (WeaponController rval, int count) {
 		if (rval.payload == null) return rval;
@@ -244,10 +237,10 @@ public class SpellGenerator : MonoBehaviour {
 			var offset = baseOffset;
 			if (lcv % 2 == 0) offset *= -1;
 			offset *= (1 + lcv / 2);
-//			clone.transform.position = new Vector3(0, 0, offset);
+			//			clone.transform.position = new Vector3(0, 0, offset);
 			clone.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY;
 			clone.thrownParralaxModifier = offset;
-//			clone.GetComponent<Rigidbody>().velocity = clone.GetComponent<Rigidbody>().velocity + new Vector3 (0,0,offset);
+			//			clone.GetComponent<Rigidbody>().velocity = clone.GetComponent<Rigidbody>().velocity + new Vector3 (0,0,offset);
 			rval.multiPayload.Add(clone);
 		}
 		rval.payload.name = "fan(" + count + ")" + rval.payload.name;
@@ -269,7 +262,7 @@ public class SpellGenerator : MonoBehaviour {
 		rval.payload.name = "split(" + count + ")" + rval.payload.name;
 		
 		return rval;
-	}
+	}	
 	#endregion
 	
 	void Awake() {
@@ -346,7 +339,7 @@ public class SpellGenerator : MonoBehaviour {
 		else leaf.depth++;
 		
 		if (Random.Range(0, 4) == 0) {
-			var splits = Random.Range(1, depth);
+			var splits = Random.Range(1, (int)Mathf.Sqrt(depth));
 			if (Random.Range(0,2) == 0) Split(parent, splits);
 			else Fan(parent, splits);
 			leaf.depth *= splits;
@@ -361,7 +354,7 @@ public class SpellGenerator : MonoBehaviour {
 			
 			leaf.payload = RandomSpell();
 			if (lcv < depth / 2 && Random.Range(0, 4) == 0) {
-				var splits = Random.Range(1, depth / lcv);
+				var splits = Random.Range(1, Mathf.Max(1, (int) Mathf.Sqrt(depth / lcv)));
 				if (Random.Range(0,2) == 0) Split(leaf, splits);
 				else Fan(leaf, splits);
 				leaf.depth *= splits;

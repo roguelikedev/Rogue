@@ -37,6 +37,8 @@ public class PlayerController : Acter {
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
 //				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_FIRE);
+//				book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
+			
 				book.payload.attackPower *= 2;
 				book.payload.payload = SpellGenerator.Instance().Explosion();
 //				SpellGenerator.Instance().Split(book, 4);
@@ -176,6 +178,7 @@ public class PlayerController : Acter {
 		}
 		if (MainClass == C_GESTALT) poiseBreakCounter = 0;
 		
+		
 		if (!_FixedUpdate()) return;
 		if (MainClass == "") return;
 
@@ -183,11 +186,13 @@ public class PlayerController : Acter {
 		v.x = Input.GetAxis ("Horizontal");
 		v.z = Input.GetAxis ("Vertical");
 						
-
+		
 		if (v.x != 0 || v.z != 0) {
 			if (EnterStateAndAnimation(ST_WALK)) Move(v);
 		}
-		else if (v == Vector3.zero && State != ST_CAST) {
+		else if (anim.GetCurrentAnimatorStateInfo(0).IsName(ST_REST) && State != ST_REST) ExitState();
+		
+		if (v == Vector3.zero && State != ST_CAST) {
 			EnterStateAndAnimation(ST_REST);
 		}
 	}

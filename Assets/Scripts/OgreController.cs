@@ -3,9 +3,10 @@ using System.Collections;
 
 public class OgreController : EnemyController {
 	void Start () {
-		var weapon = Instantiate(SpawnController.Instance.itemBarMace);
-		if (WantsToEquip(weapon)) Equip(weapon);
-		else Destroy(weapon.gameObject);
+		Equip(Instantiate(SpawnController.Instance.itemBarMace));
+//		var weapon = Instantiate(SpawnController.Instance.itemBarMace);
+//		if (WantsToEquip(weapon)) Equip(weapon);
+//		else Destroy(weapon.gameObject);
 	}
 
 	protected override bool _FixedUpdate ()

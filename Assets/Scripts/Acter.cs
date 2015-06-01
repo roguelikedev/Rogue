@@ -18,7 +18,7 @@ public abstract class Acter : MonoBehaviour {
 	protected float armorClass = 1;
 	public float meleeMultiplier = 1;
 	protected float poiseBreakCounter = 0;
-	public float Poise { get { return armorClass / 5 + racialBaseHitPoints; } }
+	public float Poise { get { return (armorClass + racialBaseHitPoints) / 5; } }
 	public float spellpower = 1;
 	public int level = 0;
 	public const string C_FIGHT = "fighter", C_WIZARD = "wizard", C_ROGUE = "rogue", C_BRUTE = "brute", C_GESTALT = "hybrid";
@@ -101,8 +101,6 @@ public abstract class Acter : MonoBehaviour {
 	public Transform pelvis;
 	string state;
 	public string State { get { return state; } }
-	// the values are the animation names
-	public const string ST_REST = "standing_breathing", ST_ATTACK = "Attack", ST_WALK = "walk", ST_HURT = "Hurt", ST_DEAD = "Die", ST_CAST = "spell_charging";
 	protected bool shouldUseMainHand = false;
 	protected bool shouldUseOffhand = false;
 	protected bool isScrambling = false;
@@ -201,18 +199,20 @@ public abstract class Acter : MonoBehaviour {
 	public void AnimationForBlockingStateDidFinish() {
 		ExitState();
 	}
-	void ExitState() {
+	// the values are the animation names
+	public const string ST_REST = "standing_breathing", ST_ATTACK = "Attack", ST_WALK = "walk", ST_HURT = "Hurt"
+						, ST_DEAD = "Die", ST_CAST = "spell_charging", ST_CAKE = "pancake";
+	protected void ExitState() {
 		if (state == ST_DEAD) return;  // you're not getting out that easy
-		switch(state) {
-			case ST_ATTACK:
-				GetComponent<Animator>().speed = 1;
-				if (isBlocking) print ("not blocking.");
-				isBlocking = false;
-				break;
-			case ST_HURT:
-				GetComponent<Animator>().speed = 1;
-				break;
-		}
+//		switch(state) {
+//			case ST_ATTACK:
+//				GetComponent<Animator>().speed = 1;
+//				isBlocking = false;
+//				break;
+//			case ST_HURT:
+//				break;
+//		}
+		GetComponent<Animator>().speed = 1;
 		isBlocking = false;
 		state = ST_REST;
 		EnterStateAndAnimation(ST_REST);
@@ -224,7 +224,8 @@ public abstract class Acter : MonoBehaviour {
 			case ST_ATTACK:
 				if (state == ST_ATTACK) return false;
 				if (state == ST_HURT) return false;
-				//				attackActive = true;  this happens during animation (see AttackActiveFramesDid[Finish|Begin])
+				if (state == ST_CAKE) return false;
+//				attackActive = true;  this happens during animation (see AttackActiveFramesDid[Finish|Begin])
 				if (shouldUseMainHand == shouldUseOffhand) {
 					Debug.LogError("should " + (shouldUseMainHand ? "" : "not ") + "attack and cast spell at the same time");
 				}
@@ -263,6 +264,7 @@ public abstract class Acter : MonoBehaviour {
 			case ST_WALK:
 				if (state == ST_ATTACK) return false;
 				if (state == ST_HURT) return false;
+				if (state == ST_CAKE) return false;
 				if (speed == SPEED_WHEN_PARALYZED) return false;
 				if (state == ST_WALK) anim.Play(ST_WALK);
 				else anim.CrossFade (ST_WALK, 0.1f);
@@ -271,14 +273,26 @@ public abstract class Acter : MonoBehaviour {
 				// HURT and ATTACK are exited after their animations resolve, not here.
 				if (state == ST_ATTACK) return false;
 				if (state == ST_HURT) return false;
+				if (state == ST_CAKE) return false;
 				if (state == ST_CAST) return false;
 				if (state == ST_REST) anim.Play (largeWeapon ? "rest_with_large_weapon" : ST_REST);
 				else anim.CrossFade (largeWeapon ? "rest_with_large_weapon" : ST_REST, 0.1f);
 				break;
 			case ST_HURT:
+				if (state == ST_CAKE) return false;
 				isBlocking = false;
 				GetComponent<Animator>().speed = 1;
 				anim.Play(ST_HURT);
+				if (pendingSpell != null) {
+					StopCoroutine(pendingSpell);
+					pendingSpell = null;
+				}
+				break;
+			case ST_CAKE:
+				isBlocking = false;
+				GetComponent<Animator>().speed = 1;
+//				transform.position = transform.position + new Vector3(0, 2);
+				anim.Play(ST_CAKE);
 				if (pendingSpell != null) {
 					StopCoroutine(pendingSpell);
 					pendingSpell = null;
@@ -717,7 +731,7 @@ public abstract class Acter : MonoBehaviour {
 		yield return new WaitForSeconds(duration);
 		speed = normalSpeed;
 		damageAnnouncer.SetParalyzed(false);
-		GetComponent<Animator>().speed = SPEED_WHEN_PARALYZED;
+		GetComponent<Animator>().speed = 1;
 		shouldUseMainHand = shouldUseOffhand = false;
 	}
 	public void Paralyze(float magnitude) {
@@ -726,6 +740,9 @@ public abstract class Acter : MonoBehaviour {
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
 		var _speed = speed;
 		speed = SPEED_WHEN_PARALYZED;
+		GetComponent<Animator>().speed = SPEED_WHEN_PARALYZED;
+		ExitState();
+		
 		shouldUseMainHand = shouldUseOffhand = false;
 		poiseBreakCounter = 0;
 		damageAnnouncer.SetParalyzed(true);
@@ -790,9 +807,13 @@ public abstract class Acter : MonoBehaviour {
 					wc.ApplySpellpower();
 				}
 			};
-			Fire(EquippedSecondaryWeapon.payload);
-			foreach (var mp in EquippedSecondaryWeapon.multiPayload) {
-				Fire(mp);
+			if (EquippedSecondaryWeapon.payload == null) {
+				Debug.LogError("why???");
+			} else {
+				Fire(EquippedSecondaryWeapon.payload);
+				foreach (var mp in EquippedSecondaryWeapon.multiPayload) {
+					Fire(mp);
+				}
 			}
 	//		var p = Instantiate(EquippedSecondaryWeapon.payload);
 	//		p.gameObject.SetActive(true);
@@ -834,16 +855,20 @@ public abstract class Acter : MonoBehaviour {
 		
 		damageAnnouncer.AnnounceDamage(quantity, type == WeaponController.DMG_GRAP);
 		
-		if (hitPoints > 0) {
-			if (state != ST_HURT && type == WeaponController.DMG_PHYS && speed != SPEED_WHEN_PARALYZED) {
+		if (hitPoints > 0 && type == WeaponController.DMG_PHYS && speed != SPEED_WHEN_PARALYZED) {
+			if (state != ST_HURT && State != ST_CAKE) {
 				poiseBreakCounter += quantity;
 				if (poiseBreakCounter > Poise) {
 					EnterStateAndAnimation(ST_HURT);
 					poiseBreakCounter = 0;
 				}
 			}
+			else {
+				TakeDamage(1, WeaponController.DMG_DEATH);
+				EnterStateAndAnimation(ST_CAKE);
+			}
 		}
-		else if (state != ST_DEAD) {
+		if (hitPoints <= 0 && state != ST_DEAD) {
 			EnterStateAndAnimation(ST_DEAD);
 		}
 	}
@@ -939,6 +964,7 @@ public abstract class Acter : MonoBehaviour {
 		if (State == ST_DEAD) {
 			return false;
 		}
+		
 		if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.charges == 0) {
 			var spentWandOrFlask = DropWeapon(EquippedSecondaryWeapon);
 			var p = spentWandOrFlask.GetComponentInChildren<ParticleSystem>();
@@ -1006,6 +1032,7 @@ public abstract class Acter : MonoBehaviour {
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 			return false;
 		}
+		
 		if (shouldUseMainHand && EnterStateAndAnimation(ST_ATTACK)) return false;
 		if (shouldUseOffhand && EnterStateAndAnimation(ST_ATTACK)) return false;
 		
