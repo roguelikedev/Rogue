@@ -332,7 +332,7 @@ public class SpellGenerator : MonoBehaviour {
 		parent.payload = leaf;
 		
 		if (leaf.damageType != WeaponController.DMG_RAISE) {
-			var powerMultiplier = Random.Range(1, depth + 1);
+			var powerMultiplier = Mathf.Max(Random.Range(1, depth + 1), Random.Range(1, depth + 1));
 			leaf.attackPower *= powerMultiplier;
 			leaf.depth += powerMultiplier;
 		}
@@ -346,7 +346,7 @@ public class SpellGenerator : MonoBehaviour {
 		}
 		for (int lcv = leaf.depth; lcv < depth; ) {
 			if (leaf.damageType != WeaponController.DMG_RAISE) {
-				var powerMultiplier = Random.Range(1, depth + 1);
+				var powerMultiplier = Mathf.Max(Random.Range(1, depth + 1), Random.Range(1, depth + 1));
 				leaf.attackPower *= powerMultiplier;
 				leaf.depth += powerMultiplier;
 			}

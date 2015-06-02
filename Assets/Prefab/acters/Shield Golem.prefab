@@ -602,7 +602,7 @@ MonoBehaviour:
   huge: 1
   depth: 12
   racialLevel: 7
-  commonness: 10
+  commonness: 5
   fleeDistance: 0
   isUnliving: 0
   baseActionDelay: 50

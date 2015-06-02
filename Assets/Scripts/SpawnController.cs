@@ -328,12 +328,10 @@ public class SpawnController : MonoBehaviour {
 		var rval = Instantiate(treasureChest);
 		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
 		possibilities.Add(itemEstusFlask as WeaponController);
-		possibilities.Clear();
 		if (PlayerController.Instance.spellpower > 1) {
 			possibilities.Add(SpellGenerator.Instance().blankBook);
 		}
 		for (int lcv = 0; lcv <= depth;) {
-			print (lcv + " / " + depth);
 			if (possibilities.Count == 0) break;
 			var item = possibilities[Random.Range(0, possibilities.Count)];
 			possibilities.Remove(item);
@@ -452,7 +450,7 @@ public class SpawnController : MonoBehaviour {
 			if (whichMob == enemyIronLich) isCaptain = true;
 			
 			var remainingEL = encounterLevel - whichMob.racialLevel;
-			if (remainingEL > depth) {
+			if (remainingEL < depth) {
 				var hugeness = Random.Range(-1, 1.5f);
 				if (hugeness > 1.25f) {
 					var tmp = whichMob.transform.localScale;

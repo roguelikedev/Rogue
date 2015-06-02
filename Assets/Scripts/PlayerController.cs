@@ -30,6 +30,7 @@ public class PlayerController : Acter {
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
 				bow.payload.payload.payload = SpellGenerator.Instance().Explosion();
+				bow.payload.payload.payload.attackPower /= 2;
 				Equip(bow);
 				speed += 50;
 				break;
@@ -62,7 +63,7 @@ public class PlayerController : Acter {
 				pet.friendly = true;
 				break;
 			case C_BRUTE:
-				BeginRegenerate(1);
+				BeginRegenerate(1 / GLOBAL_DMG_SCALING);
 				racialBaseHitPoints++;
 				Equip (Instantiate(SpawnController.Instance.itemHiltless));
 				transform.position = transform.position + new Vector3(0, 3, 0);
@@ -189,7 +190,6 @@ public class PlayerController : Acter {
 		if (v.x != 0 || v.z != 0) {
 			if (EnterStateAndAnimation(ST_WALK)) Move(v);
 		}
-		else if (anim.GetCurrentAnimatorStateInfo(0).IsName(ST_REST) && State != ST_REST) ExitState();
 		
 		if (v == Vector3.zero && State != ST_CAST) {
 			EnterStateAndAnimation(ST_REST);

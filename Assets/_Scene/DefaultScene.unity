@@ -1648,7 +1648,7 @@ Transform:
   - {fileID: 913825204}
   - {fileID: 156045264}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
 --- !u!114 &198576041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2856,7 +2856,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preventSpawn: 0
   itemPinata: 0
-  stinginess: 2
+  stinginess: 3
   enemyOrc: {fileID: 11498326, guid: 8dbbc6dd81f71774583c63e9191a9473, type: 2}
   enemyGoblin: {fileID: 11498326, guid: 96fc54eeec1a8ce43a78ec80f2053e92, type: 2}
   enemySnake: {fileID: 11498326, guid: 272967db5c3e54441b3d1138701088c8, type: 2}
@@ -4964,7 +4964,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: monster
+  m_Text: jarl the huge
 --- !u!222 &1870713939
 CanvasRenderer:
   m_ObjectHideFlags: 0

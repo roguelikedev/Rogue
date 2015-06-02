@@ -18,14 +18,15 @@ public abstract class Acter : MonoBehaviour {
 	protected float armorClass = 1;
 	public float meleeMultiplier = 1;
 	protected float poiseBreakCounter = 0;
-	public float Poise { get { return (armorClass + racialBaseHitPoints) / 5; } }
+	public float Poise { get { return (armorClass + racialBaseHitPoints) / 2.5f; } }
 	public float spellpower = 1;
 	public int level = 0;
 	public const string C_FIGHT = "fighter", C_WIZARD = "wizard", C_ROGUE = "rogue", C_BRUTE = "brute", C_GESTALT = "hybrid";
 	public bool isAquatic = false;
 	public bool freeAction = false;
+	float paralyzeScaling = 1;
 	int CLVL_SOFT_CAP = 9;
-	public const float GLOBAL_DMG_SCALING = 0.5f;
+	public const float GLOBAL_DMG_SCALING = 0.75f;
 	
 	
 	public void GainLevel(string whichClass) {
@@ -64,7 +65,8 @@ public abstract class Acter : MonoBehaviour {
 				Debug.LogError("no such class: " + whichClass);
 				break;
 		}
-		Heal(MaxHitPoints);
+		hitPoints = MaxHitPoints;		// don't use Heal() to avoid killing ghosts/ghouls
+		fireDamageTaken = 0;
 		++level;
 		damageAnnouncer.AnnounceText("reached level " + level);
 	}
@@ -119,6 +121,7 @@ public abstract class Acter : MonoBehaviour {
 	List<WeaponController> equipASAP = new List<WeaponController>();
 	public bool friendly = false;
 	Coroutine pendingSpell;
+	Coroutine attackFinishGuarantee;
 	Coroutine decay;
 	public Action<Acter> OnHitEffects = other => {};
 	protected Action OnFixedUpdate = () => {};
@@ -196,6 +199,7 @@ public abstract class Acter : MonoBehaviour {
 	}
 	#endregion
 	#region state and animation
+	
 	public void AnimationForBlockingStateDidFinish() {
 		ExitState();
 	}
@@ -204,17 +208,12 @@ public abstract class Acter : MonoBehaviour {
 						, ST_DEAD = "Die", ST_CAST = "spell_charging", ST_CAKE = "pancake";
 	protected void ExitState() {
 		if (state == ST_DEAD) return;  // you're not getting out that easy
-//		switch(state) {
-//			case ST_ATTACK:
-//				GetComponent<Animator>().speed = 1;
-//				isBlocking = false;
-//				break;
-//			case ST_HURT:
-//				break;
-//		}
 		GetComponent<Animator>().speed = 1;
 		isBlocking = false;
+		GetComponent<Rigidbody>().useGravity = true;
+		GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
 		state = ST_REST;
+		if (attackFinishGuarantee != null) StopCoroutine(attackFinishGuarantee);
 		EnterStateAndAnimation(ST_REST);
 	}
 	protected bool EnterStateAndAnimation(string what) {
@@ -240,7 +239,8 @@ public abstract class Acter : MonoBehaviour {
 					if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.tag == "offhandweapon") {
 						if (EquippedSecondaryWeapon.isSpellbook) pendingSpell = StartCoroutine(CastSpell());
 						else {
-							GetComponent<Animator>().speed = speed * EquippedSecondaryWeapon.speedCoefficient / 400;
+							var animSpeed = speed * EquippedSecondaryWeapon.speedCoefficient / 400;
+							GetComponent<Animator>().speed = animSpeed;
 							anim.Play("shoot_offhand");
 						}
 					}
@@ -260,6 +260,7 @@ public abstract class Acter : MonoBehaviour {
 					}
 				}
 				shouldUseMainHand = shouldUseOffhand = false;
+				attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(10));//.5f / anim.speed));
 				break;
 			case ST_WALK:
 				if (state == ST_ATTACK) return false;
@@ -291,7 +292,8 @@ public abstract class Acter : MonoBehaviour {
 			case ST_CAKE:
 				isBlocking = false;
 				GetComponent<Animator>().speed = 1;
-//				transform.position = transform.position + new Vector3(0, 2);
+				GetComponent<Rigidbody>().useGravity = false;
+				GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
 				anim.Play(ST_CAKE);
 				if (pendingSpell != null) {
 					StopCoroutine(pendingSpell);
@@ -666,6 +668,12 @@ public abstract class Acter : MonoBehaviour {
 	#region combat
 	
 	#region simple callbacks
+	IEnumerator LeaveAttackStateGuarantee(float seconds) {
+		yield return new WaitForSeconds(seconds);
+		if (State == ST_ATTACK) ExitState();
+		print ("left attack state");
+	}
+	
 	public virtual void AttackActiveFramesDidFinish() {
 		EquippedWeapon.attackActive = false;
 	}
@@ -737,6 +745,8 @@ public abstract class Acter : MonoBehaviour {
 	public void Paralyze(float magnitude) {
 		if (freeAction) return;
 		if (speed == SPEED_WHEN_PARALYZED) return;
+		magnitude = Mathf.Pow(magnitude / paralyzeScaling, 1/2.5f);
+		if (magnitude < 0.5f) return;
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
 		var _speed = speed;
 		speed = SPEED_WHEN_PARALYZED;
@@ -746,7 +756,8 @@ public abstract class Acter : MonoBehaviour {
 		shouldUseMainHand = shouldUseOffhand = false;
 		poiseBreakCounter = 0;
 		damageAnnouncer.SetParalyzed(true);
-		StartCoroutine(EndParalyze(Mathf.Pow(magnitude, 1/2.5f), _speed));
+		StartCoroutine(EndParalyze(magnitude, _speed));
+		paralyzeScaling += magnitude;
 	}
 	bool Zombify() {
 		if (State != ST_DEAD) return false;
@@ -836,6 +847,7 @@ public abstract class Acter : MonoBehaviour {
 		if (type == WeaponController.DMG_RAISE) {
 			return;	// handled in WeaponDidCollide() to avoid tramp variable
 		}
+//		print ("pre scaling " + quantity);
 		
 		quantity *= GLOBAL_DMG_SCALING;
 		if (type == WeaponController.DMG_HEAL) {
@@ -849,9 +861,12 @@ public abstract class Acter : MonoBehaviour {
 		
 		blood.Play ();
 		
-		if (type != WeaponController.DMG_DEATH) quantity /= (armorClass * (type == WeaponController.DMG_FIRE ? 2 : 1));
+		if (type != WeaponController.DMG_DEATH) {
+			quantity /= (armorClass * (type == WeaponController.DMG_FIRE ? 2 : 1));
+		}
 		hitPoints -= quantity;
 		if (type == WeaponController.DMG_FIRE) fireDamageTaken += quantity;
+//		print ("post scaling " + quantity + ", AC " + armorClass);
 		
 		damageAnnouncer.AnnounceDamage(quantity, type == WeaponController.DMG_GRAP);
 		
@@ -933,7 +948,7 @@ public abstract class Acter : MonoBehaviour {
 			}
 			
 			var mob = other as EnemyController;
-			if (mob != null) {
+			if (mob != null && mob.friendly != friendly) {
 				livingActers.FindAll(a => a.friendly == friendly).ForEach(a => {
 					a.xpToLevel -= mob.ChallengeRating;
 					if (a.xpToLevel <= 0) {
@@ -1026,8 +1041,11 @@ public abstract class Acter : MonoBehaviour {
 		Equip(null);
 		poiseBreakCounter -= 1 / 60;
 		
-		OnFixedUpdate();
+		if (speed != SPEED_WHEN_PARALYZED) {
+			paralyzeScaling = Mathf.Max (1, paralyzeScaling - 1/60);
+		} else print ("paralyze scaling " + paralyzeScaling);
 		
+		OnFixedUpdate();
 		if (State == ST_ATTACK) {
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 			return false;

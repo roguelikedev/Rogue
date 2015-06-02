@@ -88,11 +88,12 @@ MonoBehaviour:
   firePayloadOnTimeout: 1
   thrownHorizontalMultiplier: 0
   thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 1
   attackVictims: []
   attackActive: 0
   armorClass: 0
-  attackPower: 5
+  attackPower: 8
   impactNoise: {fileID: 0}
   firedNoise: {fileID: 8300000, guid: 83e32df7720209e4ebeaa606ce0e0bd3, type: 3}
   constantNoise: {fileID: 0}

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Utilities.Geometry;
 
 public class TerrainController : MonoBehaviour {
 	#region variables, properties
@@ -49,7 +50,7 @@ public class TerrainController : MonoBehaviour {
 		get {
 			if (!hasSpawnedEmpty) return 0;
 			var rval = generatedCount / (2f + statuesDestroyed);
-			rval = Mathf.Pow(rval, 1.3f);
+			rval = Mathf.Pow(rval, 1.5f);
 			return (int)Mathf.Max(1, Mathf.Min(27, rval));
 		}
 	}
@@ -187,7 +188,13 @@ public class TerrainController : MonoBehaviour {
 				break;
 		}
 
-		if (currentAreaType >= D_CHRISTMAS) tile = room.tiles[0].GetComponent<Rigidbody>();//.GetComponent<MeshRenderer>().material.mainTexture;
+		if (currentAreaType >= D_CHRISTMAS) {
+			foreach (var t in room.tiles) {
+				if (t.name.Contains("Slanted")) continue;
+				tile = t.GetComponent<Rigidbody>();
+				break;
+			}
+		}
 		var nextRoom = GenerateAtIndex(x, tile, floorTexture, currentAreaType);
 		rooms.Add(nextRoom);
 		if (showTraps) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
@@ -276,7 +283,9 @@ public class TerrainController : MonoBehaviour {
 						specialType = D_CHRISTMAS;					
 						break;
 				}
-				if (visitedSpecialRooms.Contains(specialType)) specialType = Random.Range(0, 3) > 0 ? D_CHRISTMAS : specialType;
+				var chanceOfMunchkinLand = 2;
+				chanceOfMunchkinLand += visitedSpecialRooms.FindAll(t => t == specialType).Count;
+				specialType = Random.Range(0, chanceOfMunchkinLand) > 0 ? D_CHRISTMAS : specialType;
 				visitedSpecialRooms.Add(specialType);
 				rval = specialType;
 			}
@@ -301,43 +310,6 @@ public class TerrainController : MonoBehaviour {
 		
 		var room = new Room();
 		room.nextRoomType = ChooseNextRoomType(areaType);
-//		while (true) {
-//			if (areaType < D_CHRISTMAS && Random.Range(0, SpawnController.Instance.stinginess) == 0) {
-//				if (Random.Range(0, 3) > 0) room.nextRoomType = areaType;
-//				else {
-//					var specialType = D_CHRISTMAS;
-//					switch(areaType) {
-//						case D_CAVE:
-//							specialType = D_MERCY;
-//							break;
-//						case D_THORNS:
-//							specialType = D_TROG;
-//							break;
-//						case D_WATER:
-//							specialType = D_ARMORY;
-//							break;
-//						case D_TOMB:
-//							specialType = D_ENCHANT;
-//							break;
-//	//					case D_FOREST:
-//	//						goto case default;
-//						default:
-//							specialType = D_CHRISTMAS;					
-//							break;
-//					}
-//					if (visitedSpecialRooms.Contains(specialType)) specialType = Random.Range(0, 3) > 0 ? D_CHRISTMAS : specialType;
-//					visitedSpecialRooms.Add(specialType);
-//					room.nextRoomType = specialType;
-//				}
-//			}
-//			else {
-//				room.nextRoomType = Random.Range(0, 3) > 0 ? areaType : Random.Range(0, D_CHRISTMAS);
-//			}
-//			if (room.nextRoomType == D_WATER && Depth < 2) continue;
-//			if (room.nextRoomType == D_FOREST && Depth < 3) continue;
-//			if (room.nextRoomType == D_TOMB && Depth < 4) continue;
-//			else break;
-//		}
 										
 		room.terrainType = areaType;
 		room.xIndex = index;
@@ -489,11 +461,33 @@ public class TerrainController : MonoBehaviour {
 			var item = spawnController.MakeSpecialItem();
 			item.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 4, 0);
 			item.OnPickup += a => {
-				switch(Random.Range(0,3)){
-					case 0: a.TakeDamage(a.MaxHitPoints, WeaponController.DMG_FIRE); break;
-					case 1: a.TakeDamage(a.HitPoints - 0.1f, WeaponController.DMG_DEATH); break;
-					case 2: a.MaxHitPoints--; break;
-					default: break;
+				WeaponController punishment = null;
+				switch(Random.Range(0, 3)) {
+					case 0:
+						punishment = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
+						punishment.attackPower = a.MaxHitPoints / Acter.GLOBAL_DMG_SCALING;
+						punishment.attackPower *= 2;	// overcome doubling of intrinsic 1 AC
+//						item.name = "Burning " + item.name;
+						break;
+					case 1:
+						punishment = SpellGenerator.Instance().Pillar(WeaponController.DMG_DEATH);
+						punishment.attackPower = (a.HitPoints - 0.1f) / Acter.GLOBAL_DMG_SCALING;
+//						item.name = "Death's Door " + item.name;
+						break;
+					case 2:
+						a.MaxHitPoints--;
+						var pc = a.GetComponent<PlayerController>();
+						if (pc != null) pc.Speak("my heart!");
+//						item.name = "Life Draining " + item.name;
+						break;
+					default: Debug.LogError("fell through case statement"); break;
+				}
+				if (punishment != null) {
+					punishment.friendlyFireActive = punishment.attackActive = true;
+					punishment.transform.position = a.transform.position;
+					punishment.GetComponent<CapsuleCollider>().center = Vec.Zero;
+					punishment.gameObject.SetActive(true);
+					punishment.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vec.Zero;
 				}
 			};
 			item.name = "Cursed " + item.name;
