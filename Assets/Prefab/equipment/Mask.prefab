@@ -70,7 +70,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e5692215b5d71d44b17b27cb45e0ed3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 27
+  depth: 28
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0
@@ -83,6 +83,7 @@ MonoBehaviour:
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 0
   thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 0
   attackVictims: []
   attackActive: 0

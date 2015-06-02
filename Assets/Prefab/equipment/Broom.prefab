@@ -71,6 +71,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   depth: 2
+  commonness: 10
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0

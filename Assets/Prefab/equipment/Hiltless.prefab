@@ -27,7 +27,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 184012}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20, y: 6, z: 0}
+  m_LocalPosition: {x: 4.9310627, y: 11.7601175, z: -17.2236004}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -57,8 +57,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: .25, y: 2.5, z: .25}
-  m_Center: {x: 0, y: -1, z: 0}
+  m_Size: {x: .25, y: 3.5, z: .25}
+  m_Center: {x: 0, y: -1.5, z: 0}
 --- !u!114 &11482274
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -70,7 +70,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29cefd7674b294e4693ee764c8313ce7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 27
+  depth: -1
+  commonness: .5
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0
@@ -83,6 +84,7 @@ MonoBehaviour:
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 0
   thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 0
   attackVictims: []
   attackActive: 0
@@ -106,7 +108,7 @@ CapsuleCollider:
   m_Radius: 1
   m_Height: 5.5
   m_Direction: 1
-  m_Center: {x: 0, y: -1, z: 0}
+  m_Center: {x: 0, y: -1.5, z: 0}
 --- !u!212 &21236282
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -131,7 +133,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5d38544f936483845baef1f4c52d16c0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3a9e7a6267f1a9c4cae87951d5125dab, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:

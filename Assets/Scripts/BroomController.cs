@@ -7,7 +7,7 @@ public class BroomController : WeaponController {
 	{
 		if (attackActive) {
 			foreach (var victim in attackVictims) {
-				if (victim == null) continue;
+				if (victim == null || victim.friendly == Parent.friendly) continue;
 				var parent = GetComponentInParent<Acter>();
 				if (parent == null) parent = thrownBy;
 				var direction = (victim.transform.position - parent.transform.position);

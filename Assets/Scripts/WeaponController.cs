@@ -33,6 +33,8 @@ public class WeaponController : ItemController {
 			}	
 		}
 	}
+	protected Acter Parent { get { return IsProjectile ? thrownBy : GetComponentInParent<Acter>(); } }
+	
 	public WeaponController payload;
 	public List<WeaponController> multiPayload = new List<WeaponController>();
 	public bool isSpellbook;
@@ -81,6 +83,7 @@ public class WeaponController : ItemController {
 				transform.rotation = rot;
 			}
 		}
+		GetComponentInChildren<SpriteRenderer>().sortingOrder -= (int)(transform.position.z * 10);		// FIXME:  DRY
 	}
 	void OnDestroy() {		
 //		Destroy(payload);		FIXME: this destoys the payload of the base instance
@@ -148,11 +151,9 @@ public class WeaponController : ItemController {
 		Acter victim = other.GetComponentInParent<Acter>();
 		if (victim == null) return;
 		
-		var parent = IsProjectile ? thrownBy : GetComponentInParent<Acter>();
-		
 		var sg = other.GetComponent<ShieldGolem>();
 		if (sg != null && !attackVictims.Contains(victim)) {
-			if (friendlyFireActive || sg.friendly != parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position
+			if (friendlyFireActive || sg.friendly != Parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position
 					, CameraController.Instance.Volume);
 			attackVictims.Add(victim);
 		}
@@ -165,18 +166,18 @@ public class WeaponController : ItemController {
 		attackVictims.Add(victim);
 		
 		
-		if (parent == null) {
+		if (Parent == null) {
 			if (friendlyFireActive) {
 				victim.TakeDamage(attackPower, damageType);
 			}
 			return;
 		}
 		
-		if (parent.friendly == victim.friendly && !friendlyFireActive) return;
+		if (Parent.friendly == victim.friendly && !friendlyFireActive) return;
 		
 		if (!IsProjectile && IsEquipped) {
-			OnHit(victim, parent);
-			if (victim != parent || friendlyFireActive) FirePayload(other);
+			OnHit(victim, Parent);
+			if (victim != Parent || friendlyFireActive) FirePayload(other);
 		}
 		else if (IsProjectile && (victim != thrownBy || friendlyFireActive)) {
 			OnHit(victim, thrownBy);

@@ -71,6 +71,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   depth: 16
+  commonness: 5
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0
@@ -78,10 +79,12 @@ MonoBehaviour:
   bodySlot: 0
   damageType: 1
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 0
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 0
   thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 0
   attackVictims: []
   attackActive: 0

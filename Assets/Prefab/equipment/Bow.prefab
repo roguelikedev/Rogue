@@ -70,16 +70,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e5692215b5d71d44b17b27cb45e0ed3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 3
+  depth: -1
+  commonness: 10
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
+  deleteOnLanding: 0
   lifetime: -1
   bodySlot: 0
   damageType: 0
   payload: {fileID: 11408120, guid: 166569f6862364848bf1f5ada2a6562a, type: 2}
+  multiPayload: []
   isSpellbook: 0
   firePayloadOnTimeout: 0
-  thrownForceMultiplier: 0
+  thrownHorizontalMultiplier: 0
+  thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 0
   attackVictims: []
   attackActive: 0
@@ -87,6 +92,8 @@ MonoBehaviour:
   attackPower: 0
   impactNoise: {fileID: 0}
   firedNoise: {fileID: 0}
+  constantNoise: {fileID: 0}
+  audioSource: {fileID: 0}
   charges: -1
   speedCoefficient: 1
 --- !u!136 &13632214

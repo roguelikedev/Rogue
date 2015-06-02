@@ -49,8 +49,9 @@ public class TerrainController : MonoBehaviour {
 	{
 		get {
 			if (!hasSpawnedEmpty) return 0;
+			if (statuesDestroyed <= -2) return 27;
 			var rval = generatedCount / (2f + statuesDestroyed);
-			rval = Mathf.Pow(rval, 1.5f);
+			rval = Mathf.Pow(rval, 1.3f);
 			return (int)Mathf.Max(1, Mathf.Min(27, rval));
 		}
 	}
@@ -190,7 +191,7 @@ public class TerrainController : MonoBehaviour {
 
 		if (currentAreaType >= D_CHRISTMAS) {
 			foreach (var t in room.tiles) {
-				if (t.name.Contains("Slanted")) continue;
+				if (t.name.Contains("Slanted") || t.name.Contains("Ramp")) continue;	// FIXME:  hack
 				tile = t.GetComponent<Rigidbody>();
 				break;
 			}
@@ -252,7 +253,6 @@ public class TerrainController : MonoBehaviour {
 		previousAreaType = currentAreaType;
 		CleanUp(x);
 	}
-	
 	int ChooseNextRoomType (int areaType) {
 		int rval;
 		while (true) {
@@ -292,6 +292,7 @@ public class TerrainController : MonoBehaviour {
 			if (rval == D_WATER && Depth < Mathf.Sqrt(spawnController.enemyTentacleMonster.Depth)) continue;
 			if (rval == D_FOREST && Depth < Mathf.Sqrt(spawnController.enemyTreant.Depth)) continue;
 			if (rval == D_TOMB && Depth < Mathf.Sqrt(spawnController.enemySuccubus.Depth)) continue;
+			if (rval == D_THORNS && Depth < 2) continue;
 			else break;
 		}
 		return rval;

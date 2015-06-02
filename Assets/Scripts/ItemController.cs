@@ -5,10 +5,14 @@ using System.Collections.Generic;
 
 public class ItemController : MonoBehaviour, IDepthSelectable {
 	public int depth;
+	public float commonness = 1;
+//	public virtual int Depth { get { return depth == -1 ? 27 : depth; } }		FIXME: should i do it like this?
 	public virtual int Depth { get { return depth; } }
-	public float Commonness { get { return 1; } }
+	
+	public float Commonness { get { return commonness; } }
 	void Start() {
 		GetComponentInChildren<SpriteRenderer>().sortingOrder -= (int)(transform.position.z * 10);
+		print (GetComponentInChildren<SpriteRenderer>().sortingOrder);
 	}
 	public System.Action<Acter> OnPickup = a => {} ;
 

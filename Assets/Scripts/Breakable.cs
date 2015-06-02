@@ -22,7 +22,14 @@ public class Breakable : MonoBehaviour {
 			Instantiate(Random.Range(0,4) == 0? largeMeal : smallMeal, transform.position, Quaternion.identity);
 		}
 		else { 	// statue
-			GameObject.FindObjectOfType<TerrainController>().statuesDestroyed++;
+			if (PlayerController.Instance.MainClass == Acter.C_GESTALT) {
+				CameraController.Instance.AnnounceText("NO MERCY,\nMURDERER");
+				TerrainController.Instance.statuesDestroyed = -27;
+			}
+			else {
+				GameObject.FindObjectOfType<TerrainController>().statuesDestroyed++;
+				CameraController.Instance.AnnounceText("things are\neasier");
+			}
 		}
 		Destroy(gameObject);
 	}

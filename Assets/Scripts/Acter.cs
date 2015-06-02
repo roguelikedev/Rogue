@@ -53,6 +53,7 @@ public abstract class Acter : MonoBehaviour {
 				}
 				if (level < CLVL_SOFT_CAP) {
 					spellpower += .75f;
+					speed += 90 / (level + 3);
 				}
 				break;
 			case C_GESTALT:
@@ -642,7 +643,7 @@ public abstract class Acter : MonoBehaviour {
 	public bool WantsToEquip (WeaponController w) {
 		if (w.IsEquipped) return false;
 		if (MainClass == C_BRUTE && !w.IsArmor && !w.IsMeleeWeapon && w.GetComponent<EstusController>() == null) return false;
-		if (MainClass == C_GESTALT && !w.IsArmor && !w.IsOffhand) return false;
+//		if (MainClass == C_GESTALT && !w.IsArmor && !w.IsOffhand) return false;
 		
 		if (!HasSlotEquipped(w.bodySlot)) return true;
 		// armor
@@ -650,7 +651,7 @@ public abstract class Acter : MonoBehaviour {
 			if (GetSlot(w.SlotAffinity) == null) return true;
 			if (GetArmor(GetSlot(w.SlotAffinity)) == null) return true;
 			print (w + " vs " + GetArmor(GetSlot(w.SlotAffinity)));
-			return (w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass);
+			return (w.Depth > GetArmor(GetSlot(w.SlotAffinity)).Depth);
 //			return GetSlot(w.SlotAffinity) == null
 //				|| GetArmor(GetSlot(w.SlotAffinity)) == null
 //					|| w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass
@@ -660,9 +661,9 @@ public abstract class Acter : MonoBehaviour {
 		if (w.isSpellbook) return true;
 		var comparedWeapon = w.IsOffhand ? EquippedSecondaryWeapon : EquippedWeapon;
 		if (comparedWeapon == null) return true;
-		if (comparedWeapon.name != w.name) return true;
+		if (comparedWeapon.Description != w.Description) return true;
 		else if (w.charges > comparedWeapon.charges) return true;
-		return w.Depth > EquippedWeapon.Depth;
+		return w.Depth > comparedWeapon.Depth;
 	}
 	#endregion
 	#region combat

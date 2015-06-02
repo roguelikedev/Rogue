@@ -19,7 +19,7 @@ public class PlayerController : Acter {
 	
 	public void SetClass(string which) {
 		if (which == "priest") mainClass = C_WIZARD;
-		else if (which == "murderer") mainClass = C_GESTALT;
+		else if (which == "murderer" || which == "wretch") mainClass = C_GESTALT;
 		else mainClass = which;
 		GameObject.FindObjectOfType<Canvas>().gameObject.SetActive(false);
 		WeaponController book;
@@ -42,13 +42,14 @@ public class PlayerController : Acter {
 			
 				book.payload.attackPower *= 2;
 				book.payload.payload = SpellGenerator.Instance().Explosion();
+				book.payload.payload.attackPower *= 2;
 //				SpellGenerator.Instance().Split(book, 4);
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
 				
 				Equip (Instantiate(SpawnController.Instance.itemBroom));
 				
-				spellpower += 4;
+				spellpower += 6;
 				break;
 			case "priest":
 				book = Instantiate(SpellGenerator.Instance().blankBook);
@@ -75,25 +76,31 @@ public class PlayerController : Acter {
 				var weapon = Instantiate(SpawnController.Instance.itemBarMace);
 				weapon.payload = SpellGenerator.Instance().Heal();
 				Equip (weapon);
-//				Equip (Instantiate(SpawnController.Instance.itemMachete));
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
 				Equip (Instantiate(SpawnController.Instance.itemArmor));
 				Equip (Instantiate(SpawnController.Instance.itemSkirt));
 				Equip (Instantiate(SpawnController.Instance.itemShield));
-				meleeMultiplier++;
+//				meleeMultiplier++;
 				break;
 			case "murderer":
 				freeAction = friendless = isAquatic = true;
 				var murderWeapon = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemMachete);
-				murderWeapon.payload = SpellGenerator.Instance().Heal();
+				murderWeapon.payload = SpellGenerator.Instance().RaiseDead();
 				murderWeapon.payload.firedNoise = SpellGenerator.Instance().rippingSound;
-				murderWeapon.payload.payload = SpellGenerator.Instance().RaiseDead();
+//				murderWeapon.payload = SpellGenerator.Instance().Heal();
+//				murderWeapon.payload.firedNoise = SpellGenerator.Instance().rippingSound;
+//				murderWeapon.payload.payload = SpellGenerator.Instance().RaiseDead();
+				murderWeapon.depth = 999;
 				Equip(murderWeapon);
 				Equip(Instantiate(murderMask));
 				speed += 200;
 				SpawnController.Instance.stinginess++;
 				TerrainController.Instance.statuesDestroyed--;
+				break;
+			case "wretch":
+				CameraController.Instance.AnnounceText ("are you really\nup to this\nchallenge?");
+				TerrainController.Instance.statuesDestroyed = -27;
 				break;
 			default: break;
 		}
@@ -110,7 +117,7 @@ public class PlayerController : Acter {
 	}
 
 	void Update () {
-		if (Input.GetKeyDown(KeyCode.Escape)) {
+		if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")) {
 			Application.LoadLevel("DefaultScene");
 		}
 		SpeechBubble.transform.rotation = Quaternion.identity;
@@ -120,23 +127,23 @@ public class PlayerController : Acter {
 		SpeechBubble.GetComponentInChildren<SpriteRenderer>().color -= fade;
 		
 		if (MainClass == "") return;
-		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0))) 
+		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0) || Input.GetButtonDown("Fire1"))) 
 		{
 			shouldUseMainHand = true;
 		}
-		if (!shouldUseMainHand && EquippedSecondaryWeapon != null && (Input.GetKeyDown("r") || Input.GetKeyDown(KeyCode.Mouse1))) {
+		if (!shouldUseMainHand && EquippedSecondaryWeapon != null && (Input.GetKeyDown("r") || Input.GetKeyDown(KeyCode.Mouse1)
+                                                                                            || Input.GetButtonDown("Fire2"))) {
 			shouldUseOffhand = true;
 		}
 		
-		
-		if (Input.GetKeyDown (KeyCode.Space)) {
+		if (Input.GetKeyDown (KeyCode.Space) || Input.GetButtonDown("Fire3")) {
 			shouldPickUpItem = true;
 			foreach(var sign in eligiblePickups.FindAll(s => s.name.Contains("signpost"))) {
 				sign.GetComponent<SignpostController>().Speak();
 				eligiblePickups.Remove(sign);
 			}
 		}
-		if (Input.GetKeyDown (KeyCode.T)) {
+		if (Input.GetKeyDown (KeyCode.T) || Input.GetButtonDown("Jump")) {
 			foreach (var ally in livingActers.FindAll(p => p.friendly && p != this)) {
 				ally.ShouldPickUpItem();
 			}
@@ -157,7 +164,10 @@ public class PlayerController : Acter {
 
 	public override void TakeDamage (float quantity, int type)
 	{
-		if (infiniteHealth) Speak("nope, invulnerable (" + quantity +")");
+		if (infiniteHealth) {
+			Speak("nope, invulnerable (" + quantity +")");
+//			print("nope, invulnerable (" + quantity +")");
+		}
 		else {
 			var dead = State == ST_DEAD;
 			base.TakeDamage (quantity, type);
@@ -186,6 +196,7 @@ public class PlayerController : Acter {
 		Vector3 v = Vector3.zero;
 		v.x = Input.GetAxis ("Horizontal");
 		v.z = Input.GetAxis ("Vertical");
+//		if (v.magnitude <= 0.3f) v = Vector3.zero;
 						
 		if (v.x != 0 || v.z != 0) {
 			if (EnterStateAndAnimation(ST_WALK)) Move(v);
