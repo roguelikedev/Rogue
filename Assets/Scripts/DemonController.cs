@@ -3,7 +3,8 @@ using System.Collections;
 
 public class DemonController : EnemyController {
 	protected WeaponController damageAura;
-	public int inverseAuraRefreshRate;
+	public int auraRefreshRate;
+	protected int auraRefreshCountdown;
 	public float auraDamage;
 	public override string MainClass {
 		get {
@@ -20,7 +21,6 @@ public class DemonController : EnemyController {
 		var ctr = damageAura.GetComponent<CapsuleCollider>().center;
 		ctr.x = 0;
 		damageAura.GetComponent<CapsuleCollider>().center = ctr;
-		
 		damageAura.gameObject.SetActive(true);
 		damageAura.thrownBy = this;
 	}
@@ -38,7 +38,10 @@ public class DemonController : EnemyController {
 				damageAura.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vector3.zero;
 			}
 			
-			if ((int)Random.Range(0, inverseAuraRefreshRate) == 0) damageAura.attackVictims.Clear();
+			if (auraRefreshCountdown-- <= 0) {
+				damageAura.attackVictims.Clear();
+				auraRefreshCountdown = auraRefreshRate;
+			}
 		}
 		return base._FixedUpdate ();
 	}

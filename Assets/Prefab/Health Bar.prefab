@@ -40,7 +40,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 0}
-  sprite: {fileID: 21249566, guid: 06e6b74c35b41384880b6f0681748437, type: 2}
+  heart: {fileID: 21249566, guid: 06e6b74c35b41384880b6f0681748437, type: 2}
+  backHand: {fileID: 0}
+  frontHand: {fileID: 0}
+  lockIcon: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

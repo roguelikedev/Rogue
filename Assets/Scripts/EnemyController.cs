@@ -101,7 +101,12 @@ public class EnemyController : Acter, IDepthSelectable
 		return targetLocn;
 	}
 
+	protected int stopRunningSlowly;
+	Vector3 lastDirection = Vector3.zero;
 	protected virtual Vector3 DirectionToTarget() {
+		if (stopRunningSlowly-- > 0) {
+			return lastDirection;
+		}
 		Vector3 targetLocn = transform.position;
 		targetLocn = DirectionFromTrap();
 		if (targetLocn == transform.position) targetLocn = DirectionToFoe();
@@ -134,6 +139,8 @@ public class EnemyController : Acter, IDepthSelectable
 			else if (posn.z > targetLocn.z)
 				rval.z = -1;
 //		}
+		stopRunningSlowly = 15;
+		lastDirection = rval;
 		return rval;
 	}
 	#endregion
@@ -180,8 +187,22 @@ public class EnemyController : Acter, IDepthSelectable
 		isThreateningPlayer = false;
 	}
 	
+	protected virtual void ResetAggro () {
+		var aggroSize = GetComponentInChildren<AggroController>().GetComponent<CapsuleCollider>();
+		if (PrimaryWeaponIsRanged || (SecondaryWeaponIsRanged && !EquippedSecondaryWeapon.name.Contains("wand"))) {
+			aggroSize.direction = 0;
+			aggroSize.center = new Vector3(-5, 0);
+			aggroSize.height = 10;
+			fleeDistance = 4f;
+		}
+		else {
+			GetComponentInChildren<AggroController>().Reinitialize();
+			if (!friendly) fleeDistance = 0f;
+		}
+	}
+	
 	void FixedUpdate() {
-		if (PlayerController.Instance.friendless) friendly = false;
+		if (friendly && PlayerController.Instance.friendless) friendly = false;
 		if (isThreateningPlayer && !shouldUseMainHand && State != ST_ATTACK) {
 			if (isThreateningPlayer) PlayerController.Instance.ShouldScramble = false;
 			isThreateningPlayer = false;
@@ -202,17 +223,7 @@ public class EnemyController : Acter, IDepthSelectable
 		
 		if (!_FixedUpdate()) return;
 		
-		var aggroSize = GetComponentInChildren<AggroController>().GetComponent<CapsuleCollider>();
-		if (PrimaryWeaponIsRanged || (SecondaryWeaponIsRanged && !EquippedSecondaryWeapon.name.Contains("wand"))) {
-			aggroSize.direction = 0;
-			aggroSize.center = new Vector3(-5, 0);
-			aggroSize.height = 10;
-			fleeDistance = 4f;
-		}
-		else {
-			GetComponentInChildren<AggroController>().Reinitialize();
-			if (!friendly) fleeDistance = 0f;
-		}
+		if (stopRunningSlowly <= 1) ResetAggro();
 		damageAnnouncer.SetFriendly(friendly);
 		
 		var dir = DirectionToTarget ();

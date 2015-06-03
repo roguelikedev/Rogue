@@ -579,7 +579,7 @@ MonoBehaviour:
   commonness: 1
   fleeDistance: 0
   isUnliving: 1
-  inverseAuraRefreshRate: 30
+  auraRefreshRate: 45
   auraDamage: 2
 --- !u!135 &13581592
 SphereCollider:

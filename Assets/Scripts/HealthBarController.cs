@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class HealthBarController : MonoBehaviour {
 	public Acter player;
 	protected Vector3 offset;
-	public SpriteRenderer sprite;
+	public SpriteRenderer heart;
 	List<SpriteRenderer> buddies = new List<SpriteRenderer>();
 	
 	
@@ -43,12 +43,12 @@ public class HealthBarController : MonoBehaviour {
 			
 			bool first = true;
 			for (float lcv = hp; lcv > 0; --lcv) {
-				var spr = Instantiate(sprite);
+				var spr = Instantiate(heart);
 				buddies.Add(spr);
 				if (first) {
 					var remainder = hp - (int)hp;
 					if (remainder > 0) {
-						spr.transform.localScale = sprite.transform.localScale * remainder;
+						spr.transform.localScale = heart.transform.localScale * remainder;
 					}
 					first = false;
 				}
@@ -61,7 +61,7 @@ public class HealthBarController : MonoBehaviour {
 		
 		// follow the acter here instead of in a LateUpdate() to avoid dangling pointers -- they SetCurrentHP every frame anyway
 		for (int lcv = 0; lcv < buddies.Count; ++lcv) {
-			var xOffset = (lcv % (int)hpPerColor) * sprite.bounds.extents.x * 2;// + lcv * 0.05f;
+			var xOffset = (lcv % (int)hpPerColor) * heart.bounds.extents.x * 2;// + lcv * 0.05f;
 //			print (xOffset + " before scaling");
 //			xOffset *= sprite.bounds.extents.x - .24f);
 //			print (xOffset + " post scaling");

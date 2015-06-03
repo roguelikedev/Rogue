@@ -21,10 +21,6 @@ public class DamageAnnouncer : MonoBehaviour {
 	float damageCount = 0;
 	public AudioClip chimeSound;
 	
-	public void AnnounceHealed() {
-//		AudioSource.PlayClipAtPoint(chimeSound, transform.position, CameraController.Instance.Volume);
-	}
-	
 	public void AnnounceDeath() {
 		var mob = acter as EnemyController;
 		if (mob != null) AnnounceText("+"+mob.ChallengeRating+" XP");
@@ -36,7 +32,7 @@ public class DamageAnnouncer : MonoBehaviour {
 		AudioSource.PlayClipAtPoint(splatter, transform.position, CameraController.Instance.Volume);
 	}
 	
-	public void AnnounceDamage(float quantity, bool silent) {
+	public void AnnounceDamage(float quantity, int damageType) {
 		damageCount += quantity;
 		quantity = damageCount;
 		var str = quantity.ToString();
@@ -45,8 +41,15 @@ public class DamageAnnouncer : MonoBehaviour {
 		damageText.text = str;
 		delayBeforeFadeOut = baseDelayBeforeFadeOut;
 		damageText.transform.localPosition = Vector3.zero;
-		if (!silent) {
-			AudioSource.PlayClipAtPoint(thump, transform.position, CameraController.Instance.Volume * Mathf.Min(1, quantity));
+		var clip = thump;
+		if (damageType == WeaponController.DMG_NOT) {		// thorns floor
+			clip = SpellGenerator.Instance().rippingSound;
+		}
+		else if (damageType == WeaponController.DMG_FIRE) {
+			clip = SpellGenerator.Instance().fireSound;
+		}
+		if (damageType != WeaponController.DMG_GRAP) {
+			AudioSource.PlayClipAtPoint(clip, transform.position, CameraController.Instance.Volume * Mathf.Min(1, quantity));
 		}
 	}
 	

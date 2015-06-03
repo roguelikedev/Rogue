@@ -563,7 +563,7 @@ MonoBehaviour:
   grappling: {fileID: 0}
   selfGameObject: {fileID: 143744}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
-  skinColor: {r: .70588237, g: .70588237, b: .745098054, a: 1}
+  skinColor: {r: .592156887, g: .545098066, b: .611764729, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
   anim: {fileID: 9570574}
   weapon: {fileID: 13651418}

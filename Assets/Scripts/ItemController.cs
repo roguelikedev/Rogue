@@ -22,15 +22,19 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 		}
 	}
 	
+	bool hasSprite;
+	bool hasCheckedSprite;
 	protected virtual void _FixedUpdate() {
 		if (transform.position.y < -2) {
 			Destroy(gameObject);
 		}
-		if (IsEquipped) {
+		if (IsEquipped && (hasSprite || !hasCheckedSprite)) {
+			hasCheckedSprite = true;
 			var spr = transform.parent.GetComponentInParent<SpriteRenderer>();
 			if (spr != null) {
 				var mySpr = GetComponentInChildren<SpriteRenderer>();
 				if (mySpr != null) {
+					hasSprite = true;
 					mySpr.sortingOrder = spr.sortingOrder;
 					if (GetComponent<WeaponController>() != null) {
 						if (GetComponent<WeaponController>().IsArmor) mySpr.sortingOrder++;

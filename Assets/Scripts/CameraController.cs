@@ -56,6 +56,10 @@ public class CameraController : MonoBehaviour {
 	}
 	
 	public void StatsChanged(string mainStat, float mainStatValue, float armorClass) {
+		if (mainStat == "acters") {
+			statsDisplay.text = mainStat + " " + mainStatValue + "  framerate " + armorClass;
+			return;
+		}
 		System.Func<float, float> Round = n => {
 			return ((float)((int) (n * 100))) / 100;
 		};

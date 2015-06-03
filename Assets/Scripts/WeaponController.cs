@@ -28,7 +28,7 @@ public class WeaponController : ItemController {
 				case EQ_SKIRT: return "pelvis";
 				case EQ_HELM: return "Head";
 				case EQ_SHOULDER: return "backArm";
-				case EQ_SHIN : return "backLeg";
+				case EQ_SHIN : return "backShin";
 				default: return null;
 			}	
 		}
@@ -105,6 +105,18 @@ public class WeaponController : ItemController {
 			}
 		}
 		
+		if (constantNoise != null) {
+			if (audioSource == null) {
+				Debug.LogError("constant noise requires AudioSource child object");
+			}
+			else if (!attackActive) audioSource.Stop();
+			else if (!audioSource.isPlaying && audioSource.isActiveAndEnabled) {
+				audioSource.volume = CameraController.Instance.Volume;
+				audioSource.clip = constantNoise;
+				audioSource.Play();
+			}
+		}
+		
 		if (charges == 0 && lifetime == -1) {
 			lifetime = 90;
 		}
@@ -155,7 +167,7 @@ public class WeaponController : ItemController {
 		if (sg != null && !attackVictims.Contains(victim)) {
 			if (friendlyFireActive || sg.friendly != Parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position
 					, CameraController.Instance.Volume);
-			attackVictims.Add(victim);
+			return;
 		}
 		
 		if (other.name != "torso") return;
@@ -164,7 +176,6 @@ public class WeaponController : ItemController {
 		
 		if (attackVictims.Contains(victim)) return;
 		attackVictims.Add(victim);
-		
 		
 		if (Parent == null) {
 			if (friendlyFireActive) {
@@ -275,7 +286,6 @@ public class WeaponController : ItemController {
 			Destroy(gameObject);	
 		}
 	}
-	
 	
 	void FirePayload(Collider impactPoint) {
 		if (payload != null) {

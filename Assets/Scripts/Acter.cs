@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using Utilities.Geometry;
 
 public abstract class Acter : MonoBehaviour {
 	#region munchkin stats
@@ -69,6 +70,7 @@ public abstract class Acter : MonoBehaviour {
 		hitPoints = MaxHitPoints;		// don't use Heal() to avoid killing ghosts/ghouls
 		fireDamageTaken = 0;
 		++level;
+		xpToLevel = (int)Math.Pow(baseXPToLevel, level);
 		damageAnnouncer.AnnounceText("reached level " + level);
 	}
 	public virtual string MainClass
@@ -76,8 +78,8 @@ public abstract class Acter : MonoBehaviour {
 		get
 		{
 			if (spellpower > 0) return C_WIZARD;
-			if (speed > racialBaseHitPoints * 100) return C_ROGUE;
-			if (huge) return C_BRUTE;
+			if (speed >= racialBaseHitPoints * 100) return C_ROGUE;
+			if (huge || (meleeMultiplier > 1 && speed < 400)) return C_BRUTE;
 			return C_FIGHT;
 		}
 	}
@@ -345,7 +347,7 @@ public abstract class Acter : MonoBehaviour {
 	public virtual void EnterTerrainCallback(string terrType) { EnterTerrainCallback(terrType, 0); }
 	public virtual void EnterTerrainCallback(string terrType, float damage) {
 		if (terrType == "thorns" && racialBaseHitPoints != 0) {
-			TakeDamage(damage, WeaponController.DMG_PHYS);
+			TakeDamage(damage, WeaponController.DMG_NOT);
 			return;
 		}
 		if (terrainCollisions.ContainsKey(terrType))
@@ -391,7 +393,7 @@ public abstract class Acter : MonoBehaviour {
 		if (direction.y > 0) direction.y = 0;			// don't skateboard jump off of ramps
 		if (direction.y < -1) direction.y = -10;		// don't float off of ramps
 		grappledBy.ForEach(e => {
-			direction /= e.meleeMultiplier;
+			if (!freeAction) direction /= e.meleeMultiplier;
 			e.GetComponent<Rigidbody>().velocity = direction;
 		});
 		GetComponent<Rigidbody>().velocity = direction;
@@ -542,21 +544,26 @@ public abstract class Acter : MonoBehaviour {
 				EquipArmor(item, pelvis);
 				break;
 			case WeaponController.EQ_SHOULDER:
-				if (equippedArmor.ContainsKey(GetSlot("frontArm"))) {
-					var prev = GetArmor(GetSlot("frontArm"));
-					EquipArmor(prev, GetSlot("backArm"));
-					equippedArmor.Remove(GetSlot("frontArm"));
-					prev.transform.localScale = new Vector3(-1, 1);
+				var whichShoulder = WantsToEquipPauldronOrGreave(item);
+				if (whichShoulder == "backArm") {
+					item.transform.localScale = Vec.New(-1, 1);
 				}
-				EquipArmor(item, GetSlot("frontArm"));
+				if (whichShoulder != null) {
+					var prevP = GetArmor(GetSlot(whichShoulder));
+					EquipArmor(item, GetSlot(whichShoulder));
+					var otherSh = prevP == null ? null : WantsToEquipPauldronOrGreave(prevP);
+					if (otherSh != null) EquipArmor(prevP, GetSlot(otherSh));
+				}
+				else Debug.LogError("should want to equip " + item);
 				break;
 			case WeaponController.EQ_SHIN:
-				if (equippedArmor.ContainsKey(GetSlot("frontShin"))) {
-					var prev = GetArmor(GetSlot("frontShin"));
-					EquipArmor(prev, GetSlot("backShin"));
-					equippedArmor.Remove(GetSlot("frontShin"));
+				var whichShin = WantsToEquipPauldronOrGreave(item);
+				if (whichShin != null) {
+					var prev = GetArmor(GetSlot(whichShin));
+					EquipArmor(item, GetSlot(whichShin));
+					var otherShin = prev == null ? null : WantsToEquipPauldronOrGreave(prev);
+					if (otherShin != null) EquipArmor(prev, GetSlot(otherShin));
 				}
-				EquipArmor(item, GetSlot("frontShin"));
 				break;
 			default:
 				Debug.LogError("no such item slot: " + item.bodySlot);
@@ -639,19 +646,46 @@ public abstract class Acter : MonoBehaviour {
 		if (trinket.trapFinding) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
 		trinket.OnIdentify();
 	}
+	string WantsToEquipPauldronOrGreave (WeaponController w) {
+		var affinity = w.SlotAffinity;
+		while (true) {
+			if (GetSlot(affinity) == null) return affinity;
+			if (GetArmor(GetSlot(affinity)) == null) return affinity;
+			var rval = w.Depth > GetArmor(GetSlot(affinity)).Depth;
+			if (!rval && (affinity == "backArm" || affinity == "backShin")) {
+//				print ("a " + affinity);
+				affinity = affinity.Replace("back", "front");
+//				print ("b " + affinity);
+				//				print (GetArmor(GetSlot(affinity)));
+				//				print (w + " vs " + GetArmor(GetSlot(w.SlotAffinity)));
+				continue;
+			}
+			return rval ? affinity : null;
+		}
+	}
 	
-	public bool WantsToEquip (WeaponController w) {
+	public virtual bool WantsToEquip (WeaponController w) {
 		if (w.IsEquipped) return false;
 		if (MainClass == C_BRUTE && !w.IsArmor && !w.IsMeleeWeapon && w.GetComponent<EstusController>() == null) return false;
 //		if (MainClass == C_GESTALT && !w.IsArmor && !w.IsOffhand) return false;
 		
 		if (!HasSlotEquipped(w.bodySlot)) return true;
 		// armor
+		var affinity = w.SlotAffinity;
 		if (w.armorClass > 0) {
-			if (GetSlot(w.SlotAffinity) == null) return true;
-			if (GetArmor(GetSlot(w.SlotAffinity)) == null) return true;
-			print (w + " vs " + GetArmor(GetSlot(w.SlotAffinity)));
-			return (w.Depth > GetArmor(GetSlot(w.SlotAffinity)).Depth);
+			if (GetSlot(affinity) == null) return true;
+			if (GetArmor(GetSlot(affinity)) == null) return true;
+			var rval = w.Depth > GetArmor(GetSlot(affinity)).Depth;
+			if (!rval && (affinity == "backArm" || affinity == "backShin")) {
+				rval = WantsToEquipPauldronOrGreave(w) != null;
+//				print ("a " + affinity);
+//				affinity = affinity.Replace("back", "front");
+//				print ("b " + affinity);
+//				print (GetArmor(GetSlot(affinity)));
+//				print (w + " vs " + GetArmor(GetSlot(w.SlotAffinity)));
+//				continue;
+			}
+			return rval;
 //			return GetSlot(w.SlotAffinity) == null
 //				|| GetArmor(GetSlot(w.SlotAffinity)) == null
 //					|| w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass
@@ -732,7 +766,6 @@ public abstract class Acter : MonoBehaviour {
 		if (hitPoints == MaxHitPoints && fireDamageTaken == 0) return false;
 		if (State == ST_DEAD) return false;
 		TakeDamage(qty, WeaponController.DMG_HEAL);
-		damageAnnouncer.AnnounceHealed();
 		return true;
 	}
 	const int SPEED_WHEN_PARALYZED = 1;
@@ -869,7 +902,7 @@ public abstract class Acter : MonoBehaviour {
 		if (type == WeaponController.DMG_FIRE) fireDamageTaken += quantity;
 //		print ("post scaling " + quantity + ", AC " + armorClass);
 		
-		damageAnnouncer.AnnounceDamage(quantity, type == WeaponController.DMG_GRAP);
+		damageAnnouncer.AnnounceDamage(quantity, type);
 		
 		if (hitPoints > 0 && type == WeaponController.DMG_PHYS && speed != SPEED_WHEN_PARALYZED) {
 			if (state != ST_HURT && State != ST_CAKE) {
@@ -954,7 +987,6 @@ public abstract class Acter : MonoBehaviour {
 					a.xpToLevel -= mob.ChallengeRating;
 					if (a.xpToLevel <= 0) {
 						a.GainLevel(a.MainClass);
-						a.xpToLevel = (int)Math.Pow(baseXPToLevel, a.level);
 					}
 				});
 			}
@@ -1046,11 +1078,11 @@ public abstract class Acter : MonoBehaviour {
 			paralyzeScaling = Mathf.Max (1, paralyzeScaling - 1/60);
 		} else print ("paralyze scaling " + paralyzeScaling);
 		
-		OnFixedUpdate();
 		if (State == ST_ATTACK) {
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 			return false;
 		}
+		OnFixedUpdate();
 		
 		if (shouldUseMainHand && EnterStateAndAnimation(ST_ATTACK)) return false;
 		if (shouldUseOffhand && EnterStateAndAnimation(ST_ATTACK)) return false;

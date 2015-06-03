@@ -555,7 +555,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 200
   racialBaseHitPoints: 1
-  meleeMultiplier: 6
+  meleeMultiplier: 5
   spellpower: 0
   level: 0
   isAquatic: 0
@@ -580,7 +580,7 @@ MonoBehaviour:
   commonness: 10
   fleeDistance: 0
   isUnliving: 0
-  inverseAuraRefreshRate: 15
+  auraRefreshRate: 30
   auraDamage: .25
   naturalArmor: 200
 --- !u!135 &13598662

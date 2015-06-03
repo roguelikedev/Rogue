@@ -51,7 +51,7 @@ public class TerrainController : MonoBehaviour {
 			if (!hasSpawnedEmpty) return 0;
 			if (statuesDestroyed <= -2) return 27;
 			var rval = generatedCount / (2f + statuesDestroyed);
-			rval = Mathf.Pow(rval, 1.3f);
+//			rval = Mathf.Pow(rval, 1.3f);
 			return (int)Mathf.Max(1, Mathf.Min(27, rval));
 		}
 	}
@@ -97,6 +97,19 @@ public class TerrainController : MonoBehaviour {
 	{
 		rooms.Add(GenerateAtIndex(0, tilePrefab, stone, D_CAVE));
 		announcer.AnnounceText("Entered Wimps Cave");
+	}
+	
+	int nightgauntCooldown = 0;
+	void FixedUpdate () {
+		if (Depth < 25) return;
+		if (Random.Range(0, nightgauntCooldown) == 0) {
+			nightgauntCooldown += 100 * Acter.livingActers.FindAll(e => !e.friendly).Count / (Depth - 24);
+			var loc = Random.Range(0, 2) == 0 ? LeftmostRoom.tiles[0].transform.position.x - TILE_SZ * 6
+					: RightmostRoom.tiles[RightmostRoom.tiles.Count - 1].transform.position.x + TILE_SZ * 6;
+			var ng = Instantiate(spawnController.enemyNightgaunt);
+			ng.transform.position = new Vector3(loc, 0) + ng.transform.position;
+		}
+		if (nightgauntCooldown > 1) nightgauntCooldown--;
 	}
 	
 	void CleanUp(int currentIndex) {
@@ -191,7 +204,7 @@ public class TerrainController : MonoBehaviour {
 
 		if (currentAreaType >= D_CHRISTMAS) {
 			foreach (var t in room.tiles) {
-				if (t.name.Contains("Slanted") || t.name.Contains("Ramp")) continue;	// FIXME:  hack
+				if (t.name.Contains("Slanted") || t.name.Contains("Ramp") || t.name.Contains("Trap")) continue;	// FIXME:  hack
 				tile = t.GetComponent<Rigidbody>();
 				break;
 			}
@@ -259,7 +272,7 @@ public class TerrainController : MonoBehaviour {
 			if (areaType >= D_CHRISTMAS) {
 				rval = Random.Range(D_FOREST, D_CHRISTMAS);
 			}
-			else if (Random.Range(0,4) > 0) rval = areaType;
+			else if (Random.Range(0, 3) > 0) rval = areaType;
 			else if (Random.Range(0, SpawnController.Instance.stinginess) != 0) rval = Random.Range(D_FOREST, D_CHRISTMAS);
 			else {
 				int specialType;
@@ -289,10 +302,10 @@ public class TerrainController : MonoBehaviour {
 				visitedSpecialRooms.Add(specialType);
 				rval = specialType;
 			}
-			if (rval == D_WATER && Depth < Mathf.Sqrt(spawnController.enemyTentacleMonster.Depth)) continue;
-			if (rval == D_FOREST && Depth < Mathf.Sqrt(spawnController.enemyTreant.Depth)) continue;
-			if (rval == D_TOMB && Depth < Mathf.Sqrt(spawnController.enemySuccubus.Depth)) continue;
-			if (rval == D_THORNS && Depth < 2) continue;
+			if (rval == D_WATER && Depth < 3) continue;
+			if (rval == D_FOREST && Depth < 4) continue;
+			if (rval == D_TOMB && Depth < 5) continue;
+			if (rval == D_THORNS && Depth < 1) continue;
 			else break;
 		}
 		return rval;
@@ -319,7 +332,7 @@ public class TerrainController : MonoBehaviour {
 		bool hasRamp = Random.Range(0,3) == 0 && areaType < D_CHRISTMAS && hasSpawnedEmpty;
 		int leftRampIndex = Random.Range(xmin, xmax - 1);
 		int rightRampIndex = Random.Range(leftRampIndex + 1, xmax);
-		
+		var trapSeed = Random.Range(0, trapRarity);
 		for (int x = xmin; x < xmax; ++x) {
 			for (int z = Z_MIN; z <= Z_MAX; ++z) {
 				Vector3 orig = tilePrefab.transform.position + new Vector3(x * TILE_SZ, 0, z * TILE_SZ);
@@ -328,13 +341,11 @@ public class TerrainController : MonoBehaviour {
 				
 				Rigidbody _floorType = floorType;
 				
-				if (areaType < D_CHRISTMAS) {
-					var trapSeed = Random.Range(0, Depth);
-					if (trapSeed > 0 && Random.Range(0, trapRarity) == 0) {
-						_floorType = tileTrapped;
-						_floorType.GetComponent<TerrainEffectTrap>().severity = trapSeed * trapRarity;
-					}
+				if (trapSeed == 0) {
+					_floorType = tileTrapped;
+					_floorType.GetComponent<TerrainEffectTrap>().severity = Random.Range(1, Mathf.Max(Depth, 1)) * trapRarity;
 				}
+				if (areaType < D_CHRISTMAS)	trapSeed = Random.Range(0, trapRarity);
 				
 				if (hasRamp) {
 					if (areaType == D_WATER) _texture = stone;

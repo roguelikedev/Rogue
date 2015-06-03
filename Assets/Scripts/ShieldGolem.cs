@@ -8,6 +8,17 @@ public class ShieldGolem : EnemyController {
 	int movementFrames;
 	Vector3 targetDirection;
 	public AudioClip clang;
+	bool isDoingNothing = false;
+	System.Action DoNothing = null;
+	
+	void Start () {
+		var self = this;
+		DoNothing = () =>
+		{
+			self.shouldUseMainHand = self.shouldUseOffhand = false; 
+			print(self.shouldUseMainHand + " " + self.shouldUseOffhand);
+		};
+	}
 	
 	protected override Vector3 DirectionToTarget ()
 	{
@@ -24,14 +35,27 @@ public class ShieldGolem : EnemyController {
 		}
 		
 		if (targetDirection == Vector3.zero) {
+			stopRunningSlowly = 0;
 			targetDirection = base.DirectionToTarget();
 			movementFrames = baseMovementFrames;
 		}
 		return targetDirection;
 	}
 	
+	public override void AttackActiveFramesDidFinish ()
+	{
+		OnFixedUpdate += DoNothing;
+		isDoingNothing = true;
+		actionDelay = baseActionDelay;
+		base.AttackActiveFramesDidFinish ();
+	}
+	
 	protected override bool _FixedUpdate ()
 	{
+		if (actionDelay <= 0 && isDoingNothing && DoNothing != null) {
+			isDoingNothing = false;
+			OnFixedUpdate -= DoNothing;
+		}
 		if (State != ST_WALK) targetDirection = Vector3.zero;
 		return base._FixedUpdate ();
 	}

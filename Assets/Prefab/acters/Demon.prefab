@@ -554,7 +554,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 400
   racialBaseHitPoints: 9
-  meleeMultiplier: 9
+  meleeMultiplier: 6
   spellpower: 0
   level: 0
   isAquatic: 1
@@ -579,7 +579,7 @@ MonoBehaviour:
   commonness: 10
   fleeDistance: 0
   isUnliving: 1
-  inverseAuraRefreshRate: 6
+  auraRefreshRate: 5
   auraDamage: 1
 --- !u!135 &13581592
 SphereCollider:

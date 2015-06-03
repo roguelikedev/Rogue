@@ -17,18 +17,18 @@ public class CarrotTitanController : DemonController {
 			}
 			else damageAura.attackPower += auraDamage;
 			damageAura.friendlyFireActive = true;
-			damageAura.damageType = WeaponController.DMG_PHYS; 		// don't let it proc itself
-			damageAura.lifetime += (int)(quantity * 5);	// remember AC doubles vs fire
+			damageAura.damageType = WeaponController.DMG_GRAP; 		// don't let it proc itself, and stay quiet
+			damageAura.lifetime += (int)(quantity * 5);			// remember AC doubles vs fire
 		}
 		base.TakeDamage (quantity, type);
 	}
 	
-	protected override bool _FixedUpdate ()
-	{
-		if (damageAura && damageAura.attackVictims.Count == 0) {
-			damageAura.attackPower -= auraDamage;
-			if (damageAura.attackPower <= 0) damageAura.lifetime = 1;
-		}
-		return base._FixedUpdate ();
-	}
+//	protected override bool _FixedUpdate ()
+//	{
+//		if (damageAura && damageAura.attackVictims.Count == 0) {
+//			damageAura.attackPower -= auraDamage;
+//			if (damageAura.attackPower <= 0) damageAura.lifetime = 1;
+//		}
+//		return base._FixedUpdate ();
+//	}
 }

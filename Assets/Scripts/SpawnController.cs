@@ -12,7 +12,7 @@ public class SpawnController : MonoBehaviour {
 	#region instance variables
 	public bool preventSpawn = false;
 	public bool itemPinata = false;
-	public int stinginess;
+	public float stinginess;
 	
 	public EnemyController enemyOrc;
 	public EnemyController enemyGoblin;
@@ -29,6 +29,7 @@ public class SpawnController : MonoBehaviour {
 	public EnemyController enemyTreant;
 	public EnemyController enemyIronLich;
 	public EnemyController enemyShieldGolem;
+	public EnemyController enemyNightgaunt;
 	
 	public WeaponController itemBrick;
 	public WeaponController itemBow;
@@ -155,6 +156,7 @@ public class SpawnController : MonoBehaviour {
 					break;
 			}
 			if (Acter.livingActers.FindAll(a => a.name.Contains("Woman")).Count > 2) bestMatches.Remove(enemyWoman);
+			bestMatches.Remove(enemyNightgaunt);
 		}
 		
 		var whichMob = bestMatches[Random.Range(0, bestMatches.Count)];
@@ -421,7 +423,7 @@ public class SpawnController : MonoBehaviour {
 			return;
 		}
 		for (int lcv = 0; lcv < 3; ++lcv) {
-			if (Random.Range(0, stinginess) != 0) continue;
+			if (Random.Range(0, stinginess) > 1) continue;
 			
 			var s = Random.Range(0, 12);
 			bool hasMadeSign = false;
@@ -433,11 +435,14 @@ public class SpawnController : MonoBehaviour {
 			else if (s < 8) Instantiate(barrel).transform.position = RandomLocation();
 			else MakeEquipmentBox(depth).transform.position = RandomLocation();
 		}
-		if (preventSpawn) {
-//			for (int lcv = 0; lcv < 3; ++lcv) {
+		
+		
+		if (preventSpawn && depth > 0) {
+			for (int lcv = 0; lcv < 9; ++lcv) {
 //				var b = Instantiate(barrel);
-//				b.transform.position = RandomLocation();
-//			}
+				var b = Instantiate(enemyTreant);
+				b.transform.position = RandomLocation();
+			}
 			//			var g = Instantiate(enemyGoblin);
 			//			g.Equip(Instantiate(itemBow));
 			return;
@@ -457,7 +462,7 @@ public class SpawnController : MonoBehaviour {
 					tmp.x *= hugeness; tmp.y *= hugeness; tmp.z *= hugeness;
 					whichMob.transform.localScale = tmp;
 					whichMob.racialBaseHitPoints += hugeness;
-					whichMob.Heal(whichMob.MaxHitPoints);
+//					whichMob.Heal(whichMob.MaxHitPoints);		// this *should* always happen via AddLevels()
 					whichMob.meleeMultiplier = Mathf.Max(whichMob.meleeMultiplier * hugeness, whichMob.meleeMultiplier + hugeness);
 					whichMob.name = "Huge " + whichMob.name;
 					whichMob.racialLevel = (int)(whichMob.racialLevel * hugeness);
@@ -471,11 +476,11 @@ public class SpawnController : MonoBehaviour {
 				if (isCaptain) {
 					whichMob.GetComponentInChildren<DamageAnnouncer>().SetElite();
 					whichMob.name = "Champion " + whichMob.name;
-					isCaptain = false;
 				}
 			}
 			
 			AddEquipment(whichMob, isCaptain);
+			isCaptain = false;
 			encounterLevel += whichMob.ChallengeRating;
 			whichMob.transform.position = RandomLocation();
 		}

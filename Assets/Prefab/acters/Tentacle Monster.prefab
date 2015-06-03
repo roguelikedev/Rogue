@@ -123,6 +123,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 430550}
   - 212: {fileID: 21280770}
+  - 95: {fileID: 9540368}
   m_Layer: 0
   m_Name: thirdArm
   m_TagString: grapple zone
@@ -535,7 +536,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 22.5200005, y: 6.90999985, z: 2.13000011}
+  m_LocalPosition: {x: 19.8700008, y: 8.35000038, z: -3.3599999}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 484652}
@@ -571,6 +572,23 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
+--- !u!95 &9540368
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 157674}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4f25d7dbc9692b040bed61da4c9a6df9, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!95 &9598328
 Animator:
   serializedVersion: 3
@@ -612,7 +630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 300
   racialBaseHitPoints: 8
-  meleeMultiplier: 3
+  meleeMultiplier: 4
   spellpower: 0
   level: 0
   isAquatic: 1
