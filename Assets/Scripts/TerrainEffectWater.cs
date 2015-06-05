@@ -9,11 +9,11 @@ public class TerrainEffectWater : TerrainEffectFloor {
 		var acter = other.GetComponentInParent<Acter>();
 		if (acter == null) return;
 		acter.EnterTerrainCallback("water");
-		splashes.Play();
+		splashes.Play();		// used to be in defunct triggerstay()
 	}
-	void OnTriggerStay(Collider other) {
-		if (other.GetComponentInParent<Acter>() == null) return;
-	}
+//	void OnTriggerStay(Collider other) {
+//		if (other.GetComponentInParent<Acter>() == null) return;
+//	}
 	
 	void OnTriggerExit(Collider other) {
 		var acter = other.GetComponentInParent<Acter>();

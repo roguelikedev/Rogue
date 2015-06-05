@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Utilities.Geometry;
 
 public class BroomController : WeaponController {
 	protected override void _FixedUpdate ()
@@ -10,15 +11,15 @@ public class BroomController : WeaponController {
 				if (victim == null || victim.friendly == Parent.friendly) continue;
 				var parent = GetComponentInParent<Acter>();
 				if (parent == null) parent = thrownBy;
-				var direction = (victim.transform.position - parent.transform.position);
-				if (direction.magnitude > 9) {
+				Vec direction = (victim.transform.position - parent.transform.position);
+				direction.z = 0;
+				direction.y = Mathf.Abs(direction.y);
+				direction = direction.Normalish;
+				if (direction.Len3 > 9) {
 					attackVictims.Clear();
 					return;
 				}
-				direction.y = 0;
-				direction.Normalize();
-				var fuckTheseVectors = 1 / Mathf.Max(3f, victim.Poise);
-				direction.Scale(new Vector3(fuckTheseVectors, fuckTheseVectors, fuckTheseVectors));
+				direction *= 1 / Mathf.Max(3f, victim.Poise);
 				victim.transform.position = victim.transform.position + direction;
 			}
 		}

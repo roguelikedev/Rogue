@@ -12,7 +12,14 @@ using System.Collections.Generic;
 //}
 //
 public class CameraController : MonoBehaviour {
-	public GameObject player;
+	public PlayerController orc;
+	public PlayerController hope;
+	public PlayerController elf;
+	public PlayerController beardMan;
+	public PlayerController tusks;
+	public Color pinkSkin;
+	public List<Acter> livingActers = new List<Acter>();
+	PlayerController player;
 	TextMesh announcement;
 	TextMesh notes;
 	TextMesh notesOutline;
@@ -36,6 +43,16 @@ public class CameraController : MonoBehaviour {
 	/// <summary> use this only from the GUI editor, scripts should call Volume </summary>
 	public float volume;
 	
+	public void AddPlayer (string who) {
+		if (who == "wizard" || who == "wretch") player = Instantiate(elf);
+		else if (who == "rogue") player = Instantiate(tusks);
+		else if (who == "priest") player = Instantiate(hope);
+		else if (who == "fighter") player = Instantiate(beardMan);
+		else player = Instantiate(orc);
+//		if (who == "hope") player = Instantiate(hope);
+		player.announcer = this;
+		player.SetClass(who);
+	}
 	
 	public void AnnounceText(string text) {
 		announcement.text = text;
@@ -87,7 +104,9 @@ public class CameraController : MonoBehaviour {
 	}
 	
 	void LateUpdate () {
-		transform.position = player.transform.position + offset;
+		if (player != null) {
+			transform.position = player.transform.position + offset;
+		}
 		var color = announcement.color;
 		if (shouldFadeIn) {
 			color.a += fadeSpeed;

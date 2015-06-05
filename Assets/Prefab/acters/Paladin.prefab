@@ -11,7 +11,7 @@ GameObject:
   - 212: {fileID: 21200000}
   m_Layer: 0
   m_Name: Head
-  m_TagString: Untagged
+  m_TagString: SkinColored
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28,7 +28,7 @@ GameObject:
   - 54: {fileID: 5400000}
   - 95: {fileID: 9519384}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Paladin
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -301,7 +301,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -.25, y: .699999988, z: 0}
+  m_LocalPosition: {x: -.159999996, y: .790000021, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400004}
@@ -625,7 +625,7 @@ MonoBehaviour:
   grappledBy: []
   grappling: {fileID: 0}
   blood: {fileID: 19899178}
-  skinColor: {r: .490196079, g: .588235319, b: .0980392173, a: 1}
+  skinColor: {r: 1, g: .864337564, b: .775862098, a: 1}
   healthBar: {fileID: 11422912, guid: 53470241c8415e549a0eece946e4bb58, type: 2}
   weapon: {fileID: 13643694}
   torso: {fileID: 415802}
@@ -1790,7 +1790,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 8c5b4193ad4b83e4697fc86351ff67b5, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 17ce93467acf58849b1bc92ba688cba8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!212 &21216616
 SpriteRenderer:

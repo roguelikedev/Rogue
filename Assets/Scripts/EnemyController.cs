@@ -16,8 +16,10 @@ public class EnemyController : Acter, IDepthSelectable
 		return new List<SphereCollider>(GetComponentsInChildren<SphereCollider>()).Find(c => !c.isTrigger);
 	} }
 	bool OffhandIsSuperior { get { var offhandSuperior = EquippedSecondaryWeapon != null;
+		// note that bows and hand crossbows are depth -1, but their ammunition has depth
+		// hiltless is also depth -1, but AI shouldn't be using it except as last resort anyway
 		if (offhandSuperior) offhandSuperior = EquippedSecondaryWeapon.Depth > EquippedWeapon.Depth;
-		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("book") && spellpower == 0) offhandSuperior = false;
+//		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("book") && spellpower == 0) offhandSuperior = false;
 		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = false;
 		return offhandSuperior;
 	} }
@@ -48,7 +50,7 @@ public class EnemyController : Acter, IDepthSelectable
 	Vector3 DirectionToFoe() {
 		Vector3 targetLocn = transform.position;
 		Vector3 closest = Vector3.zero;
-		foreach (Acter a in livingActers) {
+		foreach (Acter a in LivingActers) {
 			if (friendly == a.friendly || a.State == ST_DEAD) continue;
 			var delta = a.transform.position - transform.position;
 			if (closest == Vector3.zero || delta.magnitude < closest.magnitude) {
@@ -77,11 +79,11 @@ public class EnemyController : Acter, IDepthSelectable
 	
 	Vector3 DirectionToFriend() {
 		var targetLocn = transform.position;
-		Acter a = livingActers.Find(p => p.GetComponent<PlayerController>() != null);
+		Acter a = LivingActers.Find(p => p.GetComponent<PlayerController>() != null);
 		if (a != null && a.friendly == friendly) {
 			var delta = transform.position - a.transform.position;
 			if (delta.magnitude < playerFollowDistance) targetLocn = -a.transform.position;
-			else if (delta.magnitude > playerFollowDistance * 1.5f) targetLocn = a.transform.position;
+			else if (delta.magnitude > playerFollowDistance * 3f) targetLocn = a.transform.position;
 		}
 		return targetLocn;
 	}
@@ -124,7 +126,7 @@ public class EnemyController : Acter, IDepthSelectable
 		
 //		targetLocn = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform> ().position;
 		var rval = Vector3.zero;
-		var posn = selfGameObject.transform.position;
+		var posn = transform.position;
 
 		// the outer test prevents the AI from rapidly and repeatedly flipping when on equal X axis to the player
 		if (Mathf.Abs (posn.x - targetLocn.x) > .1f) {

@@ -8,11 +8,13 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 	public float commonness = 1;
 //	public virtual int Depth { get { return depth == -1 ? 27 : depth; } }		FIXME: should i do it like this?
 	public virtual int Depth { get { return depth; } }
+	public string Name { get { return name.Replace("(Clone)", ""); } }
+	
 	
 	public float Commonness { get { return commonness; } }
 	void Start() {
 		GetComponentInChildren<SpriteRenderer>().sortingOrder -= (int)(transform.position.z * 10);
-		print (GetComponentInChildren<SpriteRenderer>().sortingOrder);
+//		print (GetComponentInChildren<SpriteRenderer>().sortingOrder);
 	}
 	public System.Action<Acter> OnPickup = a => {} ;
 
@@ -36,9 +38,12 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 				if (mySpr != null) {
 					hasSprite = true;
 					mySpr.sortingOrder = spr.sortingOrder;
-					if (GetComponent<WeaponController>() != null) {
-						if (GetComponent<WeaponController>().IsArmor) mySpr.sortingOrder++;
-						else mySpr.sortingOrder--;
+					var wc = GetComponent<WeaponController>();
+					if (wc != null) {
+						if (wc.IsOffhand && !wc.name.Contains("Shield")) mySpr.sortingOrder--;
+						else mySpr.sortingOrder++;
+//						if (GetComponent<WeaponController>().IsArmor) mySpr.sortingOrder++;
+//						else mySpr.sortingOrder--;
 					}
 					if (GetComponent<TrinketController>() != null) mySpr.sortingOrder++;
 				}

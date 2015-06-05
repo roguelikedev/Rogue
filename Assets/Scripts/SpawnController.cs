@@ -155,7 +155,7 @@ public class SpawnController : MonoBehaviour {
 				default:
 					break;
 			}
-			if (Acter.livingActers.FindAll(a => a.name.Contains("Woman")).Count > 2) bestMatches.Remove(enemyWoman);
+			if (Acter.LivingActers.FindAll(a => a.name.Contains("Woman")).Count > 2) bestMatches.Remove(enemyWoman);
 			bestMatches.Remove(enemyNightgaunt);
 		}
 		
@@ -178,6 +178,7 @@ public class SpawnController : MonoBehaviour {
 					, whichMob.ChallengeRating)
 					.ConvertAll(i => i as WeaponController));
 				poss.RemoveAll(i => !whichMob.WantsToEquip(i));
+				if (safety > 900) print (whichMob + " " + poss);
 				poss.RemoveAll(i => i.name.Contains("wand"));
 				if (whichMob.MainClass == Acter.C_ROGUE) poss.RemoveAll(i => i.IsMeleeWeapon);
 			}
@@ -186,14 +187,18 @@ public class SpawnController : MonoBehaviour {
 //			equipmentLevel += what.depth;
 		}
 		
-		if (whichMob.MainClass == Acter.C_WIZARD && whichMob.level >= 1) {
+		if (whichMob.MainClass == Acter.C_WIZARD) {
 			var book = Instantiate(SpellGenerator.blankBook);
-			SpellGenerator.Generate(whichMob.ChallengeRating, book);
+			var min = Mathf.Min(whichMob.ChallengeRating, (int)whichMob.spellpower);
+			var max = Mathf.Max(whichMob.ChallengeRating, (int)whichMob.spellpower);
+			var depth = Random.Range(min, max);
+			SpellGenerator.Generate(depth, book);
 			whichMob.Equip(book);
 		}
 		else if (Random.Range(0, 6) == 0) {
 			var wand = Instantiate(SpellGenerator.blankWand);
-			SpellGenerator.Generate(Random.Range(1, whichMob.level + 1), wand);
+			var dept = Mathf.Max(whichMob.level + 1, TerrainController.Instance.Depth);
+			SpellGenerator.Generate(Random.Range(1, dept), wand);
 			var leaf = wand.payload;
 			
 			while (leaf != null) {
@@ -207,7 +212,7 @@ public class SpawnController : MonoBehaviour {
 		
 		while (whichMob.ChallengeRating > equipmentLevel)
 		{
-			var poss = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), whichMob.ChallengeRating)
+			var poss = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), TerrainController.Instance.Depth)
 					.ConvertAll(i => i as WeaponController);
 			poss.RemoveAll(i => !whichMob.WantsToEquip(i));
 			if (poss.Count == 0) {
@@ -415,7 +420,7 @@ public class SpawnController : MonoBehaviour {
 		if (areaType == TerrainController.D_CHRISTMAS || areaType == TerrainController.D_TROVE) {
 			for (int lcv = 0; lcv < 10 / stinginess; ++lcv) {
 				var s = Random.Range(0, stinginess);
-				if (s == stinginess - 1 || areaType == TerrainController.D_TROVE) {
+				if (s < 1 || areaType == TerrainController.D_TROVE) {
 					MakeTreasureChest(depth).transform.position = RandomLocation();
 				}
 				else MakeEquipmentBox(depth).transform.position = RandomLocation();
@@ -452,7 +457,7 @@ public class SpawnController : MonoBehaviour {
 		bool isCaptain = Random.Range(0, 5) == 0;		// huge enemies are always captains
 		while (encounterLevel <= depth) {
 			EnemyController whichMob = ChooseMob(depth, areaType);
-			if (whichMob == enemyIronLich) isCaptain = true;
+			if (whichMob == enemyIronLich || whichMob == enemyWoman) isCaptain = true;
 			
 			var remainingEL = encounterLevel - whichMob.racialLevel;
 			if (remainingEL < depth) {

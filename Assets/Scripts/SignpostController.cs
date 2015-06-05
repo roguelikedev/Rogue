@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class SignpostController : ItemController {
 	public TextMesh Speech { get { return GetComponentInChildren<TextMesh>(); } }
@@ -10,16 +11,22 @@ public class SignpostController : ItemController {
 	public WeaponController payload;
 	EnemyController spawnIn;
 	public int fixedSpeech;
+//	static List<int> heardIt = new List<int>();
 
 
 	public void Speak() {		// FIXME:  DRY
 		if (spawnIn != null) {
-			var punish = fixedSpeech == -1 && PlayerController.Instance.MainClass == Acter.C_GESTALT;
+			var punish = fixedSpeech == -1 && PlayerController.Instance.IsJason;
 			if (punish) {
 				spawnIn = SpawnController.Instance.enemyDemon;
 				info = "die, murderer";
 				Speech.fontSize = 200;
 			}
+			if (fixedSpeech == -2 && PlayerController.Instance.friendless) {
+				info = "you are friendless\nyou murderer";
+				payload = null;
+			}
+			
 			var e = Instantiate(spawnIn);
 			e.gameObject.SetActive(true);
 			e.transform.position = transform.position + new Vector3(0, 2, 0);
@@ -61,8 +68,10 @@ public class SignpostController : ItemController {
 			Speech.color -= fade; 
 //			Bubble.color -= fade;
 		}
-		if (info == "") {
-			var sw = fixedSpeech != 0 ? fixedSpeech : Random.Range(0, 27);
+		while (info == "") {
+			var sw = fixedSpeech != 0 ? fixedSpeech : Random.Range(0, 28);
+//			if (heardIt.Contains(sw) && sw != 27) continue;
+//			heardIt.Add(sw);
 			switch(sw) {
 				case -1:
 					info = "left click";
@@ -163,12 +172,6 @@ public class SignpostController : ItemController {
 					info = "you're doomed";
 					break;
 				default: break;		// player says "illegible"
-			}
-		}
-		if (PlayerController.Instance.friendless) {
-			if (fixedSpeech == -2) {
-				info = "you are friendless\nyou murderer";
-				payload = null;
 			}
 		}
 		

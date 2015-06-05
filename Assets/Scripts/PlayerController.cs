@@ -16,16 +16,42 @@ public class PlayerController : Acter {
 	int lockOffHandCounter;
 	bool lockOffHand;
 	
+	public bool IsJason { get {
+		var jasonMask = GetArmor(GetSlot("Head"));
+		return (jasonMask != null && jasonMask.name.Contains("Mask")); 
+	} }
+	
 	void Start () {
 		xpToLevel = baseXPToLevel;
 		announcer.ExpToLevelChanged(xpToLevel, level + 1);
+//		skinColor = Color.clear;
+//		ChangeSkinColor();
+//		gameObject.AddComponent
 	}
 	
 	public void SetClass(string which) {
+//		if (mainClass == "") {
+//			var hope = Instantiate(SpawnController.Instance.enemyWoman);
+//			Destroy(hope.GetComponent<EnemyController>());
+//			hope.gameObject.AddComponent<PlayerHealthBarController>();
+//			hope.gameObject.AddComponent<PlayerController>();
+//			
+//			
+//			
+//			
+//			
+////			Destroy(GameObject.Find("torso"));
+//		}
+//		hope.transform.position = transform.position;
+//		gameObject.AddComponent(GameObject.Find("torso"));
+		
+//		hope.GetComponent<PlayerController>().SetClass(which);
+
 		if (which == "priest") mainClass = C_WIZARD;
 		else if (which == "murderer" || which == "wretch") mainClass = C_GESTALT;
 		else if (which == "executioner") mainClass = C_FIGHT;
 		else mainClass = which;
+		
 		GameObject.FindObjectOfType<Canvas>().gameObject.SetActive(false);
 		WeaponController book;
 		switch (which) {
@@ -41,13 +67,13 @@ public class PlayerController : Acter {
 				break;
 			case C_WIZARD:
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
-//				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
+				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
 //				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_FIRE);
-				book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
+//				book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
 			
 				book.payload.attackPower *= 2;
-//				book.payload.payload = SpellGenerator.Instance().Explosion();
-//				book.payload.payload.attackPower *= 2;
+				book.payload.payload = SpellGenerator.Instance().Explosion();
+				book.payload.payload.attackPower *= 2;
 //				SpellGenerator.Instance().Split(book, 4);
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
@@ -86,7 +112,6 @@ public class PlayerController : Acter {
 				Equip (Instantiate(SpawnController.Instance.itemArmor));
 				Equip (Instantiate(SpawnController.Instance.itemSkirt));
 				Equip (Instantiate(SpawnController.Instance.itemShield));
-//				meleeMultiplier++;
 				break;
 			case "murderer":
 				freeAction = friendless = isAquatic = true;
@@ -95,11 +120,13 @@ public class PlayerController : Acter {
 				murderWeapon.payload.payload = SpellGenerator.Instance().RaiseDead();
 				murderWeapon.payload.payload.firedNoise = SpellGenerator.Instance().rippingSound;
 				lockMainHand = true;
-				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(lockMainHand, true);
+				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(true, lockMainHand);
 				murderWeapon.depth = 999;
 				Equip(murderWeapon);
 				Equip(Instantiate(murderMask));
 				speed += 200;
+				skinColor = announcer.pinkSkin;
+				ChangeSkinColor();
 				SpawnController.Instance.stinginess++;
 				TerrainController.Instance.statuesDestroyed--;
 				break;
@@ -115,7 +142,10 @@ public class PlayerController : Acter {
 				wand.payload.payload = SpellGenerator.Instance().Heal();
 				wand.payload.payload.attackPower = 100 / GLOBAL_DMG_SCALING;
 				SpellGenerator.Instance().Split(wand, 6);
+				lockOffHand = true;
+				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(true, false);
 				Equip (wand);
+				meleeMultiplier++;
 				break;
 			default: break;
 		}
@@ -140,13 +170,17 @@ public class PlayerController : Acter {
 		return base.WantsToEquip (w);
 	}
 
+	IEnumerator wtfCmon () {			// this is necessary to stop editor locking up
+		yield return new WaitForSeconds(0.1f);
+		Application.LoadLevel("DefaultScene");
+	}
 	void Update () {
 		if (infiniteHealth) {
-			announcer.StatsChanged("acters", livingActers.Count, Time.deltaTime);
+			announcer.StatsChanged("acters", LivingActers.Count, Time.deltaTime);
 		}
 	
 		if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")) {
-			Application.LoadLevel("DefaultScene");
+			StartCoroutine(wtfCmon());
 		}
 		SpeechBubble.transform.rotation = Quaternion.identity;
 		SpeechBubble.GetComponentInChildren<SpriteRenderer>().sortingOrder = -10;
@@ -161,9 +195,7 @@ public class PlayerController : Acter {
 			shouldUseMainHand = true;
 		}
 		if (Input.GetKey ("e") || Input.GetKey(KeyCode.Mouse0) || Input.GetButton("Fire1")) {
-			var jasonMask = GetArmor(GetSlot("Head"));
-			if (jasonMask != null && jasonMask.name.Contains("Mask")) lockMainHandCounter = int.MinValue;
-		
+			if (IsJason) lockMainHandCounter = int.MinValue;
 			lockMainHandCounter++;
 			if (lockMainHandCounter > 60 && EquippedWeapon != bareHands) {
 				lockMainHand = !lockMainHand;
@@ -196,7 +228,7 @@ public class PlayerController : Acter {
 			}
 		}
 		if (Input.GetKeyDown (KeyCode.T) || Input.GetButtonDown("Jump")) {
-			foreach (var ally in livingActers.FindAll(p => p.friendly && p != this)) {
+			foreach (var ally in LivingActers.FindAll(p => p.friendly && p != this)) {
 				ally.ShouldPickUpItem();
 			}
 		}
@@ -230,7 +262,7 @@ public class PlayerController : Acter {
 	}
 
 	void FixedUpdate () {
-		if (!livingActers.Contains(this))livingActers.Add(this);
+		if (!LivingActers.Contains(this))LivingActers.Add(this);
 		
 		if (infiniteHealth) {
 			;		// see Update()

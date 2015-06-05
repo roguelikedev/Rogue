@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class TerrainEffectTrap : TerrainEffectFloor {
@@ -25,7 +25,7 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 	}
 	
 	IEnumerator MultipleTrigger () {
-		var npcs = Acter.livingActers.FindAll(a => a is EnemyController).ConvertAll(a => a as EnemyController);
+		var npcs = Acter.LivingActers.FindAll(a => a is EnemyController).ConvertAll(a => a as EnemyController);
 		foreach (var npc in npcs) {
 			npc.TrapIsExploding(transform.position, true);
 		}
@@ -38,7 +38,6 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 				tmp.y = 9;
 				e.transform.position = tmp;
 				e.friendlyFireActive = true;
-				e.lifetime = 90;
 			}
 			e.attackActive = true;
 			if (damageStaggering == 0) {

@@ -131,10 +131,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   depth: 1
+  commonness: 1
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0
-  lifetime: -1
+  lifetime: 90
   bodySlot: 0
   damageType: 0
   payload: {fileID: 0}
@@ -143,6 +144,7 @@ MonoBehaviour:
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 1
   thrownVerticalMultiplier: 1
+  thrownParralaxModifier: 0
   friendlyFireActive: 1
   attackVictims: []
   attackActive: 0

@@ -14,10 +14,8 @@ public class HealthBarController : MonoBehaviour {
 		offset = transform.position;
 	}
 	
-	static int destCount = 0;
 	void OnDestroy () {
 		DestroyMyBuddies();
-		++destCount;
 	}
 	bool mutex = false;
 	void DestroyMyBuddies () {
@@ -34,6 +32,7 @@ public class HealthBarController : MonoBehaviour {
 	
 	float prevHP = -1;
 	public void SetCurrentHP (float hp, float hpPerColor) {
+		if (player == null) return;
 		transform.position = player.transform.position + offset;
 		
 		if (hp != prevHP) {

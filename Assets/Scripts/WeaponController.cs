@@ -152,8 +152,7 @@ public class WeaponController : ItemController {
 //		if (GetComponentInParent<Acter>() is PlayerController && damageType == DMG_PHYS) print (other);
 		
 		if (!attackActive) return;
-		if (other.tag == "breakable" && attackPower > 0) {
-			other.GetComponentInParent<Breakable>().Break(this);
+		if (other.tag == "breakable" && attackPower > 0 && other.GetComponentInParent<Breakable>().Break(this)) {
 			FirePayload(other);
 		}
 		if (other.name.Contains("Tile") && deleteOnHitting) {

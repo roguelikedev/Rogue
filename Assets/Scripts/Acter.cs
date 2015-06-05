@@ -95,11 +95,10 @@ public abstract class Acter : MonoBehaviour {
 	#region instance variables
 	public List<Acter> grappledBy = new List<Acter>();
 	public Acter grappling;
-	public GameObject selfGameObject;
 	public ParticleSystem blood;
 	public Color skinColor;
 	public HealthBarController healthBar;
-	public Animator anim;
+	public Animator Anim { get { return GetComponent<Animator>(); } }
 	public CapsuleCollider weapon;
 	public Transform torso;
 	public Transform head;
@@ -134,7 +133,7 @@ public abstract class Acter : MonoBehaviour {
 	public string Name { get { return name.Replace("(Clone)", ""); } }
 	#endregion
 	#region life cycle
-	public static List<Acter> livingActers = new List<Acter>();
+	public static List<Acter> LivingActers { get { return CameraController.Instance.livingActers; } }
 	void Awake() {
 		healthBar = Instantiate(healthBar);
 		healthBar.player = this;
@@ -154,7 +153,7 @@ public abstract class Acter : MonoBehaviour {
 		damageAnnouncer = Instantiate(damageAnnouncer);
 		damageAnnouncer.acter = this;
 		damageAnnouncer.transform.parent = transform;
-		livingActers.Add(this);
+		LivingActers.Add(this);
 		foreach (SpriteRenderer spr in GetComponentsInChildren<SpriteRenderer>())
 		{
 			if (!bodyParts.ContainsKey(spr)) bodyParts.Add(spr, spr.sortingOrder);
@@ -198,7 +197,7 @@ public abstract class Acter : MonoBehaviour {
 			Destroy(fistSize.gameObject);
 		}
 		if (healthBar != null) Destroy(healthBar.gameObject);
-		livingActers.Remove(this);
+		LivingActers.Remove(this);
 	}
 	#endregion
 	#region state and animation
@@ -244,22 +243,22 @@ public abstract class Acter : MonoBehaviour {
 						else {
 							var animSpeed = speed * EquippedSecondaryWeapon.speedCoefficient / 400;
 							GetComponent<Animator>().speed = animSpeed;
-							anim.Play("shoot_offhand");
+							Anim.Play("shoot_offhand");
 						}
 					}
 				}
 				else {
 					GetComponent<Animator>().speed = speed * EquippedWeapon.speedCoefficient / 400;
 					if (EquippedWeapon != null && EquippedWeapon.tag == "Throwable Weapon") {
-						anim.Play("throw");
+						Anim.Play("throw");
 					}
 					else if (EquippedWeapon != null && EquippedWeapon.tag == "Shootable Weapon") {
-						anim.Play("shoot");
+						Anim.Play("shoot");
 					}
 					else {
 //						if (largeWeapon || huge) anim.Play("downward_attack");
-						if (largeWeapon || huge || EquippedWeapon.tag == "slashing weapon") anim.CrossFade("downward_attack", 0.1f);
-						else anim.Play(ST_ATTACK);
+						if (largeWeapon || huge || EquippedWeapon.tag == "slashing weapon") Anim.CrossFade("downward_attack", 0.1f);
+						else Anim.Play(ST_ATTACK);
 					}
 				}
 				shouldUseMainHand = shouldUseOffhand = false;
@@ -270,8 +269,8 @@ public abstract class Acter : MonoBehaviour {
 				if (state == ST_HURT) return false;
 				if (state == ST_CAKE) return false;
 				if (speed == SPEED_WHEN_PARALYZED) return false;
-				if (state == ST_WALK) anim.Play(ST_WALK);
-				else anim.CrossFade (ST_WALK, 0.1f);
+				if (state == ST_WALK) Anim.Play(ST_WALK);
+				else Anim.CrossFade (ST_WALK, 0.1f);
 				break;
 			case ST_REST:
 				// HURT and ATTACK are exited after their animations resolve, not here.
@@ -279,14 +278,14 @@ public abstract class Acter : MonoBehaviour {
 				if (state == ST_HURT) return false;
 				if (state == ST_CAKE) return false;
 				if (state == ST_CAST) return false;
-				if (state == ST_REST) anim.Play (largeWeapon ? "rest_with_large_weapon" : ST_REST);
-				else anim.CrossFade (largeWeapon ? "rest_with_large_weapon" : ST_REST, 0.1f);
+				if (state == ST_REST) Anim.Play (largeWeapon ? "rest_with_large_weapon" : ST_REST);
+				else Anim.CrossFade (largeWeapon ? "rest_with_large_weapon" : ST_REST, 0.1f);
 				break;
 			case ST_HURT:
 				if (state == ST_CAKE) return false;
 				isBlocking = false;
 				GetComponent<Animator>().speed = 1;
-				anim.Play(ST_HURT);
+				Anim.Play(ST_HURT);
 				if (pendingSpell != null) {
 					StopCoroutine(pendingSpell);
 					pendingSpell = null;
@@ -297,7 +296,7 @@ public abstract class Acter : MonoBehaviour {
 				GetComponent<Animator>().speed = 1;
 				GetComponent<Rigidbody>().useGravity = false;
 				GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-				anim.Play(ST_CAKE);
+				Anim.Play(ST_CAKE);
 				if (pendingSpell != null) {
 					StopCoroutine(pendingSpell);
 					pendingSpell = null;
@@ -305,12 +304,12 @@ public abstract class Acter : MonoBehaviour {
 				break;
 			case ST_DEAD:
 				isBlocking = false;
-				anim.Play(ST_DEAD);
+				Anim.Play(ST_DEAD);
 				if (pendingSpell != null) {
 					StopCoroutine(pendingSpell);
 					pendingSpell = null;
 				}
-				livingActers.Remove(this);
+				LivingActers.Remove(this);
 				if (grappling != null) grappling.grappledBy.Remove(this);
 				damageAnnouncer.AnnounceDeath();
 				if (EquippedWeapon != bareHands) DropWeapon(EquippedWeapon);
@@ -345,10 +344,13 @@ public abstract class Acter : MonoBehaviour {
 	#endregion
 	#region movement
 	public virtual void EnterTerrainCallback(string terrType) { EnterTerrainCallback(terrType, 0); }
-	public virtual void EnterTerrainCallback(string terrType, float damage) {
-		if (terrType == "thorns" && racialBaseHitPoints != 0) {
-			TakeDamage(damage, WeaponController.DMG_NOT);
-			return;
+	public virtual void EnterTerrainCallback(string terrType, float damage)
+	{
+		EnterTerrainCallback(terrType, damage, WeaponController.DMG_NOT);
+	}
+	public virtual void EnterTerrainCallback(string terrType, float damage, int damageType) {
+		if (damage > 0) {
+			TakeDamage(damage, damageType);
 		}
 		if (terrainCollisions.ContainsKey(terrType))
 		{
@@ -400,6 +402,7 @@ public abstract class Acter : MonoBehaviour {
 	}
 	#endregion
 	#region equipment
+	#region helper
 	protected Transform GetSlot(string str) {
 		var ch = GetComponentsInChildren<Transform>();
 		var _ch = new List<Transform>(ch);
@@ -413,6 +416,10 @@ public abstract class Acter : MonoBehaviour {
 	public void PickupIsIneligible(ItemController item) {
 		eligiblePickups.Remove(item);
 	}
+	protected WeaponController GetArmor(Transform where) {
+		return equippedArmor.ContainsKey(where) ? equippedArmor[where] : null;
+	}
+	#endregion
 	#region weapons
 	protected WeaponController EquippedWeapon
 	{
@@ -451,9 +458,9 @@ public abstract class Acter : MonoBehaviour {
 	protected void EquipWeapon(WeaponController item) {
 		if (item == null) return;	// it's been destroyed
 		var isOffhand = item.tag == "offhandweapon";
-		var parent = isOffhand ? GetSlot("frontForeArm") : weapon.transform;
-		DropWeapon(parent.GetComponentInChildren<WeaponController>());
-		item.transform.parent = parent;
+		var _parent = isOffhand ? GetSlot("frontForeArm") : weapon.transform;
+		DropWeapon(_parent.GetComponentInChildren<WeaponController>());
+		item.transform.parent = _parent;
 		AttachEquipment(item);
 		if (isOffhand) {
 			item.transform.localPosition = new Vector3(0, -.7f);
@@ -498,7 +505,6 @@ public abstract class Acter : MonoBehaviour {
 		else {
 			item.transform.parent = transform;
 		}
-		
 		var spr = item.GetComponent<SpriteRenderer>();
 		if (spr != null) {
 			spr.sortingLayerName = "Default";
@@ -506,9 +512,7 @@ public abstract class Acter : MonoBehaviour {
 		}
 		return item;
 	}
-	protected WeaponController GetArmor(Transform where) {
-		return equippedArmor.ContainsKey(where) ? equippedArmor[where] : null;
-	}
+	
 	void AttachEquipment(WeaponController item) {
 		//		item.IsEquipped = true;
 		item.transform.localPosition = Vector3.zero;
@@ -516,6 +520,7 @@ public abstract class Acter : MonoBehaviour {
 		item.GetComponent<BoxCollider>().enabled = false;
 		item.GetComponent<Rigidbody>().isKinematic = true;
 	}
+	
 	void EquipArmor(WeaponController item, Transform where) {
 		var previous = ReleaseEquipment(GetArmor(where));
 		if (previous != null) armorClass -= previous.armorClass;
@@ -528,6 +533,7 @@ public abstract class Acter : MonoBehaviour {
 		armorClass += item.armorClass;
 		equippedArmor[where] = item;
 	}
+	
 	// avoid problems involving order of operations and Start().
 	void _Equip (WeaponController item) {
 		switch (item.bodySlot) {
@@ -646,6 +652,7 @@ public abstract class Acter : MonoBehaviour {
 		if (trinket.trapFinding) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
 		trinket.OnIdentify();
 	}
+	
 	string WantsToEquipPauldronOrGreave (WeaponController w) {
 		var affinity = w.SlotAffinity;
 		while (true) {
@@ -667,7 +674,6 @@ public abstract class Acter : MonoBehaviour {
 	public virtual bool WantsToEquip (WeaponController w) {
 		if (w.IsEquipped) return false;
 		if (MainClass == C_BRUTE && !w.IsArmor && !w.IsMeleeWeapon && w.GetComponent<EstusController>() == null) return false;
-//		if (MainClass == C_GESTALT && !w.IsArmor && !w.IsOffhand) return false;
 		
 		if (!HasSlotEquipped(w.bodySlot)) return true;
 		// armor
@@ -678,24 +684,17 @@ public abstract class Acter : MonoBehaviour {
 			var rval = w.Depth > GetArmor(GetSlot(affinity)).Depth;
 			if (!rval && (affinity == "backArm" || affinity == "backShin")) {
 				rval = WantsToEquipPauldronOrGreave(w) != null;
-//				print ("a " + affinity);
-//				affinity = affinity.Replace("back", "front");
-//				print ("b " + affinity);
-//				print (GetArmor(GetSlot(affinity)));
-//				print (w + " vs " + GetArmor(GetSlot(w.SlotAffinity)));
-//				continue;
 			}
 			return rval;
-//			return GetSlot(w.SlotAffinity) == null
-//				|| GetArmor(GetSlot(w.SlotAffinity)) == null
-//					|| w.armorClass > GetArmor(GetSlot(w.SlotAffinity)).armorClass
-//					;
 		}
 		// weapons
 		if (w.isSpellbook) return true;
 		var comparedWeapon = w.IsOffhand ? EquippedSecondaryWeapon : EquippedWeapon;
 		if (comparedWeapon == null) return true;
-		if (comparedWeapon.Description != w.Description) return true;
+
+		if (comparedWeapon.Name != w.Name) {
+			return true;
+		}
 		else if (w.charges > comparedWeapon.charges) return true;
 		return w.Depth > comparedWeapon.Depth;
 	}
@@ -779,8 +778,8 @@ public abstract class Acter : MonoBehaviour {
 	public void Paralyze(float magnitude) {
 		if (freeAction) return;
 		if (speed == SPEED_WHEN_PARALYZED) return;
-		magnitude = Mathf.Pow(magnitude / paralyzeScaling, 1/2.5f);
-		if (magnitude < 0.5f) return;
+		magnitude = magnitude / Mathf.Pow(paralyzeScaling, 2);
+//		if (magnitude < 0.5f) return;
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
 		var _speed = speed;
 		speed = SPEED_WHEN_PARALYZED;
@@ -832,13 +831,13 @@ public abstract class Acter : MonoBehaviour {
 			Debug.LogError(EquippedSecondaryWeapon + " has no payload");
 		}
 		else {
-			anim.Play(ST_CAST);
+			Anim.Play(ST_CAST);
 			float castTime = EquippedSecondaryWeapon.Depth / Mathf.Pow(spellpower, 1.5f);
 			var isWand = EquippedSecondaryWeapon.name.Contains("wand");
 			if (isWand) castTime = 0;
 			yield return new WaitForSeconds(castTime);
 			
-			anim.CrossFade("spell_complete", 0.5f);
+			Anim.CrossFade("spell_complete", 0.5f);
 			yield return new WaitForSeconds(0.5f);
 			
 			if (!isWand) {
@@ -937,7 +936,7 @@ public abstract class Acter : MonoBehaviour {
 		if (weaponController.damageType == WeaponController.DMG_RAISE) {
 			var sufficientControl = true;
 			if (friendly) {
-				var existingAllies = livingActers.FindAll(a => a.GetComponent<EnemyController>() != null)
+				var existingAllies = LivingActers.FindAll(a => a.GetComponent<EnemyController>() != null)
 											.ConvertAll(a => a as EnemyController);
 				existingAllies.RemoveAll(a => !a.isUnliving);
 				var controlledCR = 0;
@@ -983,7 +982,7 @@ public abstract class Acter : MonoBehaviour {
 			
 			var mob = other as EnemyController;
 			if (mob != null && mob.friendly != friendly) {
-				livingActers.FindAll(a => a.friendly == friendly).ForEach(a => {
+				LivingActers.FindAll(a => a.friendly == friendly).ForEach(a => {
 					a.xpToLevel -= mob.ChallengeRating;
 					if (a.xpToLevel <= 0) {
 						a.GainLevel(a.MainClass);
@@ -1019,7 +1018,7 @@ public abstract class Acter : MonoBehaviour {
 			if (p != null) p.gameObject.SetActive(false);
 		}
 		
-		if (!livingActers.Contains(this)) livingActers.Add(this);
+		if (!LivingActers.Contains(this)) LivingActers.Add(this);
 		
 		eligiblePickups.RemoveAll(shouldntHappenButDoes => shouldntHappenButDoes == null);
 		
@@ -1029,7 +1028,7 @@ public abstract class Acter : MonoBehaviour {
 					bool shouldEat = false;
 					if (Heal(eligible.depth)) shouldEat = true;
 					else {
-						foreach (var ally in livingActers.FindAll(a => a.friendly)) {
+						foreach (var ally in LivingActers.FindAll(a => a.friendly)) {
 							if (ally.Heal(eligible.depth)) {
 								shouldEat = true;
 								break;
@@ -1059,7 +1058,7 @@ public abstract class Acter : MonoBehaviour {
 					shouldPickUpItem = false;
 					break;
 				}
-				foreach (var ally in livingActers.FindAll(a => a.friendly && !(a is PlayerController))) {
+				foreach (var ally in LivingActers.FindAll(a => a.friendly && !(a is PlayerController))) {
 					if (ally.WantsToEquip(weapon)) {
 						ally.Equip(weapon);
 						cc.NoteText(subject + "gave " + weapon.Description + " to " + ally.name.Replace("(Clone)", ""));

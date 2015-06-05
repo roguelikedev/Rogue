@@ -14,6 +14,7 @@ public class TerrainController : MonoBehaviour {
 	public Rigidbody tileRoof;
 	public Rigidbody tileThorns;
 	public Rigidbody tileTrapped;
+	public Rigidbody tileLava;
 	public TerrainEffectFloor trogAltar;
 	public BoxCollider terrainTransition;
 	public CameraController announcer;
@@ -23,6 +24,7 @@ public class TerrainController : MonoBehaviour {
 	public Texture skulls;
 	public Material forest;
 	public Material cathedral;
+	public Material lava;
 	public int trapRarity;
 	bool showTraps;
 	public EnchanterStatue enchanterStatue;
@@ -66,9 +68,8 @@ public class TerrainController : MonoBehaviour {
 	const int TILES_PER_ROOM = 5;
 	const int MAX_ROOMS = 3;
 	public const int D_FOREST = 0, D_WATER = 1, D_CAVE = 2, D_THORNS = 3, D_TOMB = 4, D_CHRISTMAS = 5, D_ARMORY = 6
-					, D_MERCY = 7, D_TROG = 8, D_ENCHANT = 9, D_TROVE = 10;
+					, D_MERCY = 7, D_TROG = 8, D_ENCHANT = 9, D_TROVE = 10, D_HELL = -1;
 	List<int> visitedSpecialRooms = new List<int>();
-	const int D_FINAL = 9;		// this is +1'd before use
 	#endregion	
 	#region Room	
 	class Room {
@@ -103,7 +104,7 @@ public class TerrainController : MonoBehaviour {
 	void FixedUpdate () {
 		if (Depth < 25) return;
 		if (Random.Range(0, nightgauntCooldown) == 0) {
-			nightgauntCooldown += 100 * Acter.livingActers.FindAll(e => !e.friendly).Count / (Depth - 24);
+			nightgauntCooldown += (int)(100 * Acter.LivingActers.FindAll(e => !e.friendly).Count / Mathf.Pow(Depth - 24, 2));
 			var loc = Random.Range(0, 2) == 0 ? LeftmostRoom.tiles[0].transform.position.x - TILE_SZ * 6
 					: RightmostRoom.tiles[RightmostRoom.tiles.Count - 1].transform.position.x + TILE_SZ * 6;
 			var ng = Instantiate(spawnController.enemyNightgaunt);
@@ -197,6 +198,10 @@ public class TerrainController : MonoBehaviour {
 			case D_TROVE:
 				areaName = "Treasure Trove";
 				break;
+			case D_HELL:
+				tile = tileLava;
+				areaName = "Hell";
+				break;
 			default:
 				Debug.LogError("generate terrain to right failed in switch statement");
 				break;
@@ -250,12 +255,15 @@ public class TerrainController : MonoBehaviour {
 				case D_TROVE:
 					speech = "the glint of gold";
 					break;
+				case D_HELL:
+					speech = "i've arrived...";
+					break;
 				default:
 					Debug.LogError("generate terrain to right failed in switch statement");
 					break;
 			}
 			if (speech != "") {
-				if (PlayerController.Instance.MainClass == Acter.C_GESTALT) {
+				if (PlayerController.Instance.IsJason) {
 					speech = "   ...";
 				}
 				PlayerController.Instance.Speak(speech);
@@ -266,7 +274,9 @@ public class TerrainController : MonoBehaviour {
 		previousAreaType = currentAreaType;
 		CleanUp(x);
 	}
+	
 	int ChooseNextRoomType (int areaType) {
+		if (Depth == 27) return D_HELL;
 		int rval;
 		while (true) {
 			if (areaType >= D_CHRISTMAS) {
@@ -332,7 +342,9 @@ public class TerrainController : MonoBehaviour {
 		bool hasRamp = Random.Range(0,3) == 0 && areaType < D_CHRISTMAS && hasSpawnedEmpty;
 		int leftRampIndex = Random.Range(xmin, xmax - 1);
 		int rightRampIndex = Random.Range(leftRampIndex + 1, xmax);
-		var trapSeed = Random.Range(0, trapRarity);
+		
+		System.Func<int> TrapSeed = () => Depth == 0 ? 1 : Random.Range(0, trapRarity);
+		var trapSeed = TrapSeed();
 		for (int x = xmin; x < xmax; ++x) {
 			for (int z = Z_MIN; z <= Z_MAX; ++z) {
 				Vector3 orig = tilePrefab.transform.position + new Vector3(x * TILE_SZ, 0, z * TILE_SZ);
@@ -340,12 +352,6 @@ public class TerrainController : MonoBehaviour {
 				Texture _texture = texture;
 				
 				Rigidbody _floorType = floorType;
-				
-				if (trapSeed == 0) {
-					_floorType = tileTrapped;
-					_floorType.GetComponent<TerrainEffectTrap>().severity = Random.Range(1, Mathf.Max(Depth, 1)) * trapRarity;
-				}
-				if (areaType < D_CHRISTMAS)	trapSeed = Random.Range(0, trapRarity);
 				
 				if (hasRamp) {
 					if (areaType == D_WATER) _texture = stone;
@@ -364,7 +370,14 @@ public class TerrainController : MonoBehaviour {
 						if (areaType == D_WATER) _texture = texture;
 					}
 				}
-				else _= Instantiate(_floorType, orig, floorType.transform.rotation) as Rigidbody;
+				else {
+					_= Instantiate(_floorType, orig, floorType.transform.rotation) as Rigidbody;
+					if (trapSeed == 0) {
+						_floorType = tileTrapped;
+						_floorType.GetComponent<TerrainEffectTrap>().severity *= Random.Range(1, Mathf.Max(Depth, 1));
+						if (areaType < D_CHRISTMAS)	trapSeed = TrapSeed();
+					}
+				}
 				room.tiles.Add(_.gameObject);
 				
 				var rend = _.GetComponent<MeshRenderer>();
@@ -413,6 +426,9 @@ public class TerrainController : MonoBehaviour {
 				break;
 			case D_THORNS:
 				farWall.GetComponent<MeshRenderer>().material = forest;
+				break;
+			case D_HELL:
+				farWall.GetComponent<MeshRenderer>().material = lava;
 				break;
 			case D_TOMB:
 				farWall.GetComponent<MeshRenderer>().material.SetTexture("_MainTex", skulls);
