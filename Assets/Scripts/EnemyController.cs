@@ -19,7 +19,6 @@ public class EnemyController : Acter, IDepthSelectable
 		// note that bows and hand crossbows are depth -1, but their ammunition has depth
 		// hiltless is also depth -1, but AI shouldn't be using it except as last resort anyway
 		if (offhandSuperior) offhandSuperior = EquippedSecondaryWeapon.Depth > EquippedWeapon.Depth;
-//		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("book") && spellpower == 0) offhandSuperior = false;
 		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = false;
 		return offhandSuperior;
 	} }
@@ -173,7 +172,10 @@ public class EnemyController : Acter, IDepthSelectable
 		var distance = Vector3.Distance(transform.position, who.transform.position);
 		if (distance < fleeDistance) return;
 		
-		if (OffhandIsSuperior) shouldUseOffhand = true;
+		// secondary weapon is a brick or something
+		if (EquippedWeapon.IsMeleeWeapon && distance > weapon.height * 2 || OffhandIsSuperior) {
+			shouldUseOffhand = true;
+		}
 		else shouldUseMainHand = true;
 		
 		if (EquippedWeapon.IsMeleeWeapon && shouldUseMainHand) {
@@ -200,6 +202,8 @@ public class EnemyController : Acter, IDepthSelectable
 		else {
 			GetComponentInChildren<AggroController>().Reinitialize();
 			if (!friendly) fleeDistance = 0f;
+			var rememberMe = "debug";
+//			aggroSize.center = aggroSize.center + new Vector3(EquippedWeapon.
 		}
 	}
 	

@@ -6,11 +6,6 @@ public class DemonController : EnemyController {
 	public int auraRefreshRate;
 	protected int auraRefreshCountdown;
 	public float auraDamage;
-	public override string MainClass {
-		get {
-			return C_GESTALT;
-		}
-	}
 	
 	protected void InitializeAura(int damageType, float power) {
 		damageAura = SpellGenerator.Instance().Pillar(damageType);

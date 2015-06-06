@@ -65,7 +65,7 @@ public class HealthBarController : MonoBehaviour {
 //			xOffset *= sprite.bounds.extents.x - .24f);
 //			print (xOffset + " post scaling");
 			buddies[lcv].transform.position = transform.position + new Vector3(xOffset, 0);//lcv * 0.5f, 0);
-			buddies[lcv].sortingOrder += lcv;
+			buddies[lcv].sortingOrder = lcv;
 		}
 	}
 }

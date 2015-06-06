@@ -60,6 +60,8 @@ public class WeaponController : ItemController {
 		if (firedNoise != null) {
 			AudioSource.PlayClipAtPoint(firedNoise, transform.position, CameraController.Instance.Volume);
 		}
+		var cc = GetComponent<CapsuleCollider>();
+		originalLength = cc.height;
 		if (!IsProjectile) return;
 		if (thrownHorizontalMultiplier == 0) {
 			var offset = new Vector3(GetComponent<CapsuleCollider>().height / 2, 0);
@@ -69,7 +71,6 @@ public class WeaponController : ItemController {
 		
 		if (thrownBy.FacingRight) {
 			var rot = transform.rotation;
-			var cc = GetComponent<CapsuleCollider>();
 			if (cc.direction == 2) {		// pillars
 				rot.x = -2/3f;
 				transform.rotation = rot;
@@ -235,6 +236,14 @@ public class WeaponController : ItemController {
 		lifetime = 1;
 	}
 	#endregion
+	
+	float originalLength;
+	public void PhantomRangeActive (bool active) {
+		var cc = GetComponent<CapsuleCollider>();
+		if (active) cc.height = originalLength;
+		else cc.height = GetComponent<BoxCollider>().size.y;
+	}
+	
 	public void Throw() {
 		if (!IsProjectile) {
 			Debug.LogError(this + " shouldn't be thrown!");
@@ -253,7 +262,8 @@ public class WeaponController : ItemController {
 	
 	void Fire(Collider impactPoint, WeaponController p) {
 		if (impactNoise != null) AudioSource.PlayClipAtPoint(impactNoise, transform.position, CameraController.Instance.Volume);
-		var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
+//		var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
+		var unburyFireball = p.tag == "spell" && impactPoint.name.Contains("Tile");	// hax i know
 		
 		if (deleteOnHitting) {
 			impactPoint = GetComponent<CapsuleCollider>();
@@ -271,7 +281,8 @@ public class WeaponController : ItemController {
 				wp.Throw();
 			}
 			if (unburyFireball) {
-				wp.transform.position = wp.transform.position + new Vector3(0,3,0);
+				var hax = wp.name.Contains("fireball") ? 3 : 1;
+				wp.transform.position = wp.transform.position + new Vector3(0, hax ,0);
 			}
 		}
 		if (wp.tag == "spell") {

@@ -15,7 +15,7 @@ GameObject:
   - 95: {fileID: 9581656}
   m_Layer: 0
   m_Name: Fireball
-  m_TagString: Untagged
+  m_TagString: spell
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d98a2c2bf2d02745879ad837c16ba9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 0
+  depth: 1
   commonness: 1
   thrownBy: {fileID: 0}
   deleteOnHitting: 0

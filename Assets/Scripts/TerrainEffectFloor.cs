@@ -21,6 +21,7 @@ public class TerrainEffectFloor : MonoBehaviour {
 			return;
 		}
 		if (item.attackActive) { item.attackActive = false; }
+		item.thrownBy = null;
 	}
 
 	void OnTriggerEnter(Collider other) {

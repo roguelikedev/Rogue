@@ -16,6 +16,8 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 		if (Random.Range(0, 4) == 0) payload = SpellGenerator.Instance().Explosion();
 		else if (Random.Range(0, 4) == 0) {
 			payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
+			payload.transform.localPosition = Vector3.zero;
+			payload.GetComponent<CapsuleCollider>().center = Vector3.zero;
 			damageStaggering = 0;	
 		}
 		else {
@@ -32,6 +34,11 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 		for (float lcv = 0; lcv < severity; ) {
 			var e = Instantiate(payload);
 			e.gameObject.SetActive(true);
+			var particle = e.GetComponentInChildren<ParticleSystem>();
+			if (particle != null) {
+				particle.transform.localPosition = Vector3.zero;
+			}
+			
 			e.transform.position = transform.position + new Vector3(Random.Range(-2f, 2f), 3, Random.Range(-2f, 2f));
 			if (payload == brick) {
 				var tmp = e.transform.position;
@@ -43,7 +50,7 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 			if (damageStaggering == 0) {
 				e.attackPower = severity;
 			}
-			else e.attackPower = Random.Range(1, severity / damageStaggering);
+			else e.attackPower = Random.Range(1, Mathf.Max(1, severity / damageStaggering));
 			lcv += e.attackPower;
 			
 			yield return new WaitForSeconds(damageStaggering / 10);
@@ -69,9 +76,10 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 		hasExploded = true;
 		isSafe = false;
 		danger.gameObject.SetActive(false);
-		if (payload.damageType == WeaponController.DMG_PARA) {
-			acter.TakeDamage(payload.attackPower, payload.damageType);
-		}
-		else StartCoroutine(MultipleTrigger());
+		StartCoroutine(MultipleTrigger());
+//		if (payload.damageType == WeaponController.DMG_PARA) {
+//			acter.TakeDamage(payload.attackPower, payload.damageType);
+//		}
+//		else StartCoroutine(MultipleTrigger());
 	}
 }

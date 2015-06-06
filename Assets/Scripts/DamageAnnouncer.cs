@@ -55,7 +55,7 @@ public class DamageAnnouncer : MonoBehaviour {
 	
 	public void AnnounceText(string text) {
 		announcementText.text = text;
-		delayBeforeFadeOut = baseDelayBeforeFadeOut;
+		delayBeforeFadeOut = baseDelayBeforeFadeOut * 2;
 		announcementText.transform.localPosition = Vector3.zero;
 	}
 	

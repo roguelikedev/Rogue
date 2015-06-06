@@ -24,29 +24,15 @@ public class PlayerController : Acter {
 	void Start () {
 		xpToLevel = baseXPToLevel;
 		announcer.ExpToLevelChanged(xpToLevel, level + 1);
-//		skinColor = Color.clear;
-//		ChangeSkinColor();
-//		gameObject.AddComponent
+	}
+	
+	public void GainExperience (int quantity) {
+		xpToLevel -= quantity;
+		if (xpToLevel <= 0) GainLevel(MainClass);
+		announcer.ExpToLevelChanged(xpToLevel, level + 1);
 	}
 	
 	public void SetClass(string which) {
-//		if (mainClass == "") {
-//			var hope = Instantiate(SpawnController.Instance.enemyWoman);
-//			Destroy(hope.GetComponent<EnemyController>());
-//			hope.gameObject.AddComponent<PlayerHealthBarController>();
-//			hope.gameObject.AddComponent<PlayerController>();
-//			
-//			
-//			
-//			
-//			
-////			Destroy(GameObject.Find("torso"));
-//		}
-//		hope.transform.position = transform.position;
-//		gameObject.AddComponent(GameObject.Find("torso"));
-		
-//		hope.GetComponent<PlayerController>().SetClass(which);
-
 		if (which == "priest") mainClass = C_WIZARD;
 		else if (which == "murderer" || which == "wretch") mainClass = C_GESTALT;
 		else if (which == "executioner") mainClass = C_FIGHT;
@@ -72,6 +58,7 @@ public class PlayerController : Acter {
 //				book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
 			
 				book.payload.attackPower *= 2;
+//				book.payload.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
 				book.payload.payload = SpellGenerator.Instance().Explosion();
 				book.payload.payload.attackPower *= 2;
 //				SpellGenerator.Instance().Split(book, 4);
@@ -211,7 +198,6 @@ public class PlayerController : Acter {
 		}
 		if (Input.GetKey ("r") || Input.GetKey(KeyCode.Mouse1) || Input.GetButton("Fire2")) {
 			lockOffHandCounter++;
-			print (lockOffHandCounter);
 			if (lockOffHandCounter > 60 && EquippedSecondaryWeapon != null) {
 				lockOffHand = !lockOffHand;
 				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(lockOffHand, false);

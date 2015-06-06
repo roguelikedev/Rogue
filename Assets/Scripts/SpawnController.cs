@@ -105,7 +105,12 @@ public class SpawnController : MonoBehaviour {
 		System.Func<int, List<IDepthSelectable>> FindRange = d => {
 			var rval = new List<IDepthSelectable>();
 			foreach (var e in enemiesOrItems) {
-				if ((Mathf.Abs(depth - e.Depth) <= d * (1 + iterations * 0.1f) || e.Depth == -1) && Random.Range(0,11) <= e.Commonness) rval.Add(e);
+				var fuckInterfacesAllTheTime = e as WeaponController;
+				if (fuckInterfacesAllTheTime != null) {
+					if (fuckInterfacesAllTheTime.payload != null) rval.Add(e);		// FIXME: fuck interfaces ALL THE TIME
+				}
+				if ((e.Depth == -1 || Mathf.Abs(depth - e.Depth) <= d * (1 + iterations * 0.1f))
+					 && Random.Range(0,11) <= e.Commonness) rval.Add(e);
 			}
 			return rval;
 		};
@@ -172,13 +177,18 @@ public class SpawnController : MonoBehaviour {
 		
 		if (christmas) {
 			var poss = new List<WeaponController>();
+			System.Func<string> WhySoDissatisfied = () => {
+				var rval = "";
+				poss.ForEach (p => rval = rval + p.Name + " ");
+				return rval;
+			};
 			for (int safety = 0; safety < 1000 && poss.Count == 0; ++safety) {
-				print (safety);
 				poss.AddRange(ChooseByDepth(AllPrimaryAndSecondaryWeapons.ConvertAll(i => i as IDepthSelectable)
 					, whichMob.ChallengeRating)
 					.ConvertAll(i => i as WeaponController));
+				if (safety > 998) print (whichMob + " sees " + WhySoDissatisfied());
 				poss.RemoveAll(i => !whichMob.WantsToEquip(i));
-				if (safety > 900) print (whichMob + " " + poss);
+				if (safety > 998) print (whichMob + " likes " + WhySoDissatisfied());
 				poss.RemoveAll(i => i.name.Contains("wand"));
 				if (whichMob.MainClass == Acter.C_ROGUE) poss.RemoveAll(i => i.IsMeleeWeapon);
 			}
@@ -384,28 +394,22 @@ public class SpawnController : MonoBehaviour {
 		};
 		#region pinata
 		if (itemPinata) {
-			MakeTreasureChest(6).transform.position = RandomLocation();
-			MakeTreasureChest(6).transform.position = RandomLocation();
-			MakeTreasureChest(6).transform.position = RandomLocation();
-			MakeTreasureChest(6).transform.position = RandomLocation();
+//			MakeTreasureChest(6).transform.position = RandomLocation();
+//			MakeTreasureChest(6).transform.position = RandomLocation();
+//			MakeTreasureChest(6).transform.position = RandomLocation();
+//			MakeTreasureChest(6).transform.position = RandomLocation();
 //			MakeTreasureChest(1).transform.position = RandomLocation();
 //			MakeTreasureChest(9).transform.position = RandomLocation();
 //			MakeTreasureChest(27).transform.position = RandomLocation();			
 			
 			for (int lcv = 0; lcv < 6; ++lcv) {
-				var b = Instantiate(barrel);
-				b.transform.position = RandomLocation();
+//				var b = Instantiate(barrel);
+//				b.transform.position = RandomLocation();
+				var book = Instantiate(SpellGenerator.blankBook);
+				print ("pinata'ing " + book.Description);
+				SpellGenerator.Generate(18, book);
+				book.transform.position = RandomLocation();
 			}
-
-//			var broom = Instantiate(itemBroom);
-//			broom.payload = SpellGenerator.Mortar(WeaponController.DMG_FIRE);
-//			broom.transform.position = RandomLocation();
-			
-
-//			var book = Instantiate(SpellGenerator.blankBook);
-//			print ("pinata'ing " + book.Description);
-//			SpellGenerator.Generate(20, book);
-//			book.transform.position = RandomLocation();
 
 //			AllEquipment.ForEach(i => Instantiate(i).transform.position = RandomLocation());
 //			AllItems.ForEach(i => Instantiate(i));
@@ -440,21 +444,21 @@ public class SpawnController : MonoBehaviour {
 			else if (s < 8) Instantiate(barrel).transform.position = RandomLocation();
 			else MakeEquipmentBox(depth).transform.position = RandomLocation();
 		}
-		
-		
+		#region preventSpawn
 		if (preventSpawn && depth > 0) {
 			for (int lcv = 0; lcv < 9; ++lcv) {
 //				var b = Instantiate(barrel);
-				var b = Instantiate(enemyTreant);
-				b.transform.position = RandomLocation();
+//				var b = Instantiate(enemyTreant);
+//				b.transform.position = RandomLocation();
 			}
 			//			var g = Instantiate(enemyGoblin);
 			//			g.Equip(Instantiate(itemBow));
 			return;
 		}
+		#endregion
 		
 		float encounterLevel = 0;
-		bool isCaptain = Random.Range(0, 5) == 0;		// huge enemies are always captains
+		bool isCaptain = Random.Range(0, 4) == 0;		// huge enemies are always captains
 		while (encounterLevel <= depth) {
 			EnemyController whichMob = ChooseMob(depth, areaType);
 			if (whichMob == enemyIronLich || whichMob == enemyWoman) isCaptain = true;

@@ -56,7 +56,6 @@ public class SpellGenerator : MonoBehaviour {
 			case WeaponController.DMG_PARA:
 				emitter = purpleParticles;
 				rval.damageType = WeaponController.DMG_PARA;
-				rval.attackPower = 1;
 				rval.name = "paralysis";
 				break;
 			default:
@@ -270,7 +269,7 @@ public class SpellGenerator : MonoBehaviour {
 	}
 	
 	public void Generate(int depth, WeaponController parent) {
-		print (parent.Description + " passed into generate");
+//		print (parent.Description + " passed into generate");
 		bool initialSpellRanged = false;
 		bool hasParalyze = false;
 		bool hasRaiseDead = false;
@@ -331,12 +330,12 @@ public class SpellGenerator : MonoBehaviour {
 		}
 		parent.payload = leaf;
 		
-		if (leaf.damageType != WeaponController.DMG_RAISE) {
-			var powerMultiplier = Mathf.Max(Random.Range(1, depth + 1), Random.Range(1, depth + 1));
-			leaf.attackPower *= powerMultiplier;
-			leaf.depth += powerMultiplier;
-		}
-		else leaf.depth++;
+//		if (leaf.damageType != WeaponController.DMG_RAISE) {
+//			var powerMultiplier = Mathf.Max(Random.Range(1, depth + 1), Random.Range(1, depth + 1));
+//			leaf.attackPower *= powerMultiplier;
+//			leaf.depth += powerMultiplier;
+//		}
+//		else leaf.depth++;
 		
 		if (Random.Range(0, 4) == 0) {
 			var splits = Random.Range(1, (int)Mathf.Sqrt(depth));
@@ -348,11 +347,14 @@ public class SpellGenerator : MonoBehaviour {
 			if (leaf.damageType != WeaponController.DMG_RAISE) {
 				var powerMultiplier = Mathf.Max(Random.Range(1, depth + 1), Random.Range(1, depth + 1));
 				leaf.attackPower *= powerMultiplier;
-				leaf.depth += powerMultiplier;
+				leaf.depth *= powerMultiplier;
 			}
 			else leaf.depth++;
 			
 			leaf.payload = RandomSpell();
+			foreach (var mp in parent.multiPayload) {
+				mp.payload = leaf.payload;
+			}
 			if (lcv < depth / 2 && Random.Range(0, 4) == 0) {
 				var splits = Random.Range(1, Mathf.Max(1, (int) Mathf.Sqrt(depth / lcv)));
 				if (Random.Range(0,2) == 0) Split(leaf, splits);
@@ -360,6 +362,7 @@ public class SpellGenerator : MonoBehaviour {
 				leaf.depth *= splits;
 			}
 			lcv += leaf.depth;			
+			parent = leaf;
 			leaf = leaf.payload;
 		}
 	}

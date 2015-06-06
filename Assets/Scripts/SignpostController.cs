@@ -12,6 +12,7 @@ public class SignpostController : ItemController {
 	EnemyController spawnIn;
 	public int fixedSpeech;
 //	static List<int> heardIt = new List<int>();
+	bool wasRead = false;
 
 
 	public void Speak() {		// FIXME:  DRY
@@ -58,6 +59,10 @@ public class SignpostController : ItemController {
 			}
 			payload = null;
 		}
+		if (!wasRead) {
+			wasRead = true;
+			PlayerController.Instance.GainExperience(PlayerController.Instance.level + 1);
+		}
 	}
 	
 	protected override void _FixedUpdate ()
@@ -69,8 +74,8 @@ public class SignpostController : ItemController {
 //			Bubble.color -= fade;
 		}
 		while (info == "") {
-			var sw = fixedSpeech != 0 ? fixedSpeech : Random.Range(0, 28);
-//			if (heardIt.Contains(sw) && sw != 27) continue;
+			var sw = fixedSpeech != 0 ? fixedSpeech : Random.Range(0, 29);
+//			if (heardIt.Contains(sw) && sw < 30) continue;
 //			heardIt.Add(sw);
 			switch(sw) {
 				case -1:
@@ -81,6 +86,9 @@ public class SignpostController : ItemController {
 					info = "T gives it to her\nspace gets it\nright click uses it";
 					payload = SpawnController.Instance.itemEstusFlask;
 					spawnIn = SpawnController.Instance.enemyWoman;
+					break;
+				case -3:
+					info = "reading signs\nis worth it";
 					break;
 				case 1:
 					info = "fire damage\ndoesn't\nregenerate";
@@ -166,10 +174,11 @@ public class SignpostController : ItemController {
 				case 24:
 					info = "katak cannot find\namulet of trapfinding";
 					break;
-				// case 25
-					// goto default
 				case 26:
 					info = "you're doomed";
+					break;
+				case 27:
+					info = "treants fear\nonly death";
 					break;
 				default: break;		// player says "illegible"
 			}

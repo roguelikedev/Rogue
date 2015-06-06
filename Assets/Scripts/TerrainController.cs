@@ -72,7 +72,7 @@ public class TerrainController : MonoBehaviour {
 	List<int> visitedSpecialRooms = new List<int>();
 	#endregion	
 	#region Room	
-	class Room {
+	public class Room {
 		public List<GameObject> tiles = new List<GameObject>();
 		public int xIndex;
 		public int terrainType;
@@ -103,8 +103,10 @@ public class TerrainController : MonoBehaviour {
 	int nightgauntCooldown = 0;
 	void FixedUpdate () {
 		if (Depth < 25) return;
+		if (Acter.LivingActers.Count > 5) return;
 		if (Random.Range(0, nightgauntCooldown) == 0) {
-			nightgauntCooldown += (int)(100 * Acter.LivingActers.FindAll(e => !e.friendly).Count / Mathf.Pow(Depth - 24, 2));
+			nightgauntCooldown += (int)(100 * Mathf.Pow(Acter.LivingActers.FindAll(e => !e.friendly).Count, 2)
+											 / Mathf.Pow(Depth - 24, 2));
 			var loc = Random.Range(0, 2) == 0 ? LeftmostRoom.tiles[0].transform.position.x - TILE_SZ * 6
 					: RightmostRoom.tiles[RightmostRoom.tiles.Count - 1].transform.position.x + TILE_SZ * 6;
 			var ng = Instantiate(spawnController.enemyNightgaunt);
@@ -145,6 +147,74 @@ public class TerrainController : MonoBehaviour {
 	}
 	#endregion
 	
+	public string LevelFeeling (int type) {
+		if (PlayerController.Instance.IsJason) {
+			return "   ...";
+		}
+		
+		switch(type) {
+			case D_FOREST:
+				return "i feel a breeze";
+			case D_WATER:
+				return "i hear water";
+			case D_CAVE:
+				return "snoogin tracks";
+			case D_THORNS:
+				return "looks sharp";
+			case D_TOMB:
+				return "death lies ahead";
+			case D_CHRISTMAS:
+				return "i feel lucky";
+			case D_ARMORY:
+				return "i feel shrewd";
+			case D_MERCY:
+				return "this isn't so bad";
+			case D_TROG:
+				return "i smell blood";
+			case D_ENCHANT:
+				return "i sense power";
+			case D_TROVE:
+				return "the glint of gold";
+			case D_HELL:
+				return "i've arrived...";
+			default:
+				Debug.LogError("generate terrain to right failed in switch statement");
+				return "?!";
+		}
+	}
+	
+	public string NameOfAreaType (int type) {
+		switch(type) {
+			case D_FOREST:
+				return "Underground Forest";
+			case D_WATER:
+				return "Water Level";
+			case D_CAVE:
+				return "Wimps Cave";
+			case D_THORNS:
+				return "Thorn Garden";
+			case D_TOMB:
+				return "Tomb";
+			case D_CHRISTMAS:
+				return "Munchkin Land";
+			case D_ARMORY:
+				return  "Old Armory";
+			case D_MERCY:
+				return "Temple of Mercy";
+			case D_TROG:
+				return "Blood Vendor";
+			case D_ENCHANT:
+				return "Enchanted Altar";
+			case D_TROVE:
+				return "Treasure Trove";
+			case D_HELL:
+				return "Hell";
+			default:
+				Debug.LogError("generate terrain to right failed in switch statement");
+				return "unknown";
+		}
+	}
+	
 	public void GenerateTerrainAtIndexCallback(int x, object _room) {
 		if (rooms.Exists(r => r.xIndex == x)) {
 //			Debug.Log(x + " exists, ignoring");
@@ -153,54 +223,42 @@ public class TerrainController : MonoBehaviour {
 		
 		var tile = tilePrefab;
 		Texture floorTexture = null;
-		var areaName = "Wimps Cave";
 		var room = _room as Room;
 		previousAreaType = room.terrainType;
 		int currentAreaType = room.nextRoomType;
+		var areaName = NameOfAreaType(currentAreaType);
 		
 		switch(currentAreaType) {
 			case D_FOREST:
-				areaName = "Underground Forest";
 				break;
 			case D_WATER:
 				if (!fuckTheWaterLevel) {
 					tile = tileWater;
 				}
-				areaName = "Water Level";
 				break;
 			case D_CAVE:
 				floorTexture = stone;
-				areaName = "Wimps Cave";
 				break;
 			case D_THORNS:
 				tile = tileThorns;
-				areaName = "Thorn Garden";
 				break;
 			case D_TOMB:
 				floorTexture = skulls;
-				areaName = "Tomb";
 				break;
 			case D_CHRISTMAS:
-				areaName = "Munchkin Land";
 				break;
 			case D_ARMORY:
-				areaName = "Old Armory";
 				break;
 			case D_MERCY:
-				areaName = "Temple of Mercy";
 				break;
 			case D_TROG:
-				areaName = "Blood Vendor";
 				break;
 			case D_ENCHANT:
-				areaName = "Enchanted Altar";
 				break;
 			case D_TROVE:
-				areaName = "Treasure Trove";
 				break;
 			case D_HELL:
 				tile = tileLava;
-				areaName = "Hell";
 				break;
 			default:
 				Debug.LogError("generate terrain to right failed in switch statement");
@@ -219,56 +277,9 @@ public class TerrainController : MonoBehaviour {
 		if (showTraps) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
 		
 		if (previousAreaType != currentAreaType) announcer.AnnounceText("Entered " + areaName + "\nDepth: " + Depth);
-		if (nextRoom.nextRoomType != nextRoom.terrainType) {
-			var speech = "";
-			switch(nextRoom.nextRoomType) {
-				case D_FOREST:
-					speech = "i feel a breeze";
-					break;
-				case D_WATER:
-					speech = "i hear water";
-					break;
-				case D_CAVE:
-					speech = "snoogin tracks";
-					break;
-				case D_THORNS:
-					speech = "looks sharp";
-					break;
-				case D_TOMB:
-					speech = "death lies ahead";
-					break;
-				case D_CHRISTMAS:
-					speech = "i feel lucky";
-					break;
-				case D_ARMORY:
-					speech = "i feel shrewd";
-					break;
-				case D_MERCY:
-					speech = "this isn't so bad";
-					break;
-				case D_TROG:
-					speech = "i smell blood";
-					break;
-				case D_ENCHANT:
-					speech = "i sense power";
-					break;
-				case D_TROVE:
-					speech = "the glint of gold";
-					break;
-				case D_HELL:
-					speech = "i've arrived...";
-					break;
-				default:
-					Debug.LogError("generate terrain to right failed in switch statement");
-					break;
-			}
-			if (speech != "") {
-				if (PlayerController.Instance.IsJason) {
-					speech = "   ...";
-				}
-				PlayerController.Instance.Speak(speech);
-			}
-		}
+//		if (nextRoom.nextRoomType != nextRoom.terrainType) {
+//			PlayerController.Instance.Speak(LevelFeeling(nextRoom.nextRoomType));
+//		}
 		PlayerController.Instance.Heal(0.5f);
 		
 		previousAreaType = currentAreaType;
@@ -283,7 +294,7 @@ public class TerrainController : MonoBehaviour {
 				rval = Random.Range(D_FOREST, D_CHRISTMAS);
 			}
 			else if (Random.Range(0, 3) > 0) rval = areaType;
-			else if (Random.Range(0, SpawnController.Instance.stinginess) != 0) rval = Random.Range(D_FOREST, D_CHRISTMAS);
+			else if (Random.Range(0, SpawnController.Instance.stinginess) > 1) rval = Random.Range(D_FOREST, D_CHRISTMAS);
 			else {
 				int specialType;
 				switch(areaType) {
@@ -312,7 +323,7 @@ public class TerrainController : MonoBehaviour {
 				visitedSpecialRooms.Add(specialType);
 				rval = specialType;
 			}
-			if (rval == D_WATER && Depth < 3) continue;
+			if (rval == D_WATER && Depth < 2) continue;
 			if (rval == D_FOREST && Depth < 4) continue;
 			if (rval == D_TOMB && Depth < 5) continue;
 			if (rval == D_THORNS && Depth < 1) continue;
@@ -325,7 +336,7 @@ public class TerrainController : MonoBehaviour {
 	Room GenerateAtIndex(int index, Rigidbody floorType, Texture texture, int areaType)
 	{
 		if (rooms.Exists(r => r.xIndex == index)) return null;
-		print ("make index " + index + " depth " + Depth);
+//		print ("make index " + index + " depth " + Depth);
 		if (texture == null) {
 			var tmp = floorType.GetComponent<MeshRenderer>();
 			if (tmp == null) tmp = floorType.GetComponentInChildren<MeshRenderer>();
@@ -353,6 +364,11 @@ public class TerrainController : MonoBehaviour {
 				
 				Rigidbody _floorType = floorType;
 				
+				if (trapSeed == 0 && x != rightRampIndex && x != leftRampIndex) {
+					_floorType = tileTrapped;
+				}
+				if (areaType < D_CHRISTMAS)	trapSeed = TrapSeed();
+				
 				if (hasRamp) {
 					if (areaType == D_WATER) _texture = stone;
 					if (x == leftRampIndex) {
@@ -372,12 +388,11 @@ public class TerrainController : MonoBehaviour {
 				}
 				else {
 					_= Instantiate(_floorType, orig, floorType.transform.rotation) as Rigidbody;
-					if (trapSeed == 0) {
-						_floorType = tileTrapped;
-						_floorType.GetComponent<TerrainEffectTrap>().severity *= Random.Range(1, Mathf.Max(Depth, 1));
-						if (areaType < D_CHRISTMAS)	trapSeed = TrapSeed();
-					}
 				}
+				if (_.GetComponent<TerrainEffectTrap>() != null) {
+					_.GetComponent<TerrainEffectTrap>().severity *= Random.Range(1, Mathf.Max(Depth, 1));
+				}
+				
 				room.tiles.Add(_.gameObject);
 				
 				var rend = _.GetComponent<MeshRenderer>();
@@ -393,12 +408,16 @@ public class TerrainController : MonoBehaviour {
 		transitionLeft.terrainController = this;
 		transitionLeft.index = room.xIndex - 1;
 		transitionLeft.room = room;
+		if (rooms.Count > 0 && index > LeftmostRoom.xIndex) transitionLeft.shouldNotWarn = true;
+		else transitionLeft.arrow.sprite = transitionLeft.rightArrow;
 		where.x = room.tiles[room.tiles.Count - 1].transform.position.x;
 		tt = Instantiate(terrainTransition, where, terrainTransition.transform.rotation) as BoxCollider;
 		var transitionRight = tt.GetComponent<GenerateTerrainTrigger>();
 		transitionRight.terrainController = this;
 		transitionRight.index = room.xIndex + 1;
 		transitionRight.room = room;
+		if (rooms.Count > 0 && index < RightmostRoom.xIndex) transitionRight.shouldNotWarn = true;
+		else transitionRight.arrow.sprite = transitionRight.leftArrow;
 		room.tiles.Add(transitionLeft.gameObject);
 		room.tiles.Add(transitionRight.gameObject);
 		

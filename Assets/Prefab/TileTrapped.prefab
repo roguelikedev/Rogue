@@ -104,7 +104,7 @@ MonoBehaviour:
   danger: {fileID: 21216394, guid: 08d9c8f1890cbb94a81b9bb62d968474, type: 2}
   brick: {fileID: 11407686, guid: 3fbe9b7af5f260742ad69f0207bcdca2, type: 2}
   burntEarth: {fileID: 2800000, guid: 031800004ecd9274aa11954caa3f60e8, type: 3}
-  severity: 5
+  severity: 4
   damageStaggering: 3
 --- !u!1001 &100100000
 Prefab:

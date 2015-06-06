@@ -17,6 +17,7 @@ public abstract class Acter : MonoBehaviour {
 	public float HitPoints { get { return hitPoints; } }
 	protected float fireDamageTaken;
 	protected float armorClass = 1;
+	public float EffectiveCurrentHP { get { return HitPoints * armorClass / GLOBAL_DMG_SCALING; } }
 	public float meleeMultiplier = 1;
 	protected float poiseBreakCounter = 0;
 	public float Poise { get { return (armorClass + racialBaseHitPoints) / 2.5f; } }
@@ -44,7 +45,10 @@ public abstract class Acter : MonoBehaviour {
 			case C_ROGUE:
 				if (hpFromLevels < racialBaseHitPoints) {
 					hpFromLevels++;
+				}
+				if (level < CLVL_SOFT_CAP) {
 					meleeMultiplier += .75f;
+					spellpower += 0.75f;
 				}
 				speed += 90 / (level + 1);
 				break;
@@ -55,7 +59,9 @@ public abstract class Acter : MonoBehaviour {
 				if (level < CLVL_SOFT_CAP) {
 					spellpower += .75f;
 					speed += 90 / (level + 3);
+					meleeMultiplier += .5f;
 				}
+				spellpower += .75f;
 				break;
 			case C_GESTALT:
 				GainLevel(C_ROGUE);
@@ -333,6 +339,7 @@ public abstract class Acter : MonoBehaviour {
 				}
 				equipASAP.Clear();
 				GetComponent<Rigidbody>().mass = 0.1f;
+				GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationX;
 				shouldUseMainHand = shouldPickUpItem = ShouldScramble = shouldUseOffhand = false;
 				decay = StartCoroutine(Decay());
 				break;
@@ -421,7 +428,7 @@ public abstract class Acter : MonoBehaviour {
 	}
 	#endregion
 	#region weapons
-	protected WeaponController EquippedWeapon
+	public WeaponController EquippedWeapon
 	{
 		get
 		{
@@ -430,7 +437,7 @@ public abstract class Acter : MonoBehaviour {
 			return rval == null ? bareHands : rval;
 		}
 	}
-	protected WeaponController EquippedSecondaryWeapon
+	public WeaponController EquippedSecondaryWeapon
 	{
 		get
 		{
@@ -451,6 +458,7 @@ public abstract class Acter : MonoBehaviour {
 			weapon.center = fistSize.center;
 			weapon.direction = fistSize.direction;
 			largeWeapon = false;
+			rval.PhantomRangeActive(true);
 		}
 		ReleaseEquipment(rval);
 		return rval;
@@ -474,7 +482,7 @@ public abstract class Acter : MonoBehaviour {
 		}
 		if (!isOffhand) {
 			if (item == bareHands) {
-				weapon.radius = fistSize.radius;
+				weapon.radius = fistSize.radius;			// FIXME:  i don't think weapon is ever used
 				weapon.height = fistSize.height;
 				weapon.center = fistSize.center;
 				weapon.direction = fistSize.direction;
@@ -484,6 +492,7 @@ public abstract class Acter : MonoBehaviour {
 				weapon.direction = item.GetComponent<CapsuleCollider>().direction;
 				weapon.height = item.GetComponent<BoxCollider>().size.y;
 				weapon.center = item.GetComponent<BoxCollider>().center;
+				item.PhantomRangeActive(false);
 			}
 			largeWeapon = item.tag == "Large Weapon";
 		}
@@ -704,6 +713,11 @@ public abstract class Acter : MonoBehaviour {
 	#region simple callbacks
 	IEnumerator LeaveAttackStateGuarantee(float seconds) {
 		yield return new WaitForSeconds(seconds);
+		if (pendingSpell != null) {
+			CameraController.Instance.NoteText(Name + " failed to cast " + EquippedSecondaryWeapon.payload.Description);
+			StopCoroutine(pendingSpell);
+			pendingSpell = null;
+		}
 		if (State == ST_ATTACK) ExitState();
 		print ("left attack state");
 	}
@@ -778,7 +792,7 @@ public abstract class Acter : MonoBehaviour {
 	public void Paralyze(float magnitude) {
 		if (freeAction) return;
 		if (speed == SPEED_WHEN_PARALYZED) return;
-		magnitude = magnitude / Mathf.Pow(paralyzeScaling, 2);
+		magnitude = Mathf.Pow(magnitude, 0.33f) / Mathf.Pow(paralyzeScaling, 2);
 //		if (magnitude < 0.5f) return;
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
 		var _speed = speed;
@@ -805,7 +819,10 @@ public abstract class Acter : MonoBehaviour {
 		hitPoints = MaxHitPoints;
 		state = ST_HURT;
 		ExitState();
+		transform.rotation = Quaternion.identity;
+		facingRight = false;
 		GetComponent<Rigidbody>().mass = 1;
+		GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
 		//		transform.position += new Vector3(0, 1);
 		skinColor = Color.white;
 		ChangeSkinColor();
@@ -832,7 +849,7 @@ public abstract class Acter : MonoBehaviour {
 		}
 		else {
 			Anim.Play(ST_CAST);
-			float castTime = EquippedSecondaryWeapon.Depth / Mathf.Pow(spellpower, 1.5f);
+			float castTime = EquippedSecondaryWeapon.Depth / spellpower; //Mathf.Pow(spellpower, 1.5f);
 			var isWand = EquippedSecondaryWeapon.name.Contains("wand");
 			if (isWand) castTime = 0;
 			yield return new WaitForSeconds(castTime);
