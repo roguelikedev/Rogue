@@ -19,7 +19,7 @@ public class BroomController : WeaponController {
 					attackVictims.Clear();
 					return;
 				}
-				direction *= 1 / Mathf.Max(3f, victim.Poise);
+				direction /= Mathf.Max(3f, Mathf.Sqrt(victim.Poise));
 				victim.transform.position = victim.transform.position + direction;
 			}
 		}

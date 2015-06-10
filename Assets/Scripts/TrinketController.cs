@@ -40,7 +40,7 @@ public class TrinketController : ItemController {
 				rval.meleeMultiplier += magnitude / 4;
 				break;
 			case 1:
-				rval.armorClass += magnitude / 2;
+				rval.armorClass += magnitude / 3;
 				break;
 			case 2:
 				rval.speed += magnitude * 10;

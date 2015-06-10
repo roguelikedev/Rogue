@@ -3,10 +3,11 @@ using System.Collections;
 
 public class TrollController : EnemyController {
 	public float regenRate;
+	public float freeArmor;
 	
 	void Start() {
-		BeginRegenerate(regenRate);
-		armorClass += 2;
+		BeginRegenerate (regenRate);
+		armorClass += freeArmor;
 	}
 	
 	protected override bool _FixedUpdate ()

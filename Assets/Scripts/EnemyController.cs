@@ -172,11 +172,14 @@ public class EnemyController : Acter, IDepthSelectable
 		var distance = Vector3.Distance(transform.position, who.transform.position);
 		if (distance < fleeDistance) return;
 		
+		var weaponSize = Mathf.Max(weapon.height, weapon.radius);
 		// secondary weapon is a brick or something
-		if (EquippedWeapon.IsMeleeWeapon && distance > weapon.height * 2 || OffhandIsSuperior) {
+		if ((EquippedSecondaryWeapon != null && EquippedWeapon.IsMeleeWeapon && distance > weaponSize) || OffhandIsSuperior) {
 			shouldUseOffhand = true;
 		}
-		else shouldUseMainHand = true;
+		else {
+			shouldUseMainHand = true;
+		}
 		
 		if (EquippedWeapon.IsMeleeWeapon && shouldUseMainHand) {
 			who.ShouldScramble = true;
@@ -208,6 +211,7 @@ public class EnemyController : Acter, IDepthSelectable
 	}
 	
 	void FixedUpdate() {
+		
 		if (friendly && PlayerController.Instance.friendless) friendly = false;
 		if (isThreateningPlayer && !shouldUseMainHand && State != ST_ATTACK) {
 			if (isThreateningPlayer) PlayerController.Instance.ShouldScramble = false;
@@ -220,7 +224,7 @@ public class EnemyController : Acter, IDepthSelectable
 		}
 		// if is insurance against the else if
 		if (EquippedSecondaryWeapon == null || EquippedSecondaryWeapon.charges == 0) shouldUseOffhand = false;	
-		else if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.name.Contains("Estus")
+		else if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.GetComponent<EstusController>() != null
 		         && hitPoints < MaxHitPoints / 2 && EquippedSecondaryWeapon.charges > 0 
 		         && State != ST_ATTACK) {	// don't want to queue up another use while draining the last charge
 			shouldUseMainHand = false;

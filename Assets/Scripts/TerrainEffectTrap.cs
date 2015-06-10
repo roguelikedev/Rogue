@@ -19,6 +19,7 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 			payload.transform.localPosition = Vector3.zero;
 			payload.GetComponent<CapsuleCollider>().center = Vector3.zero;
 			damageStaggering = 0;	
+			payload.friendlyFireActive = true;
 		}
 		else {
 			payload = brick;
@@ -44,7 +45,6 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 				var tmp = e.transform.position;
 				tmp.y = 9;
 				e.transform.position = tmp;
-				e.friendlyFireActive = true;
 			}
 			e.attackActive = true;
 			if (damageStaggering == 0) {

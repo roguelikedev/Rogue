@@ -25,6 +25,7 @@ public class TerrainController : MonoBehaviour {
 	public Material forest;
 	public Material cathedral;
 	public Material lava;
+	public Material fireWall;
 	public int trapRarity;
 	bool showTraps;
 	public EnchanterStatue enchanterStatue;
@@ -53,7 +54,7 @@ public class TerrainController : MonoBehaviour {
 			if (!hasSpawnedEmpty) return 0;
 			if (statuesDestroyed <= -2) return 27;
 			var rval = generatedCount / (2f + statuesDestroyed);
-//			rval = Mathf.Pow(rval, 1.3f);
+			rval = Mathf.Pow(rval, 1.3f);
 			return (int)Mathf.Max(1, Mathf.Min(27, rval));
 		}
 	}
@@ -148,7 +149,7 @@ public class TerrainController : MonoBehaviour {
 	#endregion
 	
 	public string LevelFeeling (int type) {
-		if (PlayerController.Instance.IsJason) {
+		if (PlayerController.Instance.IsTerrifying) {
 			return "   ...";
 		}
 		
@@ -289,12 +290,15 @@ public class TerrainController : MonoBehaviour {
 	int ChooseNextRoomType (int areaType) {
 		if (Depth == 27) return D_HELL;
 		int rval;
+		bool specialRoomOK = areaType < D_CHRISTMAS;
 		while (true) {
-			if (areaType >= D_CHRISTMAS) {
+			if (specialRoomOK && Random.Range(0, 2) > 0) {
+				rval = areaType;
+				break;
+			}
+			if (!specialRoomOK || Random.Range(0, SpawnController.Instance.stinginess) > 1) {
 				rval = Random.Range(D_FOREST, D_CHRISTMAS);
 			}
-			else if (Random.Range(0, 3) > 0) rval = areaType;
-			else if (Random.Range(0, SpawnController.Instance.stinginess) > 1) rval = Random.Range(D_FOREST, D_CHRISTMAS);
 			else {
 				int specialType;
 				switch(areaType) {
@@ -447,7 +451,7 @@ public class TerrainController : MonoBehaviour {
 				farWall.GetComponent<MeshRenderer>().material = forest;
 				break;
 			case D_HELL:
-				farWall.GetComponent<MeshRenderer>().material = lava;
+				farWall.GetComponent<MeshRenderer>().material = fireWall;
 				break;
 			case D_TOMB:
 				farWall.GetComponent<MeshRenderer>().material.SetTexture("_MainTex", skulls);
@@ -502,7 +506,8 @@ public class TerrainController : MonoBehaviour {
 			#endregion
 		}
 		else if (areaType == D_MERCY) {
-			Instantiate(spawnController.statue, new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 0), Quaternion.identity);
+			var st = Instantiate(spawnController.statue);
+			st.transform.position = st.transform.position + new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 0);
 		}
 		else if (areaType == D_TROG) {
 			var item = spawnController.MakeSpecialItem();
@@ -542,7 +547,7 @@ public class TerrainController : MonoBehaviour {
 		}
 		else if (areaType == D_ENCHANT) {
 			var altar = Instantiate(enchanterStatue);
-			altar.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 1.6f, 0);
+			altar.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 7.6f, 0);
 			altar.depth = Depth;
 		}
 		else if (Depth > 0) spawnController.Spawn(new Vector3(xmin, 0, Z_MIN) * TILE_SZ, new Vector3(xmax - 1, 0, Z_MAX) * TILE_SZ

@@ -58,7 +58,7 @@ public class WeaponController : ItemController {
 	
 	void Start() {
 		if (firedNoise != null) {
-			AudioSource.PlayClipAtPoint(firedNoise, transform.position, CameraController.Instance.Volume);
+			CameraController.Instance.PlaySound(firedNoise);
 		}
 		var cc = GetComponent<CapsuleCollider>();
 		originalLength = cc.height;
@@ -86,9 +86,15 @@ public class WeaponController : ItemController {
 		}
 		GetComponentInChildren<SpriteRenderer>().sortingOrder -= (int)(transform.position.z * 10);		// FIXME:  DRY
 	}
+	void _Destroy () {
+//		MapChildren(c => _Destroy(c));
+		if (payload != null) payload._Destroy();
+		Destroy(gameObject);
+	}
 	void OnDestroy() {		
-//		Destroy(payload);		FIXME: this destoys the payload of the base instance
-		payload = null;
+		if (Name.Contains("spellbook")) {
+			payload._Destroy();
+		}
 	}
 	#endregion
 	#region update/trigger
@@ -162,29 +168,29 @@ public class WeaponController : ItemController {
 		
 		Acter victim = other.GetComponentInParent<Acter>();
 		if (victim == null) return;
+		if (attackVictims.Contains(victim)) return;
+		
+		if (Parent != null && (Parent.friendly == victim.friendly && !friendlyFireActive)) {
+			return;
+		}
 		
 		var sg = other.GetComponent<ShieldGolem>();
-		if (sg != null && !attackVictims.Contains(victim)) {
-			if (friendlyFireActive || sg.friendly != Parent.friendly) AudioSource.PlayClipAtPoint(sg.clang, transform.position
-					, CameraController.Instance.Volume);
+		if (sg != null) {
+			attackVictims.Add(sg);
+			CameraController.Instance.PlaySound(sg.clang);
 			return;
 		}
 		
 		if (other.name != "torso") return;
 		
-//		if (parent is PlayerController && damageType == DMG_PHYS) print (victim);
-		
-		if (attackVictims.Contains(victim)) return;
 		attackVictims.Add(victim);
 		
-		if (Parent == null) {
-			if (friendlyFireActive) {
-				victim.TakeDamage(attackPower, damageType);
-			}
+		if (Parent == null) {	// && friendlyFireActive) {		// it's a trap, friendly fire is assumed
+			victim.TakeDamage(attackPower, damageType);
 			return;
 		}
 		
-		if (Parent.friendly == victim.friendly && !friendlyFireActive) return;
+//		if (Parent.friendly == victim.friendly && !friendlyFireActive) return;
 		
 		if (!IsProjectile && IsEquipped) {
 			OnHit(victim, Parent);
@@ -201,13 +207,21 @@ public class WeaponController : ItemController {
 	#region helper
 	public void MapChildren (System.Action<WeaponController> Lambda) {
 		var leaf = payload;
-		while (leaf != null) {
-			Lambda(leaf);
-			foreach (var mp in leaf.multiPayload) {
-				mp.MapChildren(Lambda);
-			}
-			leaf = leaf.payload;
+		if (leaf == null) return;
+		Lambda(leaf);
+		leaf.MapChildren(Lambda);
+		foreach (var mp in multiPayload) {
+			Lambda(mp);
+			mp.MapChildren(Lambda);
 		}
+		
+//		while (leaf != null) {
+//			Lambda(leaf);
+//			foreach (var mp in leaf.multiPayload) {
+//				mp.MapChildren(Lambda);
+//			}
+//			leaf = leaf.payload;
+//		}
 	}
 	public void ApplySpellpower () {
 		if (!thrownBy) { Debug.LogError("can't apply spellpower without knowing the caster"); return; }
@@ -261,7 +275,7 @@ public class WeaponController : ItemController {
 	}
 	
 	void Fire(Collider impactPoint, WeaponController p) {
-		if (impactNoise != null) AudioSource.PlayClipAtPoint(impactNoise, transform.position, CameraController.Instance.Volume);
+		if (impactNoise != null) CameraController.Instance.PlaySound(impactNoise);
 //		var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
 		var unburyFireball = p.tag == "spell" && impactPoint.name.Contains("Tile");	// hax i know
 		

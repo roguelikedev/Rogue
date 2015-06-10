@@ -552,20 +552,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8622350140167ed44bde86d4635094dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 275
+  speed: 300
   racialBaseHitPoints: 5
-  meleeMultiplier: 1.5
+  meleeMultiplier: 2
   spellpower: 0
   level: 0
   isAquatic: 0
   freeAction: 0
   grappledBy: []
   grappling: {fileID: 0}
-  selfGameObject: {fileID: 143744}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
   skinColor: {r: .592156887, g: .545098066, b: .611764729, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
-  anim: {fileID: 9570574}
   weapon: {fileID: 13651418}
   torso: {fileID: 499994}
   head: {fileID: 439538}
@@ -576,10 +574,11 @@ MonoBehaviour:
   huge: 0
   depth: 6
   racialLevel: 4
-  commonness: 10
+  commonness: 7.5
   fleeDistance: 0
   isUnliving: 0
-  regenRate: 3
+  regenRate: 4
+  freeArmor: 4
 --- !u!135 &13576394
 SphereCollider:
   m_ObjectHideFlags: 1

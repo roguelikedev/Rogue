@@ -98,9 +98,14 @@ public class CameraController : MonoBehaviour {
 		color.a = 0;
 		announcement.color = color;
 		if (audioSource == null) Debug.LogError("wwwwttttttffffff.");
-		audioSource.volume = muteSoundFX ? 0 : Volume / 2;
+		audioSource.volume = muteSoundFX ? 0 : Volume;
 //		_mute = mute;
 //		AudioController.cameraController = this;
+	}
+	
+	public void PlaySound (AudioClip sound) {
+		if (muteSoundFX) return;
+		AudioSource.PlayClipAtPoint(sound, PlayerController.Instance.transform.position, Volume);
 	}
 	
 	void LateUpdate () {

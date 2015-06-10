@@ -102,7 +102,7 @@ public class SpellGenerator : MonoBehaviour {
 		var cc = rval.GetComponent<CapsuleCollider>();
 		cc.center = cc.center + new Vector3(0, radius/-2);
 		rval.thrownHorizontalMultiplier = 0.25f;
-		rval.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+		rval.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionZ;
 		var floorhugger = rval.gameObject.AddComponent<BoxCollider>();
 		floorhugger.size = new Vector3(0.1f, 0.1f, 0.1f);
 		floorhugger.center = new Vector3(0, radius / -2);
@@ -219,7 +219,7 @@ public class SpellGenerator : MonoBehaviour {
 		rval.lifetime = 25;
 		rval.firePayloadOnTimeout = true;
 		rval.firedNoise = moanSound;
-		rval.depth = 1;
+		rval.depth = 2;
 		rval.attackPower = 0;
 		
 		rval.name += " dead";
@@ -237,7 +237,8 @@ public class SpellGenerator : MonoBehaviour {
 			if (lcv % 2 == 0) offset *= -1;
 			offset *= (1 + lcv / 2);
 			//			clone.transform.position = new Vector3(0, 0, offset);
-			clone.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezePositionY;
+			var cons = clone.GetComponent<Rigidbody>().constraints;
+			clone.GetComponent<Rigidbody>().constraints = cons & ~RigidbodyConstraints.FreezePositionZ;
 			clone.thrownParralaxModifier = offset;
 			//			clone.GetComponent<Rigidbody>().velocity = clone.GetComponent<Rigidbody>().velocity + new Vector3 (0,0,offset);
 			rval.multiPayload.Add(clone);
@@ -264,12 +265,59 @@ public class SpellGenerator : MonoBehaviour {
 	}	
 	#endregion
 	
+	public WeaponController ColorBook (WeaponController book) {
+		float r = 0, g = 0, b = 0;
+		
+		book.MapChildren(p => {
+			switch (p.damageType) {
+				case WeaponController.DMG_FIRE:
+					r += p.depth;// * 2/3f);
+//					g /= (p.depth / 3f);
+					break;
+				case WeaponController.DMG_RAISE:
+					r -= p.depth;
+					g -= p.depth;
+					b -= p.depth;
+					break;
+				case WeaponController.DMG_DEATH:
+					r -= p.depth;
+					g -= p.depth;
+					b -= p.depth;
+//					r /= (p.depth / 3f);
+//					g /= (p.depth / 3f);
+//					b /= (p.depth / 3f);
+					break;
+				case WeaponController.DMG_PARA:
+					b += p.depth;
+					break;
+				case WeaponController.DMG_HEAL:
+					g += p.depth;
+//					r /= (p.depth / 2f);
+//					b /= (p.depth / 2f);
+					break;
+				default: break;			
+			}
+		});
+		var sum = r + g + b;
+		if (sum < 1) {
+			sum = 1;
+			r = g = b = .1f;
+		}
+		Color color = new Color(r / sum, g / sum, b / sum);
+		
+//		print (color + " r " + r + " g " + g + " b " + b);
+		book.GetComponent<SpriteRenderer>().color = color;
+	
+		return book;
+	}
+	
 	void Awake() {
 		blankBook.multiPayload.Clear();			// HOW DID THIS GET SO MANY SPLITS
 	}
 	
 	public void Generate(int depth, WeaponController parent) {
 //		print (parent.Description + " passed into generate");
+		var realParentNotAHack = parent;
 		bool initialSpellRanged = false;
 		bool hasParalyze = false;
 		bool hasRaiseDead = false;
@@ -365,5 +413,6 @@ public class SpellGenerator : MonoBehaviour {
 			parent = leaf;
 			leaf = leaf.payload;
 		}
+		if (realParentNotAHack.Name.Contains("spellbook")) ColorBook(realParentNotAHack);
 	}
 }

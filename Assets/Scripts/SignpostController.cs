@@ -11,7 +11,7 @@ public class SignpostController : ItemController {
 	public WeaponController payload;
 	EnemyController spawnIn;
 	public int fixedSpeech;
-//	static List<int> heardIt = new List<int>();
+	List<int> HeardIt { get { return SpawnController.Instance.previouslyPosted; } }
 	bool wasRead = false;
 
 
@@ -40,6 +40,7 @@ public class SignpostController : ItemController {
 	
 		if (info == "") {
 			PlayerController.Instance.Speak("illegible");
+			wasRead = true;
 		}
 		else {
 			Speech.text = info;
@@ -75,8 +76,8 @@ public class SignpostController : ItemController {
 		}
 		while (info == "") {
 			var sw = fixedSpeech != 0 ? fixedSpeech : Random.Range(0, 29);
-//			if (heardIt.Contains(sw) && sw < 30) continue;
-//			heardIt.Add(sw);
+			if (HeardIt.Contains(sw) && sw < 28) continue;
+			HeardIt.Add(sw);
 			switch(sw) {
 				case -1:
 					info = "left click";

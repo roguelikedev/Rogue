@@ -552,7 +552,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d75fc352fb39c8c42be35a8208fd8c07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 200
+  speed: 300
   racialBaseHitPoints: 4
   meleeMultiplier: 2
   spellpower: 0
@@ -561,11 +561,9 @@ MonoBehaviour:
   freeAction: 0
   grappledBy: []
   grappling: {fileID: 0}
-  selfGameObject: {fileID: 198304}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
   skinColor: {r: .807843149, g: .65882355, b: 0, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
-  anim: {fileID: 9598328}
   weapon: {fileID: 13683918}
   torso: {fileID: 484372}
   head: {fileID: 498328}

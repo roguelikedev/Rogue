@@ -27,9 +27,9 @@ public class DamageAnnouncer : MonoBehaviour {
 		var pc = acter as PlayerController;
 		if (pc != null) {
 			pc.announcer.AnnounceText("YOU DIED...\npress escape to restart");
-			AudioSource.PlayClipAtPoint(playerDeath, transform.position, CameraController.Instance.Volume);
+			CameraController.Instance.PlaySound(playerDeath);
 		}
-		AudioSource.PlayClipAtPoint(splatter, transform.position, CameraController.Instance.Volume);
+		CameraController.Instance.PlaySound(splatter);
 	}
 	
 	public void AnnounceDamage(float quantity, int damageType) {
@@ -49,7 +49,7 @@ public class DamageAnnouncer : MonoBehaviour {
 			clip = SpellGenerator.Instance().fireSound;
 		}
 		if (damageType != WeaponController.DMG_GRAP) {
-			AudioSource.PlayClipAtPoint(clip, transform.position, CameraController.Instance.Volume * Mathf.Min(1, quantity));
+			CameraController.Instance.PlaySound(clip);
 		}
 	}
 	

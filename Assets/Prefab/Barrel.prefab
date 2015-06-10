@@ -60,6 +60,8 @@ MonoBehaviour:
   smash: {fileID: 8300000, guid: 845c14a089b1da841816fed84bad5477, type: 3}
   smallMeal: {fileID: 11426862, guid: 150c437ab61aa2646a90a564f458a5cd, type: 2}
   largeMeal: {fileID: 11426862, guid: ebbe84435a72243498325feb24753c76, type: 2}
+  hugeMeal: {fileID: 11426862, guid: e3e8c36b6bb1d084aa1afa07109c32cb, type: 2}
+  broken: 0
 --- !u!136 &13680402
 CapsuleCollider:
   m_ObjectHideFlags: 1

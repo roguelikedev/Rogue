@@ -479,7 +479,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 22.4500008, y: 11.1000004, z: .100000001}
+  m_LocalPosition: {x: 33.8731079, y: 4.20833492, z: -1.94721603}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 498328}
@@ -525,8 +525,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.5, y: 7, z: 3}
-  m_Center: {x: .600000024, y: -.5, z: 0}
+  m_Size: {x: 1.29999995, y: 5, z: 3}
+  m_Center: {x: .699999988, y: -.899999976, z: 0}
 --- !u!65 &6599462
 BoxCollider:
   m_ObjectHideFlags: 1
@@ -537,8 +537,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 3, y: 7, z: 3}
-  m_Center: {x: -2, y: -.5, z: 0}
+  m_Size: {x: 3.5, y: 7, z: 3}
+  m_Center: {x: -1.75, y: -.5, z: 0}
 --- !u!95 &9598328
 Animator:
   serializedVersion: 3
@@ -587,11 +587,9 @@ MonoBehaviour:
   freeAction: 0
   grappledBy: []
   grappling: {fileID: 0}
-  selfGameObject: {fileID: 198304}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
   skinColor: {r: .435294151, g: .56078434, b: .68235296, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
-  anim: {fileID: 9598328}
   weapon: {fileID: 13683918}
   torso: {fileID: 484372}
   head: {fileID: 498328}

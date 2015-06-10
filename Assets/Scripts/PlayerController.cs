@@ -11,6 +11,9 @@ public class PlayerController : Acter {
 	public static PlayerController Instance { get { return GameObject.FindObjectOfType<PlayerController>(); } }
 	public bool friendless;
 	public WeaponController murderMask;
+	public WeaponController executionerCowl;
+	bool isTerrifying;
+	public bool IsTerrifying { get { return isTerrifying; } }
 	int lockMainHandCounter;
 	bool lockMainHand;
 	int lockOffHandCounter;
@@ -65,7 +68,9 @@ public class PlayerController : Acter {
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
 				
-				Equip (Instantiate(SpawnController.Instance.itemBroom));
+				var broom = Instantiate(SpawnController.Instance.itemBroom);
+				broom.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_PARA);
+				Equip (broom);
 				
 				spellpower += 6;
 				break;
@@ -116,6 +121,7 @@ public class PlayerController : Acter {
 				ChangeSkinColor();
 				SpawnController.Instance.stinginess++;
 				TerrainController.Instance.statuesDestroyed--;
+				isTerrifying = true;
 				break;
 			case "wretch":
 				CameraController.Instance.AnnounceText ("are you really\nup to this\nchallenge?");
@@ -133,6 +139,10 @@ public class PlayerController : Acter {
 				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(true, false);
 				Equip (wand);
 				meleeMultiplier++;
+				Equip (Instantiate(executionerCowl));
+				skinColor = new Color(.95f, .85f, .9f);
+				ChangeSkinColor();
+				isTerrifying = true;
 				break;
 			default: break;
 		}

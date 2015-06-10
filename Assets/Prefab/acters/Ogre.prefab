@@ -477,7 +477,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 15.4300003, y: 8.06000042, z: 7.61999989}
+  m_LocalPosition: {x: 15.2799997, y: 3.1500001, z: -2.06999993}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 498328}
@@ -561,11 +561,9 @@ MonoBehaviour:
   freeAction: 0
   grappledBy: []
   grappling: {fileID: 0}
-  selfGameObject: {fileID: 198304}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
   skinColor: {r: 1, g: .713725507, b: .568627477, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
-  anim: {fileID: 9598328}
   weapon: {fileID: 13683918}
   torso: {fileID: 484372}
   head: {fileID: 498328}
@@ -2055,7 +2053,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: 2
-  m_Sprite: {fileID: 21300000, guid: 808e1618fca566648831fe0d5f01fdb2, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9cc32f9d9b4269249a29ad4eead0e509, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:

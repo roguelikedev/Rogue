@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-interface IDepthSelectable {
+public interface IDepthSelectable {
 	int Depth { get; }
 	float Commonness { get; }
 }
@@ -66,6 +66,7 @@ public class SpawnController : MonoBehaviour {
 	public TreasureChest treasureChest;
 	public TreasureChest cardboardBox;
 	public SignpostController signPost;
+	public List<int> previouslyPosted = new List<int>();
 	SpellGenerator SpellGenerator { get { return GetComponentInParent<SpellGenerator>(); } }
 	#endregion
 	#region fetch
@@ -100,24 +101,29 @@ public class SpawnController : MonoBehaviour {
 			return rval;
 		}
 	}
-	List<IDepthSelectable> ChooseByDepth (List<IDepthSelectable> enemiesOrItems, float depth) {
+	public List<IDepthSelectable> ChooseByDepth (List<IDepthSelectable> enemiesOrItems, float depth) {
+		return ChooseByDepth (enemiesOrItems, depth, 3);
+	}
+	public List<IDepthSelectable> ChooseByDepth (List<IDepthSelectable> enemiesOrItems, float depth, int minChoices) {
 		float iterations = 0;
 		System.Func<int, List<IDepthSelectable>> FindRange = d => {
 			var rval = new List<IDepthSelectable>();
 			foreach (var e in enemiesOrItems) {
+				if (Random.Range(0,11) > e.Commonness) continue;
+				
+				var depthToUse = e.Depth;
 				var fuckInterfacesAllTheTime = e as WeaponController;
-				if (fuckInterfacesAllTheTime != null) {
-					if (fuckInterfacesAllTheTime.payload != null) rval.Add(e);		// FIXME: fuck interfaces ALL THE TIME
+				if (fuckInterfacesAllTheTime != null && fuckInterfacesAllTheTime.payload != null) {
+					depthToUse = fuckInterfacesAllTheTime.depth;		// don't consider the ammunition's depth
 				}
-				if ((e.Depth == -1 || Mathf.Abs(depth - e.Depth) <= d * (1 + iterations * 0.1f))
-					 && Random.Range(0,11) <= e.Commonness) rval.Add(e);
+				if (depthToUse == -1 || Mathf.Abs(depth - depthToUse) <= d * (1 + iterations * 0.1f)) rval.Add(e);
 			}
 			return rval;
 		};
 		var depthDelta = (int)Mathf.Max(1, Random.Range(0f, depth));
 		var bestMatches = new List<IDepthSelectable>();
 		
-		while (bestMatches.Count < 3) {
+		while (bestMatches.Count < minChoices) {
 			bestMatches.AddRange(FindRange(depthDelta).FindAll(e => !bestMatches.Contains(e)));
 //			depthDelta += (int)Mathf.Max(0, (Random.Range(0f, depth) - Random.Range(0f, depth)));
 			++iterations;
@@ -402,12 +408,12 @@ public class SpawnController : MonoBehaviour {
 //			MakeTreasureChest(9).transform.position = RandomLocation();
 //			MakeTreasureChest(27).transform.position = RandomLocation();			
 			
-			for (int lcv = 0; lcv < 6; ++lcv) {
+			for (int lcv = 0; lcv < 9; ++lcv) {
 //				var b = Instantiate(barrel);
 //				b.transform.position = RandomLocation();
 				var book = Instantiate(SpellGenerator.blankBook);
 				print ("pinata'ing " + book.Description);
-				SpellGenerator.Generate(18, book);
+				SpellGenerator.Generate((lcv + 1) * 3, book);
 				book.transform.position = RandomLocation();
 			}
 
@@ -446,10 +452,15 @@ public class SpawnController : MonoBehaviour {
 		}
 		#region preventSpawn
 		if (preventSpawn && depth > 0) {
-			for (int lcv = 0; lcv < 9; ++lcv) {
+//			var b = Instantiate(enemyShieldGolem);
+//			b.transform.position = RandomLocation();
+//			b.meleeMultiplier = 0.01f;
+//			b.Equip(Instantiate(itemKnife));
+			for (int lcv = 0; lcv < 1; ++lcv) {
+//				var b = MakeEquipmentBox(depth);
 //				var b = Instantiate(barrel);
-//				var b = Instantiate(enemyTreant);
-//				b.transform.position = RandomLocation();
+				var b = Instantiate(enemyOgre);
+				b.transform.position = RandomLocation();
 			}
 			//			var g = Instantiate(enemyGoblin);
 			//			g.Equip(Instantiate(itemBow));

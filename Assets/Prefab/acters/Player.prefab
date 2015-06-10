@@ -639,6 +639,7 @@ MonoBehaviour:
   infiniteHealth: 0
   friendless: 0
   murderMask: {fileID: 11438242, guid: 1fd38db4a4c46ea4cb9d5b5a18f734a1, type: 2}
+  executionerCowl: {fileID: 11438242, guid: e37a52ef5e004094f85c2b9ac5871080, type: 2}
 --- !u!135 &13553308
 SphereCollider:
   m_ObjectHideFlags: 1

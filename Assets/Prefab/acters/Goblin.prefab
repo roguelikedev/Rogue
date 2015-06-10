@@ -561,11 +561,9 @@ MonoBehaviour:
   freeAction: 0
   grappledBy: []
   grappling: {fileID: 0}
-  selfGameObject: {fileID: 198304}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
   skinColor: {r: .065137893, g: .720588207, b: 0, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
-  anim: {fileID: 9598328}
   weapon: {fileID: 13655334}
   torso: {fileID: 451682}
   head: {fileID: 498328}
@@ -575,7 +573,7 @@ MonoBehaviour:
   friendly: 0
   huge: 0
   depth: 1
-  racialLevel: 1
+  racialLevel: 0
   commonness: 10
   fleeDistance: 0
   isUnliving: 0

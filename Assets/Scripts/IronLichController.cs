@@ -2,6 +2,12 @@
 using System.Collections;
 
 public class IronLichController : DemonController {
+	public override string MainClass {
+		get {
+			return C_GESTALT;
+		}
+	}
+
 	void Start() {
 		InitializeAura(WeaponController.DMG_DEATH, auraDamage);
 		damageAura.GetComponent<CapsuleCollider>().radius *= 2;

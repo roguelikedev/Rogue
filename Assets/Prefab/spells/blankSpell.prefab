@@ -15,7 +15,7 @@ GameObject:
   - 95: {fileID: 9535230}
   m_Layer: 0
   m_Name: blankSpell
-  m_TagString: spell
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

@@ -171,7 +171,9 @@ public abstract class Acter : MonoBehaviour {
 					if (w.name.Contains("fireball")) danger = true;
 				});
 			}
-			PlayerController.Instance.Speak(danger ? "if i blow you up\ni'm sorry" : "nice to meet you");
+			if (!PlayerController.Instance.IsTerrifying) {
+				PlayerController.Instance.Speak(danger ? "if i blow you up\ni'm sorry" : "nice to meet you");
+			}
 		}
 	}
 	public void ChangeSkinColor() {
@@ -262,6 +264,11 @@ public abstract class Acter : MonoBehaviour {
 						Anim.Play("shoot");
 					}
 					else {
+						var strengthToSpeed = 1 - EquippedWeapon.speedCoefficient;
+						if (strengthToSpeed > 0) {
+							strengthToSpeed /= (float) Math.Sqrt(meleeMultiplier);
+							GetComponent<Animator>().speed = speed * (1 - strengthToSpeed) / 400;
+						}
 //						if (largeWeapon || huge) anim.Play("downward_attack");
 						if (largeWeapon || huge || EquippedWeapon.tag == "slashing weapon") Anim.CrossFade("downward_attack", 0.1f);
 						else Anim.Play(ST_ATTACK);
@@ -340,6 +347,7 @@ public abstract class Acter : MonoBehaviour {
 				equipASAP.Clear();
 				GetComponent<Rigidbody>().mass = 0.1f;
 				GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationX;
+				GetComponent<Rigidbody>().useGravity = true;
 				shouldUseMainHand = shouldPickUpItem = ShouldScramble = shouldUseOffhand = false;
 				decay = StartCoroutine(Decay());
 				break;
@@ -490,8 +498,10 @@ public abstract class Acter : MonoBehaviour {
 			else {
 				weapon.radius = item.GetComponent<CapsuleCollider>().radius;
 				weapon.direction = item.GetComponent<CapsuleCollider>().direction;
-				weapon.height = item.GetComponent<BoxCollider>().size.y;
-				weapon.center = item.GetComponent<BoxCollider>().center;
+				var box = item.GetComponent<BoxCollider>();
+				var maxDim = Mathf.Max(box.size.x, box.size.y, box.size.z);
+				weapon.height = maxDim;
+				weapon.center = box.center;
 				item.PhantomRangeActive(false);
 			}
 			largeWeapon = item.tag == "Large Weapon";
@@ -1037,16 +1047,18 @@ public abstract class Acter : MonoBehaviour {
 		
 		if (!LivingActers.Contains(this)) LivingActers.Add(this);
 		
-		eligiblePickups.RemoveAll(shouldntHappenButDoes => shouldntHappenButDoes == null);
+		eligiblePickups.RemoveAll(shouldntHappenButDoes => shouldntHappenButDoes == null);	// food and stuff
 		
 		if (shouldPickUpItem && eligiblePickups.Count > 0) {
 			foreach(var eligible in eligiblePickups.FindAll(w => !w.IsEquipped)) {
-				if (eligible.tag == "NonEquipmentItem") {
+				if (eligible.tag == "NonEquipmentItem") {		// food
+					var food = eligible as FoodController;
 					bool shouldEat = false;
-					if (Heal(eligible.depth)) shouldEat = true;
+					var calories = food.calories * GLOBAL_DMG_SCALING;
+					if (Heal(calories)) shouldEat = true;
 					else {
 						foreach (var ally in LivingActers.FindAll(a => a.friendly)) {
-							if (ally.Heal(eligible.depth)) {
+							if (ally.Heal(calories)) {
 								shouldEat = true;
 								break;
 							}
@@ -1055,7 +1067,7 @@ public abstract class Acter : MonoBehaviour {
 					if (shouldEat) {
 						eligible.gameObject.SetActive(false);
 						eligiblePickups.Remove(eligible);
-						eligible.GetComponent<FoodController>().EatMe(this);
+						food.EatMe(this);
 						Destroy(eligible.gameObject);
 						break;
 					}
@@ -1078,7 +1090,7 @@ public abstract class Acter : MonoBehaviour {
 				foreach (var ally in LivingActers.FindAll(a => a.friendly && !(a is PlayerController))) {
 					if (ally.WantsToEquip(weapon)) {
 						ally.Equip(weapon);
-						cc.NoteText(subject + "gave " + weapon.Description + " to " + ally.name.Replace("(Clone)", ""));
+						cc.NoteText(subject + "gave " + weapon.Description + " to " + ally.Name);
 						shouldPickUpItem = false;
 						break;
 					}
@@ -1092,7 +1104,7 @@ public abstract class Acter : MonoBehaviour {
 		
 		if (speed != SPEED_WHEN_PARALYZED) {
 			paralyzeScaling = Mathf.Max (1, paralyzeScaling - 1/60);
-		} else print ("paralyze scaling " + paralyzeScaling);
+		}// else print ("paralyze scaling " + paralyzeScaling);
 		
 		if (State == ST_ATTACK) {
 			GetComponent<Rigidbody>().velocity = Vector3.zero;

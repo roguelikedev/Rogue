@@ -28,7 +28,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 132454}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 11.7537422, y: 7.65427303, z: -2.2209959}
+  m_LocalPosition: {x: 34.3099785, y: 9.61682129, z: -10.6490469}
   m_LocalScale: {x: 1.39999998, y: 1.39999998, z: 1.39999998}
   m_Children: []
   m_Father: {fileID: 0}
@@ -46,7 +46,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 122
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!114 &11473676
 MonoBehaviour:
@@ -62,6 +62,8 @@ MonoBehaviour:
   smash: {fileID: 8300000, guid: 845c14a089b1da841816fed84bad5477, type: 3}
   smallMeal: {fileID: 0}
   largeMeal: {fileID: 0}
+  hugeMeal: {fileID: 0}
+  broken: 0
   depth: 0
 --- !u!136 &13680402
 CapsuleCollider:
@@ -72,10 +74,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 1
-  m_Height: 3
+  m_Radius: 1.5
+  m_Height: 9
   m_Direction: 1
-  m_Center: {x: 0, y: -.300000012, z: 0}
+  m_Center: {x: .5, y: -.300000012, z: 0}
 --- !u!198 &19861924
 ParticleSystem:
   m_ObjectHideFlags: 1
@@ -1189,7 +1191,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 596b02330ff47fa4eabcd3d3ecbd61ec, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 1c7c9b10f4109d74c93708f10e6df67e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:

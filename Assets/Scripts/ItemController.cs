@@ -8,6 +8,7 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 	public float commonness = 1;
 //	public virtual int Depth { get { return depth == -1 ? 27 : depth; } }		FIXME: should i do it like this?
 	public virtual int Depth { get { return depth; } }
+	/// <summary> only chops (clone), no downcase or etc  </summary>
 	public string Name { get { return name.Replace("(Clone)", ""); } }
 	
 	

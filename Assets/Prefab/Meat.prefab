@@ -70,7 +70,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83c5f8219086d7445a6383115c8cb921, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  depth: 2
+  depth: -1
+  commonness: 10
   eating: {fileID: 8300000, guid: 016983f6be7cd1d4ea1d8885d2e74f50, type: 3}
 --- !u!136 &13615752
 CapsuleCollider:

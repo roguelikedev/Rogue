@@ -26,7 +26,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 132454}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.02000046, y: 13.6199999, z: -2.96000004}
+  m_LocalPosition: {x: 0, y: 7, z: 0}
   m_LocalScale: {x: 1.39999998, y: 1.39999998, z: 1.39999998}
   m_Children: []
   m_Father: {fileID: 0}
@@ -60,6 +60,8 @@ MonoBehaviour:
   smash: {fileID: 8300000, guid: 845c14a089b1da841816fed84bad5477, type: 3}
   smallMeal: {fileID: 0}
   largeMeal: {fileID: 0}
+  hugeMeal: {fileID: 0}
+  broken: 0
 --- !u!136 &13680402
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -69,10 +71,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 1
-  m_Height: 3
+  m_Radius: 2
+  m_Height: 10
   m_Direction: 1
-  m_Center: {x: 0, y: .25, z: 0}
+  m_Center: {x: -.5, y: .25, z: 0}
 --- !u!212 &21291394
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -97,7 +99,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 5493b10fb2a28814598c1ef3896ed5ba, type: 3}
+  m_Sprite: {fileID: 21300000, guid: c45cc0823b8e8e4468d2367214b10bc3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:

@@ -3,8 +3,10 @@ using System.Collections;
 
 public class FoodController : ItemController {
 	public AudioClip eating;
+	public float calories;
+	
 	public void EatMe (Acter who) {
 		OnPickup(who);
-		AudioSource.PlayClipAtPoint(eating, transform.position, CameraController.Instance.Volume);
+		CameraController.Instance.PlaySound(eating);
 	}
 }
