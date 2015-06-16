@@ -8,8 +8,11 @@ public class EnchanterStatue : Breakable {
 	{
 		if (byWhat.IsProjectile) return false;
 		if (base.Break(byWhat)) {
+			var hax = TerrainController.Instance.statuesDestroyed;
 			SpawnController.Instance.EnchantEquipment(byWhat, depth);
 			CameraController.Instance.NoteText("enchanted " + byWhat.Description);
+			TerrainController.Instance.statuesDestroyed = hax;
+			CameraController.Instance.AnnounceText("empowered " + byWhat.Name);
 			return true;
 		}
 		else return false;

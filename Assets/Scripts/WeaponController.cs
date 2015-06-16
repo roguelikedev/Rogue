@@ -124,10 +124,6 @@ public class WeaponController : ItemController {
 			}
 		}
 		
-		if (charges == 0 && lifetime == -1) {
-			lifetime = 90;
-		}
-		
 		if (lifetime != -1) --lifetime;
 		if (lifetime == 0) {
 			if (attackActive && firePayloadOnTimeout) FirePayload(GetComponent<CapsuleCollider>());
@@ -232,7 +228,7 @@ public class WeaponController : ItemController {
 		attacker.WeaponDidCollide(victim, this, friendlyFireActive);
 	}
 	
-	public string Description { get {
+	public virtual string Description { get {
 		var rval = "";
 		if (attackPower != 0) {
 			rval = "+" + attackPower + " ";

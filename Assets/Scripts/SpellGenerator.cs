@@ -22,7 +22,7 @@ public class SpellGenerator : MonoBehaviour {
 	public AudioClip chimeSound;
 	public WeaponController blankBook;
 	public WeaponController blankSpell;
-	public WeaponController blankWand;
+	public WandController blankWand;
 	public FireballController fireball;
 	public static SpellGenerator Instance() {
 		return GameObject.FindObjectOfType<SpellGenerator>();

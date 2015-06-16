@@ -49,6 +49,11 @@ public class SignpostController : ItemController {
 			Speech.color = c;
 			timeToFadeout = 45;
 		}
+		
+		if (fixedSpeech == -3) {
+			PlayerController.Instance.GainLevel(PlayerController.Instance.MainClass);
+		}
+		
 		if (payload != null) {
 			var e = Instantiate(payload);
 			e.gameObject.SetActive(true);

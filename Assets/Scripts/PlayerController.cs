@@ -35,10 +35,21 @@ public class PlayerController : Acter {
 		announcer.ExpToLevelChanged(xpToLevel, level + 1);
 	}
 	
+	public virtual void HasExploredNewRoom () {
+		LivingActers.FindAll(a => a.friendly).ForEach(ally => {
+			ally.Heal(0.5f);
+			if (ally.EquippedSecondaryWeapon != null) {
+				var wand = ally.EquippedSecondaryWeapon.GetComponent<WandController>();
+				if (wand != null) wand.HasChangedRoom();
+			}
+		});
+	}
+	
 	public void SetClass(string which) {
 		if (which == "priest") mainClass = C_WIZARD;
 		else if (which == "murderer" || which == "wretch") mainClass = C_GESTALT;
 		else if (which == "executioner") mainClass = C_FIGHT;
+		else if (which == "firewalker") mainClass = C_ROGUE;
 		else mainClass = which;
 		
 		GameObject.FindObjectOfType<Canvas>().gameObject.SetActive(false);
@@ -54,23 +65,34 @@ public class PlayerController : Acter {
 				Equip(bow);
 				speed += 50;
 				break;
+			case "firewalker":
+				var boom = Instantiate(SpellGenerator.Instance().blankWand);
+				boom.payload = SpellGenerator.Instance().Explosion();
+				boom.payload.attackPower *= 4;
+				boom.payload.tag = "spell";
+				SpellGenerator.Instance().Fan(boom, 2);
+				boom.charges = boom.maxCharges = 1;
+				Equip(boom);
+				speed += 50;
+				spellpower += 1;
+				break;
 			case C_WIZARD:
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
 //				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_FIRE);
 //				book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
-			
+//				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_DEATH);
 				book.payload.attackPower *= 2;
-//				book.payload.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
+			
 				book.payload.payload = SpellGenerator.Instance().Explosion();
 				book.payload.payload.attackPower *= 2;
 //				SpellGenerator.Instance().Split(book, 4);
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
 				
-				var broom = Instantiate(SpawnController.Instance.itemBroom);
-				broom.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_PARA);
-				Equip (broom);
+//				var broom = Instantiate(SpawnController.Instance.itemBroom);
+//				broom.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_PARA);
+//				Equip (broom);
 				
 				spellpower += 6;
 				break;
@@ -130,7 +152,7 @@ public class PlayerController : Acter {
 			case "executioner":
 				Equip (Instantiate(SpawnController.Instance.itemExecutionerSword));
 				var wand = Instantiate(SpellGenerator.Instance().blankWand);
-				wand.charges = 3;
+				wand.charges = wand.maxCharges = 18;
 				
 				wand.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
 				wand.payload.attackPower = 100 / GLOBAL_DMG_SCALING;

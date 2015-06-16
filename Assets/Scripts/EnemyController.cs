@@ -12,15 +12,21 @@ public class EnemyController : Acter, IDepthSelectable
 	public bool isUnliving;
 	bool shouldFlee;
 	bool isThreateningPlayer;
+	protected bool ShouldBlock { get {
+		return hitPoints < MaxHitPoints / 2
+			    && EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.name.Contains("Shield");
+	} }
+	
 	SphereCollider FootSize { get { 
 		return new List<SphereCollider>(GetComponentsInChildren<SphereCollider>()).Find(c => !c.isTrigger);
 	} }
-	bool OffhandIsSuperior { get { var offhandSuperior = EquippedSecondaryWeapon != null;
+	bool OffhandIsSuperior { get {
+		if (EquippedSecondaryWeapon == null) return false;
 		// note that bows and hand crossbows are depth -1, but their ammunition has depth
 		// hiltless is also depth -1, but AI shouldn't be using it except as last resort anyway
-		if (offhandSuperior) offhandSuperior = EquippedSecondaryWeapon.Depth > EquippedWeapon.Depth;
-		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = false;
-		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = false;
+		var offhandSuperior = EquippedSecondaryWeapon.Depth > EquippedWeapon.Depth;
+		if (EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = ShouldBlock;
+		if (EquippedSecondaryWeapon.charges == 0) offhandSuperior = false;
 			
 		return offhandSuperior;
 	} }
@@ -183,6 +189,12 @@ public class EnemyController : Acter, IDepthSelectable
 			shouldUseMainHand = true;
 		}
 		
+		if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.name.Contains("Shield")) {
+			shouldUseOffhand = ShouldBlock;
+			shouldUseMainHand = !shouldUseOffhand;
+		}
+		
+		
 		if (EquippedWeapon.IsMeleeWeapon && shouldUseMainHand) {
 			who.ShouldScramble = true;
 			if (who is PlayerController) isThreateningPlayer = true;
@@ -213,7 +225,7 @@ public class EnemyController : Acter, IDepthSelectable
 	}
 	
 	void FixedUpdate() {
-		
+//		print ("flee " + shouldFlee + " main " + shouldUseMainHand + " off " + shouldUseOffhand);
 		if (friendly && PlayerController.Instance.friendless) friendly = false;
 		if (isThreateningPlayer && !shouldUseMainHand && State != ST_ATTACK) {
 			if (isThreateningPlayer) PlayerController.Instance.ShouldScramble = false;
@@ -224,13 +236,19 @@ public class EnemyController : Acter, IDepthSelectable
 			Destroy(gameObject);
 			return;
 		}
-		// if is insurance against the else if
-		if (EquippedSecondaryWeapon == null || EquippedSecondaryWeapon.charges == 0) shouldUseOffhand = false;	
-		else if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.GetComponent<EstusController>() != null
-		         && hitPoints < MaxHitPoints / 2 && EquippedSecondaryWeapon.charges > 0 
-		         && State != ST_ATTACK) {	// don't want to queue up another use while draining the last charge
-			shouldUseMainHand = false;
-			shouldUseOffhand = true;
+
+		if (EquippedSecondaryWeapon != null) {
+			if (EquippedSecondaryWeapon.charges == 0) shouldUseOffhand = false;
+			else if (EquippedSecondaryWeapon.GetComponent<EstusController>() != null
+			         && State != ST_ATTACK) {	// don't want to queue up another use while draining the last charge
+				shouldUseOffhand = hitPoints < MaxHitPoints / 2;
+			}
+			else {
+				var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
+				if (wand != null) {
+					shouldUseOffhand = wand.charges == wand.maxCharges;
+				}
+			}
 		}
 		
 		if (!_FixedUpdate()) return;
@@ -250,8 +268,7 @@ public class EnemyController : Acter, IDepthSelectable
 	
 	public override bool ShouldScramble {
 		set {
-			if (value && hitPoints < MaxHitPoints / 2
-					&& EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.name.Contains("Shield")) {
+			if (value && ShouldBlock) {
 				shouldUseMainHand = false;
 				shouldUseOffhand = true;
 			}

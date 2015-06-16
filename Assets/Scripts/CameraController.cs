@@ -17,6 +17,7 @@ public class CameraController : MonoBehaviour {
 	public PlayerController elf;
 	public PlayerController beardMan;
 	public PlayerController tusks;
+	public PlayerController firewalker;
 	public Color pinkSkin;
 	public List<Acter> livingActers = new List<Acter>();
 	PlayerController player;
@@ -47,6 +48,7 @@ public class CameraController : MonoBehaviour {
 		if (who == "wizard" || who == "wretch") player = Instantiate(elf);
 		else if (who == "rogue") player = Instantiate(tusks);
 		else if (who == "priest") player = Instantiate(hope);
+		else if (who == "firewalker") player = Instantiate(firewalker);
 		else if (who == "fighter") player = Instantiate(beardMan);
 		else player = Instantiate(orc);
 //		if (who == "hope") player = Instantiate(hope);

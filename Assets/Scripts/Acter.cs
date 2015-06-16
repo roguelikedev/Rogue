@@ -9,7 +9,7 @@ public abstract class Acter : MonoBehaviour {
 	public float speed = 200;
 	public float racialBaseHitPoints;
 	protected int xpToLevel;
-	protected readonly int baseXPToLevel = 2;
+	protected readonly int baseXPToLevel = 3;
 	float hpFromLevels;
 	public float MaxHitPoints { get { return racialBaseHitPoints + hpFromLevels; }
 							set { hpFromLevels = value - racialBaseHitPoints; } }
@@ -76,7 +76,7 @@ public abstract class Acter : MonoBehaviour {
 		hitPoints = MaxHitPoints;		// don't use Heal() to avoid killing ghosts/ghouls
 		fireDamageTaken = 0;
 		++level;
-		xpToLevel = (int)Math.Pow(baseXPToLevel, level);
+		xpToLevel = (int)Math.Pow(baseXPToLevel, Math.Pow(level, 1.5f));
 		damageAnnouncer.AnnounceText("reached level " + level);
 	}
 	public virtual string MainClass
@@ -246,8 +246,16 @@ public abstract class Acter : MonoBehaviour {
 						shouldUseOffhand = false;
 						return EnterStateAndAnimation(ST_REST);
 					}
-					if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.tag == "offhandweapon") {
-						if (EquippedSecondaryWeapon.isSpellbook) pendingSpell = StartCoroutine(CastSpell());
+					else if (EquippedSecondaryWeapon.tag == "offhandweapon") {
+						var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
+						if (wand != null && wand.charges < wand.maxCharges) {
+							shouldUseOffhand = false;
+							return false;
+						}
+						
+						if (EquippedSecondaryWeapon.isSpellbook) {
+							pendingSpell = StartCoroutine(CastSpell());
+						}
 						else {
 							var animSpeed = speed * EquippedSecondaryWeapon.speedCoefficient / 400;
 							GetComponent<Animator>().speed = animSpeed;
@@ -424,8 +432,8 @@ public abstract class Acter : MonoBehaviour {
 		return _ch.Find(t => t.name == str);
 	}
 	public void PickupIsEligible(ItemController item) {
-		var wc = item as WeaponController;
-		if (wc != null && wc.charges == 0) return;
+		var wc = item as EstusController;
+		if (wc != null && wc.charges <= 0) return;
 		if (!eligiblePickups.Contains(item)) eligiblePickups.Add(item);
 	}
 	public void PickupIsIneligible(ItemController item) {
@@ -520,6 +528,7 @@ public abstract class Acter : MonoBehaviour {
 		if (item != bareHands) {
 			item.GetComponent<BoxCollider>().enabled = true;
 			item.GetComponent<Rigidbody>().isKinematic = false;
+			item.GetComponent<Rigidbody>().velocity = Vector3.zero;
 		}
 		else {
 			item.transform.parent = transform;
@@ -861,8 +870,12 @@ public abstract class Acter : MonoBehaviour {
 			Anim.Play(ST_CAST);
 			float castTime = EquippedSecondaryWeapon.Depth / spellpower; //Mathf.Pow(spellpower, 1.5f);
 			var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
-			var isWand = EquippedSecondaryWeapon.name.Contains("wand");
-			if (isWand) castTime = 0;
+			var isWand = wand != null;
+			if (isWand) {
+				if (wand.charges < wand.maxCharges) Debug.LogError(wand.Name + " shouldn't have cast with " + wand.charges + "/" +
+													wand.maxCharges + " charges!");
+				castTime = 0;
+			}
 			yield return new WaitForSeconds(castTime);
 			
 			Anim.CrossFade("spell_complete", 0.5f);
@@ -876,6 +889,7 @@ public abstract class Acter : MonoBehaviour {
 				wc.gameObject.SetActive(true);
 				ThrowWeapon(wc, EquippedSecondaryWeapon.transform);
 				if (wc.tag == "spell") {
+					print (wc);
 					wc.ApplySpellpower();
 				}
 			};
@@ -893,7 +907,7 @@ public abstract class Acter : MonoBehaviour {
 	//		if (p.tag == "spell") {
 	//			p.ApplySpellpower();
 	//		}
-			if (isWand) EquippedSecondaryWeapon.charges--;
+			if (isWand) wand.charges = 0;
 			ExitState();
 			pendingSpell = null;
 		}
@@ -1040,10 +1054,12 @@ public abstract class Acter : MonoBehaviour {
 			return false;
 		}
 		
-		if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.charges == 0) {
-			var spentWandOrFlask = DropWeapon(EquippedSecondaryWeapon);
-			var p = spentWandOrFlask.GetComponentInChildren<ParticleSystem>();
-			if (p != null) p.gameObject.SetActive(false);
+		if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.GetComponent<EstusController>() != null &&
+										 EquippedSecondaryWeapon.charges <= 0) {
+			DropWeapon(EquippedSecondaryWeapon);
+//			var spentFlask = DropWeapon(EquippedSecondaryWeapon);
+//			var p = spentFlask.GetComponentInChildren<ParticleSystem>();
+//			if (p != null) p.gameObject.SetActive(false);
 		}
 		
 		if (!LivingActers.Contains(this)) LivingActers.Add(this);

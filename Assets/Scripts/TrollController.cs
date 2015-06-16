@@ -12,8 +12,8 @@ public class TrollController : EnemyController {
 	
 	protected override bool _FixedUpdate ()
 	{
-		if (hitPoints < racialBaseHitPoints) fleeDistance = 4;
-		if (hitPoints >= racialBaseHitPoints) fleeDistance = 0;
+		if (hitPoints < MaxHitPoints / 2) fleeDistance = 9;
+		else fleeDistance = 0;
 		return base._FixedUpdate ();
 	}
 }

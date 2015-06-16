@@ -54,7 +54,7 @@ public class TerrainController : MonoBehaviour {
 			if (!hasSpawnedEmpty) return 0;
 			if (statuesDestroyed <= -2) return 27;
 			var rval = generatedCount / (2f + statuesDestroyed);
-			rval = Mathf.Pow(rval, 1.3f);
+//			rval = Mathf.Pow(rval, 1.3f);
 			return (int)Mathf.Max(1, Mathf.Min(27, rval));
 		}
 	}
@@ -281,7 +281,7 @@ public class TerrainController : MonoBehaviour {
 //		if (nextRoom.nextRoomType != nextRoom.terrainType) {
 //			PlayerController.Instance.Speak(LevelFeeling(nextRoom.nextRoomType));
 //		}
-		PlayerController.Instance.Heal(0.5f);
+		PlayerController.Instance.HasExploredNewRoom();
 		
 		previousAreaType = currentAreaType;
 		CleanUp(x);

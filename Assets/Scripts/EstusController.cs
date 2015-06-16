@@ -13,6 +13,11 @@ public class EstusController : WeaponController {
 			payload = SpellGenerator.Instance().Heal();
 			payload.attackPower = 1;
 		}
+		
+		if (charges == 0 && lifetime == -1) {
+			lifetime = 90;
+		}
+		
 		base._FixedUpdate ();
 	}
 }
