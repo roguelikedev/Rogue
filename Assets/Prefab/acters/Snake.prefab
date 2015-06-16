@@ -477,7 +477,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 198304}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 15.7109222, y: 6.88033772, z: .373382568}
+  m_LocalPosition: {x: 17.1299992, y: 9.52000046, z: -1.05999994}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 484652}
@@ -562,7 +562,7 @@ MonoBehaviour:
   grappledBy: []
   grappling: {fileID: 0}
   blood: {fileID: 19865056, guid: c25982fdcdd26404da243f43e5d4df50, type: 2}
-  skinColor: {r: .0137867667, g: .0735294223, b: .036629539, a: 1}
+  skinColor: {r: 1, g: 1, b: 1, a: 1}
   healthBar: {fileID: 11422912, guid: f5d09450f6fc6d54abcdd33d8947ea02, type: 2}
   weapon: {fileID: 13683918}
   torso: {fileID: 484372}
@@ -587,8 +587,8 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: .100000001
-  m_Center: {x: 0, y: -1.5, z: 0}
+  m_Radius: 1
+  m_Center: {x: -.5, y: -1, z: 0}
 --- !u!136 &13604506
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -1793,7 +1793,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: -1
-  m_Sprite: {fileID: 21300000, guid: bbd8dc70e5cd9bb46a2155be19fe0de1, type: 3}
+  m_Sprite: {fileID: 21300000, guid: dbc785aaa7cf8d24fbc3f6878724221e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!212 &21225030
 SpriteRenderer:
@@ -2027,7 +2027,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: -2
-  m_Sprite: {fileID: 21300000, guid: fce06a6a2028ce645958d1bfdf2838fc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f60b75abb35b72c4585a78941f6f8ed7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!212 &21298328
 SpriteRenderer:

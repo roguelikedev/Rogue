@@ -860,6 +860,7 @@ public abstract class Acter : MonoBehaviour {
 		else {
 			Anim.Play(ST_CAST);
 			float castTime = EquippedSecondaryWeapon.Depth / spellpower; //Mathf.Pow(spellpower, 1.5f);
+			var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
 			var isWand = EquippedSecondaryWeapon.name.Contains("wand");
 			if (isWand) castTime = 0;
 			yield return new WaitForSeconds(castTime);

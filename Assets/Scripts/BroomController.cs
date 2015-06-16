@@ -8,10 +8,14 @@ public class BroomController : WeaponController {
 	{
 		if (attackActive) {
 			foreach (var victim in attackVictims) {
-				if (victim == null || victim.friendly == Parent.friendly) continue;
-				var parent = GetComponentInParent<Acter>();
-				if (parent == null) parent = thrownBy;
-				Vec direction = (victim.transform.position - parent.transform.position);
+				if (victim == null) continue;
+				
+				Vec direction;
+				if (Parent != null) {
+				 	direction = (victim.transform.position - Parent.transform.position);
+					if (victim.friendly == Parent.friendly) continue;
+				}
+				else direction = victim.transform.position - transform.position;		// it's a trap
 				direction.z = 0;
 				direction.y = Mathf.Abs(direction.y);
 				direction = direction.Normalish;

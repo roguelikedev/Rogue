@@ -97,10 +97,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 184012}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e5692215b5d71d44b17b27cb45e0ed3, type: 3}
+  m_Script: {fileID: 11500000, guid: 360b66e2dce6072488e97e1f74b6e06c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   depth: 0
+  commonness: 1
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0
@@ -108,10 +109,12 @@ MonoBehaviour:
   bodySlot: 0
   damageType: 0
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 1
   firePayloadOnTimeout: 0
   thrownHorizontalMultiplier: 0
   thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 0
   attackVictims: []
   attackActive: 0
@@ -123,6 +126,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   charges: -1
   speedCoefficient: 1
+  maxCharges: 0
 --- !u!136 &13632214
 CapsuleCollider:
   m_ObjectHideFlags: 1

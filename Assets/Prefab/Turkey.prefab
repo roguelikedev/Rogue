@@ -73,6 +73,7 @@ MonoBehaviour:
   depth: -1
   commonness: 4
   eating: {fileID: 8300000, guid: 016983f6be7cd1d4ea1d8885d2e74f50, type: 3}
+  calories: 4
 --- !u!136 &13615752
 CapsuleCollider:
   m_ObjectHideFlags: 1

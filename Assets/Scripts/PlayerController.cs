@@ -49,8 +49,8 @@ public class PlayerController : Acter {
 				freeAction = true;
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
-				bow.payload.payload.payload = SpellGenerator.Instance().Explosion();
-				bow.payload.payload.payload.attackPower /= 2;
+				bow.payload.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
+				bow.payload.payload.payload.attackPower *= 2;
 				Equip(bow);
 				speed += 50;
 				break;
@@ -130,6 +130,8 @@ public class PlayerController : Acter {
 			case "executioner":
 				Equip (Instantiate(SpawnController.Instance.itemExecutionerSword));
 				var wand = Instantiate(SpellGenerator.Instance().blankWand);
+				wand.charges = 3;
+				
 				wand.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
 				wand.payload.attackPower = 100 / GLOBAL_DMG_SCALING;
 				wand.payload.payload = SpellGenerator.Instance().Heal();
@@ -187,11 +189,13 @@ public class PlayerController : Acter {
 		
 		if (MainClass == "") return;
 		
-		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0) || Input.GetButtonDown("Fire1"))) 
+		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0) 
+		                          || Input.GetKeyDown ("j") || Input.GetButtonDown("Fire1"))) 
 		{
 			shouldUseMainHand = true;
 		}
-		if (Input.GetKey ("e") || Input.GetKey(KeyCode.Mouse0) || Input.GetButton("Fire1")) {
+		if (Input.GetKey ("e") || Input.GetKey(KeyCode.Mouse0)
+							    || Input.GetKey ("j") || Input.GetButton("Fire1")) {
 			if (IsJason) lockMainHandCounter = int.MinValue;
 			lockMainHandCounter++;
 			if (lockMainHandCounter > 60 && EquippedWeapon != bareHands) {
@@ -202,11 +206,12 @@ public class PlayerController : Acter {
 		}
 		else lockMainHandCounter = 0;
 		
-		if (!shouldUseMainHand && EquippedSecondaryWeapon != null && (Input.GetKeyDown("r") || Input.GetKeyDown(KeyCode.Mouse1)
-                                                                                            || Input.GetButtonDown("Fire2"))) {
+		if (!shouldUseMainHand && EquippedSecondaryWeapon != null && (Input.GetKeyDown("r")
+				 || Input.GetKeyDown("k") || Input.GetKeyDown(KeyCode.Mouse1) || Input.GetButtonDown("Fire2"))) {
 			shouldUseOffhand = true;
 		}
-		if (Input.GetKey ("r") || Input.GetKey(KeyCode.Mouse1) || Input.GetButton("Fire2")) {
+		if (Input.GetKey ("r") || Input.GetKey(KeyCode.Mouse1)
+						    || Input.GetKey ("k") || Input.GetButton("Fire2")) {
 			lockOffHandCounter++;
 			if (lockOffHandCounter > 60 && EquippedSecondaryWeapon != null) {
 				lockOffHand = !lockOffHand;
@@ -230,6 +235,8 @@ public class PlayerController : Acter {
 		}
 		if (Input.GetKeyDown ("tab"))
 		{
+			damageAnnouncer.AnnounceDeath();
+			Speak("one more try...");		
 			infiniteHealth = !infiniteHealth;
 			spellpower *= infiniteHealth ? 10 : 0.1f;
 			speed *= infiniteHealth ? 4 : 0.25f;

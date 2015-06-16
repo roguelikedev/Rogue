@@ -221,7 +221,7 @@ public class SpawnController : MonoBehaviour {
 				leaf.tag = "Untagged";
 				leaf = leaf.payload;
 			}
-			wand.charges = Random.Range(4, 10);
+			wand.charges = Random.Range(1, dept) + Random.Range(1, dept);
 			whichMob.Equip(wand);
 			equipmentLevel += wand.Depth;
 		}

@@ -9,11 +9,11 @@ public class TerrainEffectLava : TerrainEffectFloor {
 	void OnTriggerStay(Collider other) {
 		base._OnTriggerEnter(other);
 		var item = other.GetComponent<ItemController>();
-		if (item != null && Random.Range(0, 60 * destroyChancePerSecond) < 1) {
-			var box = item.GetComponent<BoxCollider>();
-			if (box != null) box.gameObject.SetActive(false);
-			else if (!item.IsEquipped) Destroy (item.gameObject);
-		}
+//		if (item != null && Random.Range(0, 60 * destroyChancePerSecond) < 1) {
+//			var box = item.GetComponent<BoxCollider>();
+//			if (box != null) box.gameObject.SetActive(false);
+//			else if (!item.IsEquipped) Destroy (item.gameObject);
+//		}
 		var barrel = other.GetComponent<Breakable>();
 		if (barrel != null && Random.Range(0, 60 * destroyChancePerSecond) < 1) {
 			barrel.Break(null);

@@ -424,7 +424,7 @@ Transform:
   - {fileID: 1924174124}
   - {fileID: 249661889}
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 7
 --- !u!114 &165839880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -449,7 +449,7 @@ MonoBehaviour:
   song3: {fileID: 8300000, guid: 96cdb9c767b1f5d4a834b9578252ccce, type: 3}
   song4: {fileID: 8300000, guid: dc54d1f7780d0964db43014071c3000c, type: 3}
   muteSoundFX: 0
-  muteSongs: 1
+  muteSongs: 0
   volume: .0500000007
 --- !u!1 &184645471
 GameObject:
@@ -1047,7 +1047,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 8
 --- !u!1 &583455975
 GameObject:
   m_ObjectHideFlags: 0
@@ -1170,6 +1170,7 @@ MonoBehaviour:
   forest: {fileID: 2100000, guid: 5785827f3f9af0648bb0a9522f1ea416, type: 2}
   cathedral: {fileID: 2100000, guid: fc4cb8f2dd0006a40aa1ce52a9ee2972, type: 2}
   lava: {fileID: 2100000, guid: 993c4c189fb89534b89c5248c4343d67, type: 2}
+  fireWall: {fileID: 2100000, guid: 287eea12738df484096c9f76d97e30d1, type: 2}
   trapRarity: 9
   enchanterStatue: {fileID: 11473676, guid: f0d065f97273bc6439ca80dfe313d5df, type: 2}
   statuesDestroyed: 0
@@ -1356,7 +1357,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 9
 --- !u!1 &822194313
 GameObject:
   m_ObjectHideFlags: 0
@@ -1879,7 +1880,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 415160, guid: afd7dc09fb5192b40809a0c60c09bd23, type: 2}
       propertyPath: m_RootOrder
-      value: 7
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 10275962, guid: afd7dc09fb5192b40809a0c60c09bd23, type: 2}
       propertyPath: m_Text
@@ -1993,11 +1994,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 433450, guid: a9f3fcbcca6f1f04b94368ae0306efe7, type: 2}
       propertyPath: m_RootOrder
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 6507070, guid: a9f3fcbcca6f1f04b94368ae0306efe7, type: 2}
-      propertyPath: m_Center.y
-      value: -1
+    - target: {fileID: 127630, guid: a9f3fcbcca6f1f04b94368ae0306efe7, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a9f3fcbcca6f1f04b94368ae0306efe7, type: 2}

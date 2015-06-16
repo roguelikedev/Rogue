@@ -20,6 +20,8 @@ public class EnemyController : Acter, IDepthSelectable
 		// hiltless is also depth -1, but AI shouldn't be using it except as last resort anyway
 		if (offhandSuperior) offhandSuperior = EquippedSecondaryWeapon.Depth > EquippedWeapon.Depth;
 		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = false;
+		if (offhandSuperior && EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = false;
+			
 		return offhandSuperior;
 	} }
 	

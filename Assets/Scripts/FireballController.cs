@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class FireballController : WeaponController {
+public class FireballController : BroomController {
 	float originalAttackPower = -1;
 
 	protected override void OnHit (Acter victim, Acter attacker)
