@@ -8,8 +8,11 @@ public class FireballController : BroomController {
 	{
 		if (originalAttackPower == -1) originalAttackPower = attackPower;
 		var distance = victim.transform.position - transform.position;
-		attackPower = originalAttackPower / Mathf.Max(1, Mathf.Pow(distance.magnitude, 2f));
+		if (distance.magnitude > 2f) {
+			attackPower = originalAttackPower / Mathf.Max(1, Mathf.Pow(distance.magnitude, 2f));
+		}
 		
+		victim.TakeDamage(attackPower, DMG_POISE);
 		base.OnHit (victim, attacker);
 	}
 }

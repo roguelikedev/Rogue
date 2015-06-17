@@ -1202,7 +1202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   preventSpawn: 0
   itemPinata: 0
-  stinginess: 3
+  stinginess: 2.5
   enemyOrc: {fileID: 11498326, guid: 8dbbc6dd81f71774583c63e9191a9473, type: 2}
   enemyGoblin: {fileID: 11498326, guid: 96fc54eeec1a8ce43a78ec80f2053e92, type: 2}
   enemySnake: {fileID: 11498326, guid: 272967db5c3e54441b3d1138701088c8, type: 2}

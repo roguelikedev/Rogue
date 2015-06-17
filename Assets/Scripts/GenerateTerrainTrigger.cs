@@ -37,7 +37,7 @@ public class GenerateTerrainTrigger : MonoBehaviour {
 				if (w.damageType == WeaponController.DMG_DEATH) shouldNotWarn = true;
 			};
 			pc.EquippedWeapon.MapChildren(CheckKillTreants);
-			pc.EquippedSecondaryWeapon.MapChildren(CheckKillTreants);
+			if (pc.EquippedSecondaryWeapon != null) pc.EquippedSecondaryWeapon.MapChildren(CheckKillTreants);
 		}
 		else if (NextRoomType == TerrainController.D_THORNS) {
 			if (pc.EffectiveCurrentHP > 7 || pc.MainClass == Acter.C_BRUTE) shouldNotWarn = true;

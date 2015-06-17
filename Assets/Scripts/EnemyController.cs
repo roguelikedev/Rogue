@@ -27,7 +27,8 @@ public class EnemyController : Acter, IDepthSelectable
 		var offhandSuperior = EquippedSecondaryWeapon.Depth > EquippedWeapon.Depth;
 		if (EquippedSecondaryWeapon.name.Contains("Shield")) offhandSuperior = ShouldBlock;
 		if (EquippedSecondaryWeapon.charges == 0) offhandSuperior = false;
-			
+		var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
+		if (wand != null && wand.charges < wand.maxCharges) offhandSuperior = false;
 		return offhandSuperior;
 	} }
 	
@@ -169,6 +170,11 @@ public class EnemyController : Acter, IDepthSelectable
 		}
 	}
 	public int ChallengeRating { get { return racialLevel + level; } }
+	public void AwardExpForMyDeath () {
+		LivingActers.FindAll(a => a.friendly != friendly).ForEach(a => {
+			a.RewardExperience(ChallengeRating);
+		});
+	}
 	public int Depth { get { return depth; } }
 	public float Commonness { get { return commonness; } }
 	#endregion
@@ -182,7 +188,8 @@ public class EnemyController : Acter, IDepthSelectable
 		
 		var weaponSize = Mathf.Max(weapon.height, weapon.radius);
 		// secondary weapon is a brick or something
-		if ((EquippedSecondaryWeapon != null && EquippedWeapon.IsMeleeWeapon && distance > weaponSize) || OffhandIsSuperior) {
+		if ((EquippedSecondaryWeapon != null && EquippedWeapon.IsMeleeWeapon && distance > weaponSize
+			&& EquippedSecondaryWeapon.charges != 0) || OffhandIsSuperior) {
 			shouldUseOffhand = true;
 		}
 		else {
@@ -207,7 +214,7 @@ public class EnemyController : Acter, IDepthSelectable
 		PlayerController.Instance.ShouldScramble = false;
 		isThreateningPlayer = false;
 	}
-	
+
 	protected virtual void ResetAggro () {
 		var aggroSize = GetComponentInChildren<AggroController>().GetComponent<CapsuleCollider>();
 		if (PrimaryWeaponIsRanged || (SecondaryWeaponIsRanged && !EquippedSecondaryWeapon.name.Contains("wand"))) {
@@ -233,21 +240,20 @@ public class EnemyController : Acter, IDepthSelectable
 		}
 	
 		if (transform.position.y < -2) {
+			if (State != ST_DEAD) AwardExpForMyDeath();
 			Destroy(gameObject);
 			return;
 		}
 
 		if (EquippedSecondaryWeapon != null) {
+			var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
+			if (wand != null) {
+				shouldUseOffhand = wand.charges == wand.maxCharges;
+			}
 			if (EquippedSecondaryWeapon.charges == 0) shouldUseOffhand = false;
 			else if (EquippedSecondaryWeapon.GetComponent<EstusController>() != null
 			         && State != ST_ATTACK) {	// don't want to queue up another use while draining the last charge
 				shouldUseOffhand = hitPoints < MaxHitPoints / 2;
-			}
-			else {
-				var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
-				if (wand != null) {
-					shouldUseOffhand = wand.charges == wand.maxCharges;
-				}
 			}
 		}
 		

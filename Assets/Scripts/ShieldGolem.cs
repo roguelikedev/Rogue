@@ -16,7 +16,6 @@ public class ShieldGolem : EnemyController {
 		DoNothing = () =>
 		{
 			self.shouldUseMainHand = self.shouldUseOffhand = false; 
-			print(self.shouldUseMainHand + " " + self.shouldUseOffhand);
 		};
 	}
 	

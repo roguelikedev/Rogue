@@ -18,7 +18,7 @@ public class WeaponController : ItemController {
 	public int lifetime = -1;
 	public int bodySlot;
 	public const int DMG_NOT = 0, DMG_PHYS = 1, DMG_FIRE = 2, DMG_HEAL = 3, DMG_RAISE = 4, DMG_PARA = 5, DMG_DEATH = 6
-					, DMG_GRAP = 7;
+					, DMG_GRAP = 7, DMG_POISE = 8;
 	public int damageType = DMG_NOT;
 	public const int EQ_WEAPON = 0, EQ_ARMOR = 1, EQ_SKIRT = 2, EQ_HELM = 3, EQ_SHOULDER = 4, EQ_SHIN = 5;
 	public string SlotAffinity {
@@ -53,6 +53,7 @@ public class WeaponController : ItemController {
 	public AudioSource audioSource;
 	public int charges = -1;
 	public float speedCoefficient = 1;		// attack speed for weapons, movement speed for armours
+	public const float GLOBAL_ARMOR_SCALING = 1.5f;
 	#endregion
 	#region life cycle
 	
@@ -150,11 +151,11 @@ public class WeaponController : ItemController {
 		base._FixedUpdate();
 	}
 	
-	// attack
-	void OnTriggerStay(Collider other) {
+	/// <summary>returns whether 'other' took damage.</summary>
+	protected virtual bool _OnTriggerStay(Collider other) {
 //		if (GetComponentInParent<Acter>() is PlayerController && damageType == DMG_PHYS) print (other);
 		
-		if (!attackActive) return;
+		if (!attackActive) return false;
 		if (other.tag == "breakable" && attackPower > 0 && other.GetComponentInParent<Breakable>().Break(this)) {
 			FirePayload(other);
 		}
@@ -163,27 +164,27 @@ public class WeaponController : ItemController {
 		}
 		
 		Acter victim = other.GetComponentInParent<Acter>();
-		if (victim == null) return;
-		if (attackVictims.Contains(victim)) return;
+		if (victim == null) return false;
+		if (attackVictims.Contains(victim)) return false;
 		
 		if (Parent != null && (Parent.friendly == victim.friendly && !friendlyFireActive)) {
-			return;
+			return false;
 		}
 		
 		var sg = other.GetComponent<ShieldGolem>();
 		if (sg != null) {
 			attackVictims.Add(sg);
 			CameraController.Instance.PlaySound(sg.clang);
-			return;
+			return false;
 		}
 		
-		if (other.name != "torso") return;
+		if (other.name != "torso") return false;
 		
 		attackVictims.Add(victim);
 		
 		if (Parent == null) {	// && friendlyFireActive) {		// it's a trap, friendly fire is assumed
 			victim.TakeDamage(attackPower, damageType);
-			return;
+			return true;
 		}
 		
 //		if (Parent.friendly == victim.friendly && !friendlyFireActive) return;
@@ -198,6 +199,10 @@ public class WeaponController : ItemController {
 				FirePayload(other);
 			}
 		}
+		return true;
+	}
+	void OnTriggerStay(Collider other) {
+		_OnTriggerStay(other);
 	}
 	#endregion
 	#region helper

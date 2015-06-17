@@ -28,9 +28,14 @@ public abstract class Acter : MonoBehaviour {
 	public bool freeAction = false;
 	float paralyzeScaling = 1;
 	int CLVL_SOFT_CAP = 9;
-	public const float GLOBAL_DMG_SCALING = 0.75f;
+	public const float GLOBAL_DMG_SCALING = 0.5f;
 	
-	
+	public void RewardExperience (int qty) {
+		xpToLevel -= qty;
+		if (xpToLevel <= 0) {
+			GainLevel(MainClass);
+		}
+	}
 	public void GainLevel(string whichClass) {
 		switch (whichClass) {
 			case C_BRUTE: goto case C_FIGHT;
@@ -76,7 +81,7 @@ public abstract class Acter : MonoBehaviour {
 		hitPoints = MaxHitPoints;		// don't use Heal() to avoid killing ghosts/ghouls
 		fireDamageTaken = 0;
 		++level;
-		xpToLevel = (int)Math.Pow(baseXPToLevel, Math.Pow(level, 1.5f));
+		xpToLevel = (int)Math.Pow(baseXPToLevel, level * .75f);
 		damageAnnouncer.AnnounceText("reached level " + level);
 	}
 	public virtual string MainClass
@@ -889,7 +894,6 @@ public abstract class Acter : MonoBehaviour {
 				wc.gameObject.SetActive(true);
 				ThrowWeapon(wc, EquippedSecondaryWeapon.transform);
 				if (wc.tag == "spell") {
-					print (wc);
 					wc.ApplySpellpower();
 				}
 			};
@@ -937,15 +941,18 @@ public abstract class Acter : MonoBehaviour {
 		blood.Play ();
 		
 		if (type != WeaponController.DMG_DEATH) {
-			quantity /= (armorClass * (type == WeaponController.DMG_FIRE ? 2 : 1));
+			quantity /= (armorClass * WeaponController.GLOBAL_ARMOR_SCALING * (type == WeaponController.DMG_FIRE ? 2 : 1));
 		}
-		hitPoints -= quantity;
+		if (type != WeaponController.DMG_POISE) {
+			hitPoints -= quantity;
+			damageAnnouncer.AnnounceDamage(quantity, type);
+		}
 		if (type == WeaponController.DMG_FIRE) fireDamageTaken += quantity;
 //		print ("post scaling " + quantity + ", AC " + armorClass);
 		
-		damageAnnouncer.AnnounceDamage(quantity, type);
 		
-		if (hitPoints > 0 && type == WeaponController.DMG_PHYS && speed != SPEED_WHEN_PARALYZED) {
+		if (hitPoints > 0 && (type == WeaponController.DMG_PHYS || type == WeaponController.DMG_POISE)
+						 && speed != SPEED_WHEN_PARALYZED) {
 			if (state != ST_HURT && State != ST_CAKE) {
 				poiseBreakCounter += quantity;
 				if (poiseBreakCounter > Poise) {
@@ -954,7 +961,7 @@ public abstract class Acter : MonoBehaviour {
 				}
 			}
 			else {
-				TakeDamage(1, WeaponController.DMG_DEATH);
+				if (type != WeaponController.DMG_POISE) TakeDamage(1, WeaponController.DMG_DEATH);
 				EnterStateAndAnimation(ST_CAKE);
 			}
 		}
@@ -1024,17 +1031,14 @@ public abstract class Acter : MonoBehaviour {
 			
 			var mob = other as EnemyController;
 			if (mob != null && mob.friendly != friendly) {
-				LivingActers.FindAll(a => a.friendly == friendly).ForEach(a => {
-					a.xpToLevel -= mob.ChallengeRating;
-					if (a.xpToLevel <= 0) {
-						a.GainLevel(a.MainClass);
-					}
-				});
+				mob.AwardExpForMyDeath();
 			}
 		}
 		
 		OnHitEffects(other);
 	}
+		
+	
 	#endregion
 	
 	// returns whether to continue child's fixedupdate()
@@ -1071,11 +1075,10 @@ public abstract class Acter : MonoBehaviour {
 				if (eligible.tag == "NonEquipmentItem") {		// food
 					var food = eligible as FoodController;
 					bool shouldEat = false;
-					var calories = food.calories * GLOBAL_DMG_SCALING;
-					if (Heal(calories)) shouldEat = true;
+					if (Heal(food.calories)) shouldEat = true;
 					else {
 						foreach (var ally in LivingActers.FindAll(a => a.friendly)) {
-							if (ally.Heal(calories)) {
+							if (ally.Heal(food.calories)) {
 								shouldEat = true;
 								break;
 							}
@@ -1123,11 +1126,11 @@ public abstract class Acter : MonoBehaviour {
 			paralyzeScaling = Mathf.Max (1, paralyzeScaling - 1/60);
 		}// else print ("paralyze scaling " + paralyzeScaling);
 		
+		OnFixedUpdate();
 		if (State == ST_ATTACK) {
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 			return false;
 		}
-		OnFixedUpdate();
 		
 		if (shouldUseMainHand && EnterStateAndAnimation(ST_ATTACK)) return false;
 		if (shouldUseOffhand && EnterStateAndAnimation(ST_ATTACK)) return false;

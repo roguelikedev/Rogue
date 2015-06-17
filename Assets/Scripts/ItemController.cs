@@ -15,6 +15,7 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 	public float Commonness { get { return commonness; } }
 	void Start() {
 		GetComponentInChildren<SpriteRenderer>().sortingOrder -= (int)(transform.position.z * 10);
+		GetComponentInChildren<SpriteRenderer>().sortingLayerName = "Character";
 //		print (GetComponentInChildren<SpriteRenderer>().sortingOrder);
 	}
 	public System.Action<Acter> OnPickup = a => {} ;

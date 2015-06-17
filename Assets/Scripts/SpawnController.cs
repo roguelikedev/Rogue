@@ -42,6 +42,7 @@ public class SpawnController : MonoBehaviour {
 	public WeaponController itemHiltless;
 	public WeaponController itemHandCrossbow;
 	public EstusController itemEstusFlask;
+	
 	public WeaponController itemLightArmor;
 	public WeaponController itemArmor;
 	public WeaponController itemHeavyArmor;
@@ -378,10 +379,26 @@ public class SpawnController : MonoBehaviour {
 	
 	TreasureChest MakeEquipmentBox (float depth) {
 		var rval = Instantiate(cardboardBox);
-		var contents = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
-		contents.Add(itemEstusFlask as WeaponController);
 		
-		var itemInstance = Instantiate(contents[Random.Range(0, contents.Count)]);
+		var guaranteeArmor = Random.Range(0, stinginess) < 1;
+		
+		WeaponController itemInstance = null;
+		var contents = new List<WeaponController>();
+		while (itemInstance == null) {
+			if (guaranteeArmor) {
+				contents.RemoveAll(c => !c.IsArmor);
+			}
+			
+			if (contents.Count == 0) {
+				contents = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
+				continue;
+			}
+			
+			itemInstance = Instantiate(contents[Random.Range(0, contents.Count)]);
+		}
+		if (guaranteeArmor) print (itemInstance.Description);
+//		itemInstance = Instantiate(contents[Random.Range(0, contents.Count)]);
+		
 		var enchantDepth = Random.Range(0, Mathf.Sqrt(depth)) - Random.Range(1, 10);
 		if (enchantDepth > 0 && itemInstance.GetComponent<EstusController>() == null) {
 			EnchantEquipment(itemInstance, enchantDepth);
@@ -437,18 +454,18 @@ public class SpawnController : MonoBehaviour {
 			}
 			return;
 		}
+		bool hasMadeSign = false;
 		for (int lcv = 0; lcv < 3; ++lcv) {
 			if (Random.Range(0, stinginess) > 1) continue;
 			
 			var s = Random.Range(0, 12);
-			bool hasMadeSign = false;
 			if (s == 0) MakeTreasureChest(depth).transform.position = RandomLocation();
 			else if (s < 3 && !hasMadeSign) {
 				Instantiate(signPost).transform.position = RandomLocation();
 				hasMadeSign = true;
 			}
-			else if (s < 8) Instantiate(barrel).transform.position = RandomLocation();
-			else MakeEquipmentBox(depth).transform.position = RandomLocation();
+			else if (s < 4) Instantiate(barrel).transform.position = RandomLocation();
+			else if (s < 11) MakeEquipmentBox(depth).transform.position = RandomLocation();
 		}
 		#region preventSpawn
 		if (preventSpawn && depth > 0) {
@@ -459,7 +476,9 @@ public class SpawnController : MonoBehaviour {
 			for (int lcv = 0; lcv < 1; ++lcv) {
 //				var b = MakeEquipmentBox(depth);
 //				var b = Instantiate(barrel);
-				var b = Instantiate(enemyOgre);
+				var b = Instantiate(enemyShieldGolem);
+				b.transform.position = RandomLocation();
+				b = Instantiate(enemyTroll);
 				b.transform.position = RandomLocation();
 			}
 			//			var g = Instantiate(enemyGoblin);

@@ -13,9 +13,9 @@ public class FireWalkerController : PlayerController {
 				startingFireball = book.payload as FireballController;
 				fireballBaseDamage = book.payload.attackPower;
 			}
-			if (book.payload == startingFireball) {
-				book.payload.attackPower = fireballBaseDamage * Mathf.Max(1, TerrainController.Instance.Depth);
-			}
+			var prev = book.Description;
+			book.payload.attackPower = fireballBaseDamage * Mathf.Max(1, TerrainController.Instance.Depth);
+			if (prev != book.Description) announcer.NoteText(prev + " became " + book.Description);
 		}
 		
 		base.HasExploredNewRoom ();
@@ -23,7 +23,9 @@ public class FireWalkerController : PlayerController {
 
 	public override void TakeDamage (float quantity, int type)
 	{
-		if (type == WeaponController.DMG_FIRE) return;
+		if (type == WeaponController.DMG_FIRE) {
+			return;
+		}
 		base.TakeDamage (quantity, type);
 	}
 

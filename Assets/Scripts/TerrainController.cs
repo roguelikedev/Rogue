@@ -148,6 +148,57 @@ public class TerrainController : MonoBehaviour {
 	}
 	#endregion
 	
+	
+	
+	int ChooseNextRoomType (int areaType) {
+		if (Depth == 27) return D_HELL;
+		int rval;
+		bool specialRoomOK = areaType < D_CHRISTMAS;
+		while (true) {
+			if (specialRoomOK && Random.Range(0, 2) > 0) {
+				rval = areaType;
+				break;
+			}
+			if (!specialRoomOK || Random.Range(0, SpawnController.Instance.stinginess) > 1) {
+				rval = Random.Range(D_FOREST, D_CHRISTMAS);
+			}
+			else {
+				int specialType;
+				switch(areaType) {
+				case D_CAVE:
+					specialType = D_MERCY;
+					break;
+				case D_THORNS:
+					specialType = D_TROG;
+					break;
+				case D_WATER:
+					specialType = D_ARMORY;
+					break;
+				case D_TOMB:
+					specialType = D_TROVE;
+					break;
+				case D_FOREST:
+					specialType = D_ENCHANT;
+					break;
+				default:
+					specialType = D_CHRISTMAS;					
+					break;
+				}
+				var chanceOfMunchkinLand = 2;
+				chanceOfMunchkinLand += visitedSpecialRooms.FindAll(t => t == specialType).Count;
+				specialType = Random.Range(0, chanceOfMunchkinLand) > 0 ? D_CHRISTMAS : specialType;
+				visitedSpecialRooms.Add(specialType);
+				rval = specialType;
+			}
+			if (rval == D_WATER && Depth < 2) continue;
+			if (rval == D_FOREST && Depth < 4) continue;
+			if (rval == D_TOMB && Depth < 5) continue;
+			if (rval == D_THORNS && Depth < 1) continue;
+			else break;
+		}
+		return rval;
+	}
+	
 	public string LevelFeeling (int type) {
 		if (PlayerController.Instance.IsTerrifying) {
 			return "   ...";
@@ -285,55 +336,6 @@ public class TerrainController : MonoBehaviour {
 		
 		previousAreaType = currentAreaType;
 		CleanUp(x);
-	}
-	
-	int ChooseNextRoomType (int areaType) {
-		if (Depth == 27) return D_HELL;
-		int rval;
-		bool specialRoomOK = areaType < D_CHRISTMAS;
-		while (true) {
-			if (specialRoomOK && Random.Range(0, 2) > 0) {
-				rval = areaType;
-				break;
-			}
-			if (!specialRoomOK || Random.Range(0, SpawnController.Instance.stinginess) > 1) {
-				rval = Random.Range(D_FOREST, D_CHRISTMAS);
-			}
-			else {
-				int specialType;
-				switch(areaType) {
-					case D_CAVE:
-						specialType = D_MERCY;
-						break;
-					case D_THORNS:
-						specialType = D_TROG;
-						break;
-					case D_WATER:
-						specialType = D_ARMORY;
-						break;
-					case D_TOMB:
-						specialType = D_TROVE;
-						break;
-					case D_FOREST:
-						specialType = D_ENCHANT;
-						break;
-					default:
-						specialType = D_CHRISTMAS;					
-						break;
-				}
-				var chanceOfMunchkinLand = 2;
-				chanceOfMunchkinLand += visitedSpecialRooms.FindAll(t => t == specialType).Count;
-				specialType = Random.Range(0, chanceOfMunchkinLand) > 0 ? D_CHRISTMAS : specialType;
-				visitedSpecialRooms.Add(specialType);
-				rval = specialType;
-			}
-			if (rval == D_WATER && Depth < 2) continue;
-			if (rval == D_FOREST && Depth < 4) continue;
-			if (rval == D_TOMB && Depth < 5) continue;
-			if (rval == D_THORNS && Depth < 1) continue;
-			else break;
-		}
-		return rval;
 	}
 	
 	const int Z_MIN = -1, Z_MAX = 1;

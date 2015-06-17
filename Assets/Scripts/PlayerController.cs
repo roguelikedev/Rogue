@@ -37,7 +37,7 @@ public class PlayerController : Acter {
 	
 	public virtual void HasExploredNewRoom () {
 		LivingActers.FindAll(a => a.friendly).ForEach(ally => {
-			ally.Heal(0.5f);
+//			ally.Heal(0.5f);
 			if (ally.EquippedSecondaryWeapon != null) {
 				var wand = ally.EquippedSecondaryWeapon.GetComponent<WandController>();
 				if (wand != null) wand.HasChangedRoom();
@@ -61,7 +61,7 @@ public class PlayerController : Acter {
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
 				bow.payload.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
-				bow.payload.payload.payload.attackPower *= 2;
+				bow.payload.payload.payload.attackPower *= 4;
 				Equip(bow);
 				speed += 50;
 				break;
@@ -85,7 +85,8 @@ public class PlayerController : Acter {
 				book.payload.attackPower *= 2;
 			
 				book.payload.payload = SpellGenerator.Instance().Explosion();
-				book.payload.payload.attackPower *= 2;
+				book.MapChildren(pl => pl.attackPower *= 2);
+//				book.payload.payload.attackPower *= 2;
 //				SpellGenerator.Instance().Split(book, 4);
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
@@ -265,10 +266,10 @@ public class PlayerController : Acter {
 			freeAction = infiniteHealth;
 			GetComponent<Rigidbody>().mass = infiniteHealth ? 3 : 1;
 		}
-		if (infiniteHealth) grappledBy.ForEach(e => {
-			print(e);
-			e.TakeDamage(100, WeaponController.DMG_DEATH);
-		});
+//		if (infiniteHealth) grappledBy.ForEach(e => {
+//			e.TakeDamage(100, WeaponController.DMG_DEATH);
+//		});
+		if (infiniteHealth) grappledBy.Clear();
 	}
 
 	public override void TakeDamage (float quantity, int type)
@@ -322,6 +323,13 @@ public class PlayerController : Acter {
 	
 	public override void WeaponDidCollide (Acter other, WeaponController weaponController, bool friendlyFireOK)
 	{
+		if (infiniteHealth) {
+			other.TakeDamage(100, WeaponController.DMG_DEATH);
+			other.TakeDamage(100, WeaponController.DMG_RAISE);
+			return;
+		}
+		
+			
 		base.WeaponDidCollide(other, weaponController, friendlyFireOK);
 		announcer.ExpToLevelChanged(xpToLevel, level + 1);
 	}

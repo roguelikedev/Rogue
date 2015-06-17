@@ -574,7 +574,7 @@ MonoBehaviour:
   huge: 0
   depth: -1
   racialLevel: 2
-  commonness: 10
+  commonness: 5
   fleeDistance: 0
   isUnliving: 0
 --- !u!135 &13576394
