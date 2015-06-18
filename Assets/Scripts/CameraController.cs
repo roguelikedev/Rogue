@@ -11,7 +11,7 @@ using System.Collections.Generic;
 //	}
 //}
 //
-public class CameraController : MonoBehaviour {
+public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't be used as a kitchen sink singleton
 	public PlayerController orc;
 	public PlayerController hope;
 	public PlayerController elf;
@@ -20,6 +20,7 @@ public class CameraController : MonoBehaviour {
 	public PlayerController firewalker;
 	public Color pinkSkin;
 	public List<Acter> livingActers = new List<Acter>();
+	public float npcSpeedModifier = 1;
 	PlayerController player;
 	TextMesh announcement;
 	TextMesh notes;

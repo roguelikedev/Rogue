@@ -1041,35 +1041,7 @@ public abstract class Acter : MonoBehaviour {
 	
 	#endregion
 	
-	// returns whether to continue child's fixedupdate()
-	protected virtual bool _FixedUpdate() {
-		healthBar.SetCurrentHP(hitPoints, racialBaseHitPoints);
-		
-		foreach (var kvp in bodyParts)
-		{
-			if (kvp.Key == null) continue;		// FIXME: why necessary?
-			kvp.Key.sortingOrder = kvp.Value - (int)(transform.position.z * 10);
-		}
-		
-		grappledBy.RemoveAll(e => e == null);
-		grappledBy.ForEach(e => TakeDamage(e.meleeMultiplier / 60, WeaponController.DMG_GRAP));
-		
-		if (State == ST_DEAD) {
-			return false;
-		}
-		
-		if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.GetComponent<EstusController>() != null &&
-										 EquippedSecondaryWeapon.charges <= 0) {
-			DropWeapon(EquippedSecondaryWeapon);
-//			var spentFlask = DropWeapon(EquippedSecondaryWeapon);
-//			var p = spentFlask.GetComponentInChildren<ParticleSystem>();
-//			if (p != null) p.gameObject.SetActive(false);
-		}
-		
-		if (!LivingActers.Contains(this)) LivingActers.Add(this);
-		
-		eligiblePickups.RemoveAll(shouldntHappenButDoes => shouldntHappenButDoes == null);	// food and stuff
-		
+	void TryGetItem () {
 		if (shouldPickUpItem && eligiblePickups.Count > 0) {
 			foreach(var eligible in eligiblePickups.FindAll(w => !w.IsEquipped)) {
 				if (eligible.tag == "NonEquipmentItem") {		// food
@@ -1118,6 +1090,36 @@ public abstract class Acter : MonoBehaviour {
 			}
 		}
 		if (this is PlayerController) shouldPickUpItem = false;
+	}
+	
+	// returns whether to continue child's fixedupdate()
+	protected virtual bool _FixedUpdate() {
+		healthBar.SetCurrentHP(hitPoints, racialBaseHitPoints);
+		
+		foreach (var kvp in bodyParts)
+		{
+			if (kvp.Key == null) continue;		// FIXME: why necessary?
+			kvp.Key.sortingOrder = kvp.Value - (int)(transform.position.z * 10);
+		}
+		
+		if (State == ST_DEAD) {
+			return false;
+		}
+		
+		grappledBy.RemoveAll(e => e == null);
+		grappledBy.ForEach(e => TakeDamage(e.meleeMultiplier / 60, WeaponController.DMG_GRAP));
+		
+		if (EquippedSecondaryWeapon != null && EquippedSecondaryWeapon.GetComponent<EstusController>() != null &&
+										 EquippedSecondaryWeapon.charges <= 0) {
+			DropWeapon(EquippedSecondaryWeapon);
+//			var spentFlask = DropWeapon(EquippedSecondaryWeapon);
+//			var p = spentFlask.GetComponentInChildren<ParticleSystem>();
+//			if (p != null) p.gameObject.SetActive(false);
+		}
+		
+		if (!LivingActers.Contains(this)) LivingActers.Add(this);
+		
+		eligiblePickups.RemoveAll(shouldntHappenButDoes => shouldntHappenButDoes == null);	// food and stuff
 		
 		Equip(null);
 		poiseBreakCounter -= 1 / 60;

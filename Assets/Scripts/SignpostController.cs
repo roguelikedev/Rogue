@@ -38,7 +38,7 @@ public class SignpostController : ItemController {
 			}
 		}
 	
-		if (info == "") {
+		if (info == " ") {
 			PlayerController.Instance.Speak("illegible");
 			wasRead = true;
 		}
@@ -121,9 +121,9 @@ public class SignpostController : ItemController {
 				case 7:
 					info = "every room is\ndeeper than\nthe last";
 					break;
-				case 8:
-					info = "fear water\nand death";
-					break;
+//				case 8:
+//					info = "fear water\nand death";
+//					break;
 				case 9:
 					info = "death damage\nignores\narmor";
 					break;
@@ -133,9 +133,9 @@ public class SignpostController : ItemController {
 				case 11:
 					info = "anything can\ngain levels";
 					break;
-				case 12:
-					info = "exploring\nheals you";
-					break;
+//				case 12:
+//					info = "exploring\nheals you";
+//					break;
 				case 13:
 					info = "heavy armor\nslows movement";
 					break;
@@ -186,7 +186,9 @@ public class SignpostController : ItemController {
 				case 27:
 					info = "treants fear\nonly death";
 					break;
-				default: break;		// player says "illegible"
+				default:
+					info = " ";
+					break;		// player says "illegible"
 			}
 		}
 		

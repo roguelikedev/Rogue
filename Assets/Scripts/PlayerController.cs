@@ -67,11 +67,12 @@ public class PlayerController : Acter {
 				break;
 			case "firewalker":
 				var boom = Instantiate(SpellGenerator.Instance().blankWand);
-				boom.payload = SpellGenerator.Instance().Explosion();
-				boom.payload.attackPower *= 4;
-				boom.payload.tag = "spell";
-				SpellGenerator.Instance().Fan(boom, 2);
-				boom.charges = boom.maxCharges = 1;
+				boom.payload = Instantiate(SpellGenerator.Instance().pullIn);
+				boom.payload.payload = SpellGenerator.Instance().Explosion();
+				boom.payload.payload.attackPower *= 4;
+				boom.payload.payload.tag = "spell";
+				SpellGenerator.Instance().Fan(boom.payload, 2);
+				boom.charges = boom.maxCharges = 3;
 				Equip(boom);
 				speed += 50;
 				spellpower += 1;

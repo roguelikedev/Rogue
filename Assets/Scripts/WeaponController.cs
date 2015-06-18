@@ -124,10 +124,10 @@ public class WeaponController : ItemController {
 				audioSource.Play();
 			}
 		}
-		
 		if (lifetime != -1) --lifetime;
+	
 		if (lifetime == 0) {
-			if (attackActive && firePayloadOnTimeout) FirePayload(GetComponent<CapsuleCollider>());
+			if (firePayloadOnTimeout) FirePayload(GetComponent<CapsuleCollider>());
 			Destroy(gameObject);
 		}
 		
@@ -313,6 +313,7 @@ public class WeaponController : ItemController {
 	}
 	
 	void FirePayload(Collider impactPoint) {
+		if (firePayloadOnTimeout && lifetime > 0) return;		// HAX
 		if (payload != null) {
 			var pl = Instantiate(payload);
 	//		pl.multiPayload.Clear();

@@ -24,6 +24,7 @@ public class SpellGenerator : MonoBehaviour {
 	public WeaponController blankSpell;
 	public WandController blankWand;
 	public FireballController fireball;
+	public PullController pullIn;
 	public static SpellGenerator Instance() {
 		return GameObject.FindObjectOfType<SpellGenerator>();
 	}
