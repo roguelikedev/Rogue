@@ -8,13 +8,17 @@ public class FireWalkerController : PlayerController {
 	public override void HasExploredNewRoom ()
 	{
 		var book = EquippedSecondaryWeapon;
-		if (book != null && book.payload != null && book.payload is FireballController) {
+		print (book != null);
+		print ("pl " + (book.payload != null));
+		print ("fb " + book.payload.payload + (book.payload.payload is FireballController));
+		if (book != null && book.payload != null && book.payload.payload != null && book.payload.payload is FireballController) {
+			print ("fuck me!!!");
 			if (startingFireball == null) {
-				startingFireball = book.payload as FireballController;
-				fireballBaseDamage = book.payload.attackPower;
+				startingFireball = book.payload.payload as FireballController;
+				fireballBaseDamage = book.payload.payload.attackPower;
 			}
 			var prev = book.Description;
-			book.payload.attackPower = fireballBaseDamage * Mathf.Max(1, TerrainController.Instance.Depth);
+			book.payload.payload.attackPower = fireballBaseDamage * Mathf.Max(1, TerrainController.Instance.Depth);
 			if (prev != book.Description) announcer.NoteText(prev + " became " + book.Description);
 		}
 		

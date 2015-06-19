@@ -149,7 +149,7 @@ public class EnemyController : Acter, IDepthSelectable
 			else if (posn.z > targetLocn.z)
 				rval.z = -1;
 //		}
-		stopRunningSlowly = 15;
+		stopRunningSlowly = 1;
 		lastDirection = rval;
 		return rval;
 	}

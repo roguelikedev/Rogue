@@ -11527,7 +11527,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_GenerateMotionCurves: 0
   m_Events:
-  - time: 1
+  - time: .983333349
     functionName: AnimationForBlockingStateDidFinish
     data: 
     objectReferenceParameter: {fileID: 0}

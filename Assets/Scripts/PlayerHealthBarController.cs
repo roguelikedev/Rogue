@@ -6,6 +6,9 @@ public class PlayerHealthBarController : HealthBarController {
 	public SpriteRenderer backHand;
 	public SpriteRenderer frontLock;
 	public SpriteRenderer backLock;
+	public TextMesh itemCharges;
+	public SpriteRenderer wandIcon;
+	public SpriteRenderer potionIcon;
 	
 	public void ShowLock (bool active, bool back) {
 		var which = back ? backLock : frontLock;

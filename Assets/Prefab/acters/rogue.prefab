@@ -313,7 +313,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100004}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.82999992, y: 3.25, z: -1.47000003}
+  m_LocalPosition: {x: 6.0880022, y: 5.45418072, z: -7.63307095}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 400000}
@@ -639,6 +639,7 @@ MonoBehaviour:
   infiniteHealth: 0
   friendless: 0
   murderMask: {fileID: 11438242, guid: 1fd38db4a4c46ea4cb9d5b5a18f734a1, type: 2}
+  executionerCowl: {fileID: 0}
 --- !u!135 &13553308
 SphereCollider:
   m_ObjectHideFlags: 1
@@ -1868,7 +1869,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 14390d4ea606f7f41a8824bd9ed5a7c7, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a690276a358de1c42b2e2bfe3c2b474c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!212 &21222836
 SpriteRenderer:
@@ -1894,7 +1895,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1783731295
   m_SortingOrder: -3
-  m_Sprite: {fileID: 21300000, guid: 8712f6e1e3c5814439dd5b3b9cb2fc02, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 9433490c1d797ca48ab5da4163eab1d3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!212 &21229500
 SpriteRenderer:

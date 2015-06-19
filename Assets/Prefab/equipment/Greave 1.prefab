@@ -71,15 +71,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   depth: 1
+  commonness: 1
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
+  deleteOnLanding: 0
   lifetime: -1
   bodySlot: 5
   damageType: 0
   payload: {fileID: 0}
+  multiPayload: []
   isSpellbook: 0
   firePayloadOnTimeout: 0
-  thrownForceMultiplier: 0
+  thrownHorizontalMultiplier: 0
+  thrownVerticalMultiplier: 0
+  thrownParralaxModifier: 0
   friendlyFireActive: 0
   attackVictims: []
   attackActive: 0
@@ -87,6 +92,8 @@ MonoBehaviour:
   attackPower: 0
   impactNoise: {fileID: 0}
   firedNoise: {fileID: 0}
+  constantNoise: {fileID: 0}
+  audioSource: {fileID: 0}
   charges: -1
   speedCoefficient: .980000019
 --- !u!136 &13604756
@@ -126,7 +133,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 3
-  m_Sprite: {fileID: 21300000, guid: 00703cfb44aa0a244a5338f7edd06387, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2f9ed827f6df00f4d9007b253ebb879f, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
 --- !u!1001 &100100000
 Prefab:
@@ -134,7 +141,12 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 2f9ed827f6df00f4d9007b253ebb879f,
+        type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 128868}

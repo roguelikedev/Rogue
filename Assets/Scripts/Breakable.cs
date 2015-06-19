@@ -46,6 +46,7 @@ public class Breakable : MonoBehaviour {
 			}
 			else {
 				GameObject.FindObjectOfType<TerrainController>().statuesDestroyed++;
+				SpawnController.Instance.stinginess *= 0.8f;
 				CameraController.Instance.AnnounceText("things are\neasier");
 			}
 		}

@@ -486,12 +486,14 @@ public class SpawnController : MonoBehaviour {
 //			b.meleeMultiplier = 0.01f;
 //			b.Equip(Instantiate(itemKnife));
 			for (int lcv = 0; lcv < 1; ++lcv) {
+				var b = Instantiate(enemySnake);
+				b.Equip(Instantiate(itemBow));
 //				var b = MakeEquipmentBox(depth);
 //				var b = Instantiate(barrel);
-				var b = Instantiate(enemyShieldGolem);
-				b.transform.position = RandomLocation();
-				b = Instantiate(enemyTroll);
-				b.transform.position = RandomLocation();
+//				var b = Instantiate(enemyShieldGolem);
+//				b.transform.position = RandomLocation();
+//				b = Instantiate(enemyTroll);
+//				b.transform.position = RandomLocation();
 			}
 			//			var g = Instantiate(enemyGoblin);
 			//			g.Equip(Instantiate(itemBow));

@@ -2,15 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-//public class AudioController {
-//	public static CameraController cameraController;
-//	
-//	public static void PlaySound (AudioClip sound, Vector3 where) {
-//		if (cameraController.mute) return;
-//		AudioSource.PlayClipAtPoint(sound, where);
-//	}
-//}
-//
+
 public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't be used as a kitchen sink singleton
 	public PlayerController orc;
 	public PlayerController hope;
@@ -37,6 +29,7 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 	public AudioClip song2;
 	public AudioClip song3;
 	public AudioClip song4;
+	public AudioClip song5;
 	public bool muteSoundFX = false;
 	public bool muteSongs;
 	public static CameraController Instance { get { return GameObject.FindObjectOfType<CameraController>(); } }
@@ -52,7 +45,7 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 		else if (who == "firewalker") player = Instantiate(firewalker);
 		else if (who == "fighter") player = Instantiate(beardMan);
 		else player = Instantiate(orc);
-//		if (who == "hope") player = Instantiate(hope);
+		player.transform.position = new Vector3(10, 3.5f, 0);
 		player.announcer = this;
 		player.SetClass(who);
 	}
@@ -136,7 +129,7 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 		announcement.color = color;
 		
 		if (!audioSource.isPlaying) {
-			switch(Random.Range(0,4)) {
+			switch(Random.Range(0,5)) {
 				case 0:
 					audioSource.clip = song1;
 					break;
@@ -148,6 +141,9 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 					break;
 				case 3:
 					audioSource.clip = song4;
+					break;
+				case 4:
+					audioSource.clip = song5;
 					break;
 				default:
 					Debug.LogError("no such song");

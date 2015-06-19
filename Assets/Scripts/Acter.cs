@@ -91,7 +91,7 @@ public abstract class Acter : MonoBehaviour {
 		get
 		{
 			if (spellpower > 0) return C_WIZARD;
-			if (Speed >= racialBaseHitPoints * 100) return C_ROGUE;
+			if (speed >= racialBaseHitPoints * 100) return C_ROGUE;
 			if (huge || (meleeMultiplier > 1 && Speed < 400)) return C_BRUTE;
 			return C_FIGHT;
 		}
@@ -435,7 +435,10 @@ public abstract class Acter : MonoBehaviour {
 		if (direction.y < -1) direction.y = -10;		// don't float off of ramps
 		grappledBy.ForEach(e => {
 			if (!freeAction) direction /= e.meleeMultiplier;
-			e.GetComponent<Rigidbody>().velocity = direction;
+			if (Vector3.Distance(transform.position, e.transform.position) 
+					> Vector3.Distance(transform.position, e.transform.position + direction)) {
+				e.GetComponent<Rigidbody>().velocity = direction;
+			}
 		});
 		GetComponent<Rigidbody>().velocity = direction;
 	}
@@ -689,7 +692,7 @@ public abstract class Acter : MonoBehaviour {
 			trinket.transform.localPosition = Vector3.zero;
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = foot.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
-		if (trinket.npcSlowdown != 1) {
+		if (trinket.npcSlowdown != 1 && CameraController.Instance.npcSpeedModifier == 1) {
 			CameraController.Instance.npcSpeedModifier *= trinket.npcSlowdown;
 			var hand = GetSlot("frontForeArm");
 			trinket.transform.parent = hand;
@@ -1175,5 +1178,17 @@ public abstract class Acter : MonoBehaviour {
 		if (shouldUseOffhand && EnterStateAndAnimation(ST_ATTACK)) return false;
 		
 		return true;
+	}
+	
+	void OnTriggerStay (Collider collider) {
+//		print (collider);
+		if (collider.tag == "Wall") {
+			var zDir = transform.position.z > 5? -1 : 1;
+			transform.position = transform.position + new Vector3(0, 0, zDir);
+		}
+//		if (collider.tag == "Wall") {
+//			var zDir = transform.position.z > 5? -1 : 1;
+//			transform.position = transform.position + new Vector3(0, 0, zDir);
+//		}
 	}
 }

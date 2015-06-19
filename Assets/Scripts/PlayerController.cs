@@ -84,22 +84,15 @@ public class PlayerController : Acter {
 				break;
 			case C_WIZARD:
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
+			    
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
-//				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_FIRE);
-//				book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
-//				book.payload = SpellGenerator.Instance().Mortar(WeaponController.DMG_DEATH);
 				book.payload.attackPower *= 2;
 			
 				book.payload.payload = SpellGenerator.Instance().Explosion();
 				book.MapChildren(pl => pl.attackPower *= 2);
-//				book.payload.payload.attackPower *= 2;
-//				SpellGenerator.Instance().Split(book, 4);
+				book.payload.payload.attackPower *= 2;
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
-				
-//				var broom = Instantiate(SpawnController.Instance.itemBroom);
-//				broom.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_PARA);
-//				Equip (broom);
 				
 				spellpower += 6;
 				break;
@@ -173,6 +166,7 @@ public class PlayerController : Acter {
 				break;
 			default: break;
 		}
+		
 	}
 
 	public void Speak(string what) {
@@ -213,6 +207,22 @@ public class PlayerController : Acter {
 		SpeechBubble.GetComponentInChildren<SpriteRenderer>().color -= fade;
 		
 		if (MainClass == "") return;
+		
+		if (EquippedSecondaryWeapon != null) {
+			var hbar = healthBar.GetComponent<PlayerHealthBarController>();
+			var myWand = EquippedSecondaryWeapon.GetComponent<WandController>();
+			if (myWand != null) {
+				hbar.itemCharges.text = myWand.charges + "/" + myWand.maxCharges;
+				hbar.wandIcon.gameObject.SetActive(true);
+			}
+			else hbar.wandIcon.gameObject.SetActive(false);
+			var myPot = EquippedSecondaryWeapon.GetComponent<EstusController>();
+			if (myPot != null) {
+				hbar.itemCharges.text = myPot.charges + "";
+				hbar.potionIcon.gameObject.SetActive(true);
+			}
+			else hbar.potionIcon.gameObject.SetActive(false);
+		}
 		
 		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0) 
 		                          || Input.GetKeyDown ("j") || Input.GetButtonDown("Fire1"))) 
