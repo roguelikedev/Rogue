@@ -208,7 +208,7 @@ MonoBehaviour:
   thrownBy: {fileID: 0}
   deleteOnHitting: 0
   deleteOnLanding: 0
-  lifetime: 90
+  lifetime: 60
   bodySlot: 0
   damageType: 0
   payload: {fileID: 0}
@@ -238,7 +238,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 3
+  m_Radius: 6
   m_Height: 1
   m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}
@@ -259,7 +259,7 @@ ParticleSystem:
   InitialModule:
     enabled: 1
     startLifetime:
-      scalar: .800000012
+      scalar: 1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -292,7 +292,7 @@ ParticleSystem:
         m_PostInfinity: 2
       minMaxState: 0
     startSpeed:
-      scalar: -3.5
+      scalar: -5
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -491,7 +491,7 @@ ParticleSystem:
     serializedVersion: 2
     enabled: 1
     type: 11
-    radius: 3
+    radius: 6
     angle: 25
     length: 5
     boxX: .699999988

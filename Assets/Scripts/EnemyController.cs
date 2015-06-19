@@ -231,7 +231,7 @@ public class EnemyController : Acter, IDepthSelectable
 		}
 	}
 	
-	void FixedUpdate() {
+	void Update() {
 //		print ("flee " + shouldFlee + " main " + shouldUseMainHand + " off " + shouldUseOffhand);
 		if (friendly && PlayerController.Instance.friendless) friendly = false;
 		if (isThreateningPlayer && !shouldUseMainHand && State != ST_ATTACK) {
@@ -259,9 +259,9 @@ public class EnemyController : Acter, IDepthSelectable
 		
 		if (!_FixedUpdate()) return;
 		
-		if (stopRunningSlowly <= 1) ResetAggro();
 		damageAnnouncer.SetFriendly(friendly);
-		
+		ResetAggro();
+	
 		var dir = DirectionToTarget ();
 		if (dir != Vector3.zero) {
 			if (EnterStateAndAnimation(ST_WALK)) Move(dir);

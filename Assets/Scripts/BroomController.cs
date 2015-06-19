@@ -38,6 +38,7 @@ public class BroomController : WeaponController {
 			}
 		}
 		
+		
 		base._FixedUpdate ();
 	}
 //	protected override bool _OnTriggerStay (Collider other)

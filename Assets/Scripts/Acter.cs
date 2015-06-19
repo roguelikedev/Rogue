@@ -7,6 +7,8 @@ using Utilities.Geometry;
 public abstract class Acter : MonoBehaviour {
 	#region munchkin stats
 	public float speed = 200;
+	protected virtual float Speed { get { return speed == SPEED_WHEN_PARALYZED ? speed :
+												 speed * CameraController.Instance.npcSpeedModifier; } }
 	public float racialBaseHitPoints;
 	protected int xpToLevel;
 	protected readonly int baseXPToLevel = 3;
@@ -89,8 +91,8 @@ public abstract class Acter : MonoBehaviour {
 		get
 		{
 			if (spellpower > 0) return C_WIZARD;
-			if (speed >= racialBaseHitPoints * 100) return C_ROGUE;
-			if (huge || (meleeMultiplier > 1 && speed < 400)) return C_BRUTE;
+			if (Speed >= racialBaseHitPoints * 100) return C_ROGUE;
+			if (huge || (meleeMultiplier > 1 && Speed < 400)) return C_BRUTE;
 			return C_FIGHT;
 		}
 	}
@@ -101,6 +103,15 @@ public abstract class Acter : MonoBehaviour {
 				if (hitPoints > MaxHitPoints - fireDamageTaken) hitPoints = MaxHitPoints - fireDamageTaken;
 			}
 		};
+	}
+	public void Grow(float hugeness) {
+		huge = true;
+		var tmp = transform.localScale;
+		tmp.x *= hugeness; tmp.y *= hugeness; tmp.z *= hugeness;
+		transform.position = transform.position + new Vector3(0, 3, 0);
+		transform.localScale = tmp;
+		racialBaseHitPoints += (int) hugeness;
+		meleeMultiplier = Mathf.Max(meleeMultiplier * hugeness, meleeMultiplier + hugeness);
 	}
 	#endregion
 	#region instance variables
@@ -243,7 +254,7 @@ public abstract class Acter : MonoBehaviour {
 				if (shouldUseMainHand == shouldUseOffhand) {
 					Debug.LogError("should " + (shouldUseMainHand ? "" : "not ") + "attack and cast spell at the same time");
 				}
-				if (speed == SPEED_WHEN_PARALYZED) return false;
+				if (Speed == SPEED_WHEN_PARALYZED) return false;
 				
 				if (shouldUseOffhand) {
 					if (EquippedSecondaryWeapon == null) {
@@ -262,14 +273,14 @@ public abstract class Acter : MonoBehaviour {
 							pendingSpell = StartCoroutine(CastSpell());
 						}
 						else {
-							var animSpeed = speed * EquippedSecondaryWeapon.speedCoefficient / 400;
+							var animSpeed = Speed * EquippedSecondaryWeapon.speedCoefficient / 400;
 							GetComponent<Animator>().speed = animSpeed;
 							Anim.Play("shoot_offhand");
 						}
 					}
 				}
 				else {
-					GetComponent<Animator>().speed = speed * EquippedWeapon.speedCoefficient / 400;
+					GetComponent<Animator>().speed = Speed * EquippedWeapon.speedCoefficient / 400;
 					if (EquippedWeapon != null && EquippedWeapon.tag == "Throwable Weapon") {
 						Anim.Play("throw");
 					}
@@ -280,7 +291,7 @@ public abstract class Acter : MonoBehaviour {
 						var strengthToSpeed = 1 - EquippedWeapon.speedCoefficient;
 						if (strengthToSpeed > 0) {
 							strengthToSpeed /= (float) Math.Sqrt(meleeMultiplier);
-							GetComponent<Animator>().speed = speed * (1 - strengthToSpeed) / 400;
+							GetComponent<Animator>().speed = Speed * (1 - strengthToSpeed) / 400;
 						}
 //						if (largeWeapon || huge) anim.Play("downward_attack");
 						if (largeWeapon || huge || EquippedWeapon.tag == "slashing weapon") Anim.CrossFade("downward_attack", 0.1f);
@@ -294,7 +305,7 @@ public abstract class Acter : MonoBehaviour {
 				if (state == ST_ATTACK) return false;
 				if (state == ST_HURT) return false;
 				if (state == ST_CAKE) return false;
-				if (speed == SPEED_WHEN_PARALYZED) return false;
+				if (Speed == SPEED_WHEN_PARALYZED) return false;
 				if (state == ST_WALK) Anim.Play(ST_WALK);
 				else Anim.CrossFade (ST_WALK, 0.1f);
 				break;
@@ -407,7 +418,7 @@ public abstract class Acter : MonoBehaviour {
 		if (direction.x > 0 && !facingRight) Flip ();
 		else if (direction.x < 0 && facingRight) Flip ();
 		
-		var _speed = speed;
+		var _speed = Speed;
 		if (isScrambling && grappledBy.Count == 0) _speed *= 1.5f;
 		if (MainClass != C_GESTALT) {
 			foreach (WeaponController armor in equippedArmor.Values) {
@@ -678,9 +689,27 @@ public abstract class Acter : MonoBehaviour {
 			trinket.transform.localPosition = Vector3.zero;
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = foot.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
+		if (trinket.npcSlowdown != 1) {
+			CameraController.Instance.npcSpeedModifier *= trinket.npcSlowdown;
+			var hand = GetSlot("frontForeArm");
+			trinket.transform.parent = hand;
+			trinket.transform.localRotation = Quaternion.identity;
+			trinket.transform.localPosition = Vector3.zero;
+			trinket.GetComponent<SpriteRenderer>().sortingOrder = hand.GetComponent<SpriteRenderer>().sortingOrder + 1;
+		}
+		if (trinket.hugeness != 1) {
+			Grow(1.5f);
+			var hand = GetSlot("backForeArm");
+			trinket.transform.parent = hand;
+			trinket.transform.localRotation = Quaternion.identity;
+			trinket.transform.localPosition = Vector3.zero;
+			trinket.GetComponent<SpriteRenderer>().sortingOrder = hand.GetComponent<SpriteRenderer>().sortingOrder + 1;
+		}
+		
 		armorClass += trinket.armorClass;
 		speed += trinket.speed;
 		spellpower += trinket.spellPower;
+		CameraController.Instance.npcSpeedModifier *= trinket.npcSlowdown;
 		if (trinket.regeneration != 0) BeginRegenerate(trinket.regeneration); 
 		if (trinket.trapFinding) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
 		trinket.OnIdentify();
@@ -815,7 +844,7 @@ public abstract class Acter : MonoBehaviour {
 	}
 	public void Paralyze(float magnitude) {
 		if (freeAction) return;
-		if (speed == SPEED_WHEN_PARALYZED) return;
+		if (Speed == SPEED_WHEN_PARALYZED) return;
 		magnitude = Mathf.Pow(magnitude, 0.33f) / Mathf.Pow(paralyzeScaling, 2);
 //		if (magnitude < 0.5f) return;
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
@@ -952,7 +981,7 @@ public abstract class Acter : MonoBehaviour {
 		
 		
 		if (hitPoints > 0 && (type == WeaponController.DMG_PHYS || type == WeaponController.DMG_POISE)
-						 && speed != SPEED_WHEN_PARALYZED) {
+						 && Speed != SPEED_WHEN_PARALYZED) {
 			if (state != ST_HURT && State != ST_CAKE) {
 				poiseBreakCounter += quantity;
 				if (poiseBreakCounter > Poise) {
@@ -1044,6 +1073,8 @@ public abstract class Acter : MonoBehaviour {
 	void TryGetItem () {
 		if (shouldPickUpItem && eligiblePickups.Count > 0) {
 			foreach(var eligible in eligiblePickups.FindAll(w => !w.IsEquipped)) {
+				print (eligible);
+					
 				if (eligible.tag == "NonEquipmentItem") {		// food
 					var food = eligible as FoodController;
 					bool shouldEat = false;
@@ -1101,6 +1132,10 @@ public abstract class Acter : MonoBehaviour {
 			if (kvp.Key == null) continue;		// FIXME: why necessary?
 			kvp.Key.sortingOrder = kvp.Value - (int)(transform.position.z * 10);
 		}
+		foreach (var eq in GetComponentsInChildren<ItemController>()) {
+			eq.UpdateSortingOrder();
+			eq.transform.localScale = new Vector3(1, Mathf.Sign(eq.transform.localScale.y), 1);
+		}
 		
 		if (State == ST_DEAD) {
 			return false;
@@ -1121,10 +1156,12 @@ public abstract class Acter : MonoBehaviour {
 		
 		eligiblePickups.RemoveAll(shouldntHappenButDoes => shouldntHappenButDoes == null);	// food and stuff
 		
+		TryGetItem();
+		
 		Equip(null);
 		poiseBreakCounter -= 1 / 60;
 		
-		if (speed != SPEED_WHEN_PARALYZED) {
+		if (Speed != SPEED_WHEN_PARALYZED) {
 			paralyzeScaling = Mathf.Max (1, paralyzeScaling - 1/60);
 		}// else print ("paralyze scaling " + paralyzeScaling);
 		

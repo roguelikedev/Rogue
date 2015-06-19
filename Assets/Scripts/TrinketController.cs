@@ -12,6 +12,8 @@ public class TrinketController : ItemController {
 	public bool freeAction;
 	public float regeneration;
 	public bool trapFinding;
+	public float npcSlowdown = 1;
+	public float hugeness = 1;
 	bool hasGyppedPlayer = false;
 	
 	void Start() {
@@ -74,12 +76,17 @@ public class TrinketController : ItemController {
 		if (waterWalking) properties.Add(" water walking");
 		if (freeAction) properties.Add(" free action");
 		if (trapFinding) properties.Add(" trap finding");
+		if (npcSlowdown != 1) properties.Add(" bullet time x" + Abbreviate(npcSlowdown));
+		if (hugeness != 1) properties.Add(" hugeness x" + Abbreviate(hugeness));
 		if (properties.Count > 1) properties.Insert(properties.Count - 1, " and");
 		if (properties.Count == 0) properties.Add(" adornment");
 		string _properties = "";
 		properties.ForEach(s => _properties += s);
 		
-		var noun = freeAction || waterWalking ? "boot" : "amulet";
+		var noun = "amulet";
+		if (freeAction || waterWalking) noun = "boot";
+		if (npcSlowdown != 1 || hugeness != 1) noun = "glove";
+		
 		cameraController.NoteText("identified " + noun + " of" + _properties);
 	}
 }

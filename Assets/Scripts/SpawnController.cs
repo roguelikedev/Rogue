@@ -62,6 +62,8 @@ public class SpawnController : MonoBehaviour {
 	
 	public TrinketController amulet;
 	public TrinketController boot;
+	public TrinketController glove;
+	public TrinketController rearGlove;
 	public Breakable barrel;
 	public Breakable statue;
 	public TreasureChest treasureChest;
@@ -180,6 +182,8 @@ public class SpawnController : MonoBehaviour {
 	// FIXME: checking wantstoequip() here is all that prevents grapplecontrollers from grappling half a screen away
 	// FIXME: it doesn't
 	public void AddEquipment (EnemyController whichMob, bool christmas) {
+//		whichMob.Equip(Instantiate(itemBroom));
+//		return;
 		var equipmentLevel = 0;
 		
 		if (christmas) {
@@ -329,8 +333,9 @@ public class SpawnController : MonoBehaviour {
 		return rval;
 	}
 	
+	bool hasSpawnedHugeness = false;
 	TrinketController MakeTrinket (float depth) {
-		switch(Random.Range(0,3)) {
+		switch(Random.Range(0,5)) {
 			case 0:
 				if (PlayerController.Instance.isAquatic) goto case 1;
 				return Instantiate(boot);
@@ -342,6 +347,13 @@ public class SpawnController : MonoBehaviour {
 				return _boot;
 			case 2:
 				return amulet.MakeAmulet(depth);
+			case 3:
+				if (CameraController.Instance.npcSpeedModifier != 1) goto case 2;
+				return Instantiate(glove);
+			case 4:
+				if (hasSpawnedHugeness) goto case 2;
+				hasSpawnedHugeness = true;
+				return Instantiate(rearGlove);
 			default:
 				Debug.LogError("broken switch");
 				return null;
@@ -497,12 +509,8 @@ public class SpawnController : MonoBehaviour {
 			if (remainingEL < depth) {
 				var hugeness = Random.Range(-1, 1.5f);
 				if (hugeness > 1.25f) {
-					var tmp = whichMob.transform.localScale;
-					tmp.x *= hugeness; tmp.y *= hugeness; tmp.z *= hugeness;
-					whichMob.transform.localScale = tmp;
-					whichMob.racialBaseHitPoints += hugeness;
+					whichMob.Grow (hugeness);
 //					whichMob.Heal(whichMob.MaxHitPoints);		// this *should* always happen via AddLevels()
-					whichMob.meleeMultiplier = Mathf.Max(whichMob.meleeMultiplier * hugeness, whichMob.meleeMultiplier + hugeness);
 					whichMob.name = "Huge " + whichMob.name;
 					whichMob.racialLevel = (int)(whichMob.racialLevel * hugeness);
 					isCaptain = true;

@@ -9,6 +9,11 @@ public class PlayerController : Acter {
 	public override string MainClass { get { return mainClass; } }
 	TextMesh SpeechBubble { get { return GetComponentInChildren<TextMesh>(); } }
 	public static PlayerController Instance { get { return GameObject.FindObjectOfType<PlayerController>(); } }
+	protected override float Speed {
+		get {
+			return speed;		// ignore NPC slowdown modifier
+		}
+	}
 	public bool friendless;
 	public WeaponController murderMask;
 	public WeaponController executionerCowl;
@@ -112,12 +117,8 @@ public class PlayerController : Acter {
 				break;
 			case C_BRUTE:
 				BeginRegenerate(1 / GLOBAL_DMG_SCALING);
-				racialBaseHitPoints++;
 				Equip (Instantiate(SpawnController.Instance.itemHiltless));
-				transform.position = transform.position + new Vector3(0, 3, 0);
-				transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-				huge = true;
-				meleeMultiplier++;
+				Grow(1.5f);
 				break;
 			case C_FIGHT:
 				var weapon = Instantiate(SpawnController.Instance.itemBarMace);

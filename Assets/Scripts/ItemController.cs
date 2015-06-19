@@ -22,17 +22,15 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 
 	public bool IsEquipped {
 		get {
-			return GetComponentInParent<Acter>() != null;
+			return GetComponentsInParent<Acter>().Length != 0;
 		}
 	}
 	
-	bool hasSprite;
-	bool hasCheckedSprite;
-	protected virtual void _FixedUpdate() {
-		if (transform.position.y < -2) {
-			Destroy(gameObject);
-		}
-		if (IsEquipped && (hasSprite || !hasCheckedSprite)) {
+	public void UpdateSortingOrder () {
+//		if (IsEquipped) {
+//			Debug.LogError(Name + " shouldn't be updating sort order!");
+//		}
+		if (hasSprite || !hasCheckedSprite) {
 			hasCheckedSprite = true;
 			var spr = transform.parent.GetComponentInParent<SpriteRenderer>();
 			if (spr != null) {
@@ -43,13 +41,25 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 					var wc = GetComponent<WeaponController>();
 					if (wc != null) {
 						if (wc.IsOffhand && !wc.name.Contains("Shield")) mySpr.sortingOrder--;
-						else mySpr.sortingOrder++;
-//						if (GetComponent<WeaponController>().IsArmor) mySpr.sortingOrder++;
-//						else mySpr.sortingOrder--;
+						else mySpr.sortingOrder += 2;
+						//						if (GetComponent<WeaponController>().IsArmor) mySpr.sortingOrder++;
+						//						else mySpr.sortingOrder--;
 					}
-					if (GetComponent<TrinketController>() != null) mySpr.sortingOrder++;
+					if (GetComponent<TrinketController>() != null) {
+//						print (transform.parent + " order " + spr.sortingOrder);
+						mySpr.sortingOrder++;
+//						print ("my order " + mySpr.sortingOrder);
+					}
 				}
 			}
+		}
+	}
+	
+	bool hasSprite;
+	bool hasCheckedSprite;
+	protected virtual void _FixedUpdate() {
+		if (transform.position.y < -2) {
+			Destroy(gameObject);
 		}
 	}
 	

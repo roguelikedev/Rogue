@@ -106,7 +106,7 @@ public class TerrainController : MonoBehaviour {
 		if (Depth < 25) return;
 		if (Acter.LivingActers.Count > 5) return;
 		if (Random.Range(0, nightgauntCooldown) == 0) {
-			nightgauntCooldown += (int)(100 * Mathf.Pow(Acter.LivingActers.FindAll(e => !e.friendly).Count, 2)
+			nightgauntCooldown += (int)(100 * Mathf.Pow(Acter.LivingActers.FindAll(e => !e.friendly).Count, 1.5f)
 											 / Mathf.Pow(Depth - 24, 2));
 			var loc = Random.Range(0, 2) == 0 ? LeftmostRoom.tiles[0].transform.position.x - TILE_SZ * 6
 					: RightmostRoom.tiles[RightmostRoom.tiles.Count - 1].transform.position.x + TILE_SZ * 6;
