@@ -189,6 +189,11 @@ public class SpellGenerator : MonoBehaviour {
 		explosion.name = "fireball";		// fucking GUI doesn't support lower case
 		return explosion as WeaponController;
 	}
+	public WeaponController Vortex () {
+		var vortex = Instantiate(pullIn);
+		vortex.name = "vortex";		// fucking GUI doesn't support lower case
+		return vortex as WeaponController;
+	}
 	public WeaponController Heal () {
 		var rval = Instantiate(blankSpell);
 		
@@ -343,7 +348,7 @@ public class SpellGenerator : MonoBehaviour {
 				}
 			}
 			while (true) {
-				switch(Random.Range(0, 8)) {
+				switch(Random.Range(0, 9)) {
 					case 0:
 						initialSpellRanged = true;
 						return Beam(dmgType);
@@ -366,6 +371,9 @@ public class SpellGenerator : MonoBehaviour {
 						return Wave(dmgType);
 					case 7:
 						return Heal();
+					case 8:
+						initialSpellRanged = true;
+						return Vortex();
 					default:
 						Debug.LogError("broken switch statement in Generate#RandomSpell!");
 						return null;

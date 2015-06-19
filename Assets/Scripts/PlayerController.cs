@@ -67,12 +67,13 @@ public class PlayerController : Acter {
 				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
 				bow.payload.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
 				bow.payload.payload.payload.attackPower *= 4;
+				SpawnController.Instance.ApplyParticles(bow);
 				Equip(bow);
 				speed += 50;
 				break;
 			case "firewalker":
 				var boom = Instantiate(SpellGenerator.Instance().blankWand);
-				boom.payload = Instantiate(SpellGenerator.Instance().pullIn);
+				boom.payload = SpellGenerator.Instance().Vortex();
 				boom.payload.payload = SpellGenerator.Instance().Explosion();
 				boom.payload.payload.attackPower *= 4;
 				boom.payload.payload.tag = "spell";
@@ -84,7 +85,6 @@ public class PlayerController : Acter {
 				break;
 			case C_WIZARD:
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
-			    
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
 				book.payload.attackPower *= 2;
 			
@@ -116,6 +116,7 @@ public class PlayerController : Acter {
 			case C_FIGHT:
 				var weapon = Instantiate(SpawnController.Instance.itemBarMace);
 				weapon.payload = SpellGenerator.Instance().Heal();
+				SpawnController.Instance.ApplyParticles(weapon);
 				Equip (weapon);
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
@@ -129,6 +130,7 @@ public class PlayerController : Acter {
 				murderWeapon.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_DEATH);
 				murderWeapon.payload.payload = SpellGenerator.Instance().RaiseDead();
 				murderWeapon.payload.payload.firedNoise = SpellGenerator.Instance().rippingSound;
+				SpawnController.Instance.ApplyParticles(murderWeapon);
 				lockMainHand = true;
 				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(true, lockMainHand);
 				murderWeapon.depth = 999;

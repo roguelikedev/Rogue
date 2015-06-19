@@ -258,6 +258,31 @@ public class SpawnController : MonoBehaviour {
 	}
 	#endregion
 	#region loot
+	public void ApplyParticles (WeaponController what) {
+		var boom = what.payload;
+		var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
+		//			foreach(var emitter in possibleEmitters) {
+		ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
+		if (possibleEmitters.Length == 0) emitter = SpellGenerator.purpleParticles;
+		else emitter = possibleEmitters[0];
+		
+		emitter = Instantiate(emitter);
+		var prev = what.GetComponentInChildren<ParticleSystem>();
+		if (prev != null) {
+			prev.transform.parent = null;
+			Destroy(prev.gameObject);
+		}
+		
+		emitter.transform.parent = what.transform;
+		var box = what.GetComponent<BoxCollider>();
+		emitter.transform.localPosition = box.center;
+		emitter.transform.localScale = new Vector3(box.size.magnitude, 1, 1);
+		//			emitter.startSize *= (box.size.magnitude / 27);
+		//			emitter.emissionRate *= box.size.magnitude;
+		var c = emitter.startColor;
+		c.a *= .25f + what.Depth / 20;
+		emitter.startColor = c;
+	}
 	public WeaponController EnchantEquipment (WeaponController what, float depth) {
 		if (what.isSpellbook) {
 			Debug.LogError("didn't expect to enchant a " + what);
@@ -289,28 +314,29 @@ public class SpawnController : MonoBehaviour {
 //					break;
 //				}
 //			}
-			var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
-//			foreach(var emitter in possibleEmitters) {
-			ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
-			if (possibleEmitters.Length == 0) emitter = SpellGenerator.purpleParticles;
-			else emitter = possibleEmitters[0];
-			
-			emitter = Instantiate(emitter);
-			var prev = what.GetComponentInChildren<ParticleSystem>();
-			if (prev != null) {
-				prev.transform.parent = null;
-				Destroy(prev.gameObject);
-			}
-			
-			emitter.transform.parent = what.transform;
-			var box = what.GetComponent<BoxCollider>();
-			emitter.transform.localPosition = box.center;
-			emitter.transform.localScale = new Vector3(box.size.magnitude, 1, 1);
-//			emitter.startSize *= (box.size.magnitude / 27);
-//			emitter.emissionRate *= box.size.magnitude;
-			var c = emitter.startColor;
-			c.a *= .25f + what.Depth / 20;
-			emitter.startColor = c;
+			ApplyParticles(what);
+//			var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
+////			foreach(var emitter in possibleEmitters) {
+//			ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
+//			if (possibleEmitters.Length == 0) emitter = SpellGenerator.purpleParticles;
+//			else emitter = possibleEmitters[0];
+//			
+//			emitter = Instantiate(emitter);
+//			var prev = what.GetComponentInChildren<ParticleSystem>();
+//			if (prev != null) {
+//				prev.transform.parent = null;
+//				Destroy(prev.gameObject);
+//			}
+//			
+//			emitter.transform.parent = what.transform;
+//			var box = what.GetComponent<BoxCollider>();
+//			emitter.transform.localPosition = box.center;
+//			emitter.transform.localScale = new Vector3(box.size.magnitude, 1, 1);
+////			emitter.startSize *= (box.size.magnitude / 27);
+////			emitter.emissionRate *= box.size.magnitude;
+//			var c = emitter.startColor;
+//			c.a *= .25f + what.Depth / 20;
+//			emitter.startColor = c;
 		}
 		
 		return what;
