@@ -29,6 +29,7 @@ public class TerrainController : MonoBehaviour {
 	public int trapRarity;
 	bool showTraps;
 	public EnchanterStatue enchanterStatue;
+	public OrbitController buzzsaw;
 	public static TerrainController Instance { get { return GameObject.FindObjectOfType<TerrainController>(); } }
 	public bool ShowTraps {
 		get {
@@ -148,9 +149,9 @@ public class TerrainController : MonoBehaviour {
 	}
 	#endregion
 	
-	
-	
+	#region long switch statements
 	int ChooseNextRoomType (int areaType) {
+		if (Random.Range(0,Depth) < 2) return D_TROG;
 		if (Depth == 27) return D_HELL;
 		int rval;
 		bool specialRoomOK = areaType < D_CHRISTMAS;
@@ -254,7 +255,7 @@ public class TerrainController : MonoBehaviour {
 			case D_MERCY:
 				return "Temple of Mercy";
 			case D_TROG:
-				return "Blood Vendor";
+				return "Altar of Sacrifice";
 			case D_ENCHANT:
 				return "Enchanted Altar";
 			case D_TROVE:
@@ -266,6 +267,7 @@ public class TerrainController : MonoBehaviour {
 				return "unknown";
 		}
 	}
+	#endregion
 	
 	public void GenerateTerrainAtIndexCallback(int x, object _room) {
 		if (rooms.Exists(r => r.xIndex == x)) {
@@ -281,8 +283,6 @@ public class TerrainController : MonoBehaviour {
 		var areaName = NameOfAreaType(currentAreaType);
 		
 		switch(currentAreaType) {
-			case D_FOREST:
-				break;
 			case D_WATER:
 				if (!fuckTheWaterLevel) {
 					tile = tileWater;
@@ -297,23 +297,10 @@ public class TerrainController : MonoBehaviour {
 			case D_TOMB:
 				floorTexture = skulls;
 				break;
-			case D_CHRISTMAS:
-				break;
-			case D_ARMORY:
-				break;
-			case D_MERCY:
-				break;
-			case D_TROG:
-				break;
-			case D_ENCHANT:
-				break;
-			case D_TROVE:
-				break;
 			case D_HELL:
 				tile = tileLava;
 				break;
 			default:
-				Debug.LogError("generate terrain to right failed in switch statement");
 				break;
 		}
 
@@ -326,12 +313,9 @@ public class TerrainController : MonoBehaviour {
 		}
 		var nextRoom = GenerateAtIndex(x, tile, floorTexture, currentAreaType);
 		rooms.Add(nextRoom);
-		if (showTraps) GameObject.FindObjectOfType<TerrainController>().ShowTraps = true;
+		if (showTraps) ShowTraps = true;
 		
 		if (previousAreaType != currentAreaType) announcer.AnnounceText("Entered " + areaName + "\nDepth: " + Depth);
-//		if (nextRoom.nextRoomType != nextRoom.terrainType) {
-//			PlayerController.Instance.Speak(LevelFeeling(nextRoom.nextRoomType));
-//		}
 		PlayerController.Instance.HasExploredNewRoom();
 		
 		previousAreaType = currentAreaType;
@@ -460,6 +444,8 @@ public class TerrainController : MonoBehaviour {
 				break;
 			default: break;
 		}
+		
+		#region populate special rooms
 		if (areaType >= D_CHRISTMAS) farWall.GetComponent<MeshRenderer>().material = cathedral;
 		
 		// note that D_CHRISTMAS itself is incongruously handled by spawncontroller
@@ -514,25 +500,31 @@ public class TerrainController : MonoBehaviour {
 		else if (areaType == D_TROG) {
 			var item = spawnController.MakeSpecialItem();
 			item.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 4, 0);
+			var fate = Random.Range(0, 3);
+			switch (fate) {
+				case 0: item.name = "Burning " + item.name; break;
+				case 1: item.name = "Death's Door " + item.name; break;
+				case 2: item.name = "Life Draining " + item.name; break;
+			}
+			item.name = "Cursed " + item.name;
+			
 			item.OnPickup += a => {
 				WeaponController punishment = null;
-				switch(Random.Range(0, 3)) {
+				switch(fate) {
 					case 0:
 						punishment = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
 						punishment.attackPower = a.MaxHitPoints / Acter.GLOBAL_DMG_SCALING;
 						punishment.attackPower *= 2;	// overcome doubling of intrinsic 1 AC
-//						item.name = "Burning " + item.name;
 						break;
 					case 1:
 						punishment = SpellGenerator.Instance().Pillar(WeaponController.DMG_DEATH);
 						punishment.attackPower = (a.HitPoints - 0.1f) / Acter.GLOBAL_DMG_SCALING;
-//						item.name = "Death's Door " + item.name;
 						break;
 					case 2:
 						a.MaxHitPoints--;
+						
 						var pc = a.GetComponent<PlayerController>();
 						if (pc != null) pc.Speak("my heart!");
-//						item.name = "Life Draining " + item.name;
 						break;
 					default: Debug.LogError("fell through case statement"); break;
 				}
@@ -544,7 +536,19 @@ public class TerrainController : MonoBehaviour {
 					punishment.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vec.Zero;
 				}
 			};
-			item.name = "Cursed " + item.name;
+			System.Action<Acter> OneTimePickup = a => {
+				var saw = Instantiate(buzzsaw);
+				saw.weapon.thrownBy = PlayerController.Instance;
+				var wc = item.GetComponent<WeaponController>();
+				if (wc != null) {
+					print (wc);
+					saw.weapon.payload = Instantiate(wc.payload);
+					spawnController.ApplyParticles(saw.weapon);
+				}
+			};
+			item.OnPickup += OneTimePickup;
+			item.OnPickup += a => item.OnPickup -= OneTimePickup;
+			
 			Instantiate(trogAltar).transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 1.6f, 0);
 		}
 		else if (areaType == D_ENCHANT) {
@@ -552,6 +556,7 @@ public class TerrainController : MonoBehaviour {
 			altar.transform.position = new Vector3((xmin + TILES_PER_ROOM / 2) * TILE_SZ, 7.6f, 0);
 			altar.depth = Depth;
 		}
+		#endregion
 		else if (Depth > 0) spawnController.Spawn(new Vector3(xmin, 0, Z_MIN) * TILE_SZ, new Vector3(xmax - 1, 0, Z_MAX) * TILE_SZ
 							, Depth, areaType);
 		hasSpawnedEmpty = true;

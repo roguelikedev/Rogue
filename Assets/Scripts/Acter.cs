@@ -763,6 +763,58 @@ public abstract class Acter : MonoBehaviour {
 		else if (w.charges > comparedWeapon.charges) return true;
 		return w.Depth > comparedWeapon.Depth;
 	}
+	void TryGetItem () {
+		if (shouldPickUpItem && eligiblePickups.Count > 0) {
+			foreach(var eligible in eligiblePickups.FindAll(w => !w.IsEquipped)) {
+				print (eligible);
+				
+				if (eligible.tag == "NonEquipmentItem") {		// food
+					var food = eligible as FoodController;
+					bool shouldEat = false;
+					if (Heal(food.calories)) shouldEat = true;
+					else {
+						foreach (var ally in LivingActers.FindAll(a => a.friendly)) {
+							if (ally.Heal(food.calories)) {
+								shouldEat = true;
+								break;
+							}
+						}
+					}
+					if (shouldEat) {
+						eligible.gameObject.SetActive(false);
+						eligiblePickups.Remove(eligible);
+						food.EatMe(this);
+						Destroy(eligible.gameObject);
+						break;
+					}
+				}
+				if (eligible.GetComponent<TrinketController>()) {
+					eligiblePickups.Remove(eligible);
+					EquipTrinket(eligible.GetComponent<TrinketController>());
+					break;
+				}
+				var weapon = eligible as WeaponController;
+				if (weapon == null) break;
+				var cc = GameObject.FindObjectOfType<CameraController>();
+				var subject = this is PlayerController ? "" : Name + " ";
+				if (WantsToEquip(weapon)) {
+					Equip(weapon);
+					cc.NoteText(subject + "got " + weapon.Description);
+					shouldPickUpItem = false;
+					break;
+				}
+				foreach (var ally in LivingActers.FindAll(a => a.friendly && !(a is PlayerController))) {
+					if (ally.WantsToEquip(weapon)) {
+						ally.Equip(weapon);
+						cc.NoteText(subject + "gave " + weapon.Description + " to " + ally.Name);
+						shouldPickUpItem = false;
+						break;
+					}
+				}
+			}
+		}
+		if (this is PlayerController) shouldPickUpItem = false;
+	}
 	#endregion
 	#region combat
 	
@@ -1007,13 +1059,6 @@ public abstract class Acter : MonoBehaviour {
 		if (!friendlyFireOK && other.friendly == friendly) {
 			return;
 		}
-//		if (weaponController.damageType == WeaponController.DMG_HEAL) {
-//			print ("yup didcollide");
-//			other.TakeDamage(weaponController.attackPower, WeaponController.DMG_HEAL);
-////			other.Heal(weaponController.attackPower);
-//			if (other == this) damageAnnouncer.AnnounceHealed();
-//			return;
-//		}
 		if (weaponController.damageType == WeaponController.DMG_RAISE) {
 			var sufficientControl = true;
 			if (friendly) {
@@ -1034,7 +1079,6 @@ public abstract class Acter : MonoBehaviour {
 				var enemy = other.GetComponent<EnemyController>();
 				if (enemy != null && enemy.friendly) enemy.fleeDistance = 1;
 			}
-			
 			
 			// fall through to allow "raise dead damage" to ghosts
 		}
@@ -1073,61 +1117,11 @@ public abstract class Acter : MonoBehaviour {
 	
 	#endregion
 	
-	void TryGetItem () {
-		if (shouldPickUpItem && eligiblePickups.Count > 0) {
-			foreach(var eligible in eligiblePickups.FindAll(w => !w.IsEquipped)) {
-				print (eligible);
-					
-				if (eligible.tag == "NonEquipmentItem") {		// food
-					var food = eligible as FoodController;
-					bool shouldEat = false;
-					if (Heal(food.calories)) shouldEat = true;
-					else {
-						foreach (var ally in LivingActers.FindAll(a => a.friendly)) {
-							if (ally.Heal(food.calories)) {
-								shouldEat = true;
-								break;
-							}
-						}
-					}
-					if (shouldEat) {
-						eligible.gameObject.SetActive(false);
-						eligiblePickups.Remove(eligible);
-						food.EatMe(this);
-						Destroy(eligible.gameObject);
-						break;
-					}
-				}
-				if (eligible.GetComponent<TrinketController>()) {
-					eligiblePickups.Remove(eligible);
-					EquipTrinket(eligible.GetComponent<TrinketController>());
-					break;
-				}
-				var weapon = eligible as WeaponController;
-				if (weapon == null) break;
-				var cc = GameObject.FindObjectOfType<CameraController>();
-				var subject = this is PlayerController ? "" : Name + " ";
-				if (WantsToEquip(weapon)) {
-					Equip(weapon);
-					cc.NoteText(subject + "got " + weapon.Description);
-					shouldPickUpItem = false;
-					break;
-				}
-				foreach (var ally in LivingActers.FindAll(a => a.friendly && !(a is PlayerController))) {
-					if (ally.WantsToEquip(weapon)) {
-						ally.Equip(weapon);
-						cc.NoteText(subject + "gave " + weapon.Description + " to " + ally.Name);
-						shouldPickUpItem = false;
-						break;
-					}
-				}
-			}
-		}
-		if (this is PlayerController) shouldPickUpItem = false;
-	}
+
 	
 	// returns whether to continue child's fixedupdate()
 	protected virtual bool _FixedUpdate() {
+		if (hitPoints > MaxHitPoints) hitPoints = MaxHitPoints;	// can happen with a curse
 		healthBar.SetCurrentHP(hitPoints, racialBaseHitPoints);
 		
 		foreach (var kvp in bodyParts)

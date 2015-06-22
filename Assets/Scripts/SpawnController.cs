@@ -260,6 +260,7 @@ public class SpawnController : MonoBehaviour {
 	#region loot
 	public void ApplyParticles (WeaponController what) {
 		var boom = what.payload;
+		if (boom == null) return;
 		var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
 		//			foreach(var emitter in possibleEmitters) {
 		ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();

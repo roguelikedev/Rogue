@@ -87,13 +87,11 @@ public class PlayerController : Acter {
 			    book = Instantiate(SpellGenerator.Instance().blankBook);
 				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
 				book.payload.attackPower *= 2;
-			
 				book.payload.payload = SpellGenerator.Instance().Explosion();
 				book.MapChildren(pl => pl.attackPower *= 2);
 				book.payload.payload.attackPower *= 2;
 				SpellGenerator.Instance().Fan(book, 4);
 				Equip(book);
-				
 				spellpower += 6;
 				break;
 			case "priest":
@@ -151,7 +149,6 @@ public class PlayerController : Acter {
 				Equip (Instantiate(SpawnController.Instance.itemExecutionerSword));
 				var wand = Instantiate(SpellGenerator.Instance().blankWand);
 				wand.charges = wand.maxCharges = 18;
-				
 				wand.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
 				wand.payload.attackPower = 100 / GLOBAL_DMG_SCALING;
 				wand.payload.payload = SpellGenerator.Instance().Heal();

@@ -84,7 +84,7 @@ namespace Utilities.Geometry
         public static implicit operator Vec(float f) { return Vec.New(f); }
         public static implicit operator Vec(Vector2 vec) { return new Vec(vec.x, vec.y, 0, 0); }
         public static implicit operator Vec(Vector3 vec) { return new Vec(vec.x, vec.y, vec.z, 0); }
-//        public static implicit operator Vec(Vector4 vec) { return new Vec(vec.x, vec.y, vec.z, vec.W); }
+//        public static implicit operator Vec(Quaternion q) { return new Vec(q.x, q.y, q.z, q.w); }
         public static implicit operator Vec(Color c) { return Vec.New(c.r, c.g, c.b, c.a); }
         public static Vec New(object obj)
         {
@@ -118,14 +118,14 @@ namespace Utilities.Geometry
             throw new InvalidCastException();
         }
         
-        public static implicit operator Vector4(Vec vec) { return new Vector4(vec.x, vec.y, vec.z, vec.d); }
+//        public static implicit operator Quaternion(Vec vec) { return new Quaternion(vec.x, vec.y, vec.z, vec.d); }
         public static implicit operator Vector3(Vec vec) { return new Vector3(vec.x, vec.y, vec.z); }
         public static implicit operator Vector2(Vec vec) { return new Vector2(vec.x, vec.y); }
         public static implicit operator Color(Vec vec) { vec = (vec / 255).Clamp(0, 1); return new Color(vec.x, vec.y, vec.z, vec.d); }
 //        public static explicit operator Box(Vec vec) { return Box.New(vec); }
         public Vec To2 { get { return new Vec(x, y, 0, 0); } }
         public Vector3 To3 { get { return new Vector3(x, y, z); } }
-//        public Vector4 To4 { get { return new Vector4(x, y, z, d); } }
+        public Quaternion ToQ { get { return new Quaternion(x, y, z, d); } }
 //        public Point ToPt
 //        {
 //            get

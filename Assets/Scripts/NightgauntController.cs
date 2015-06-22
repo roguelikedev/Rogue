@@ -10,7 +10,7 @@ public class NightgauntController : EnemyController {
 
 	void Start () {
 		var book = Instantiate(SpellGenerator.Instance().blankBook);
-//		book.GetComponent<SpriteRenderer>().gameObject.SetActive(false);
+		book.GetComponent<SpriteRenderer>().color = Color.clear;
 		book.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
 		book.payload.transform.position = ((Vec)book.payload.transform.position) + Vec.New(0, -7, 0);
 		book.payload.transform.position = ((Vec)book.payload.transform.position).UnitY;
