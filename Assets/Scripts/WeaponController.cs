@@ -35,11 +35,41 @@ public class WeaponController : ItemController {
 	}
 	public override bool IsEquipped {
 		get {
-			if (Parent) return Parent;
+			if (Owner) return Owner;
 			return base.IsEquipped;
 		}
 	}
-	protected Acter Parent { get { return IsProjectile ? thrownBy : GetComponentInParent<Acter>(); } }
+	protected Acter Owner { get { return IsProjectile ? thrownBy : GetComponentInParent<Acter>(); } }
+	public WeaponController Root { get {
+		if (!Owner) return null;
+		return IsOffhand || tag == "spell" ? Owner.EquippedSecondaryWeapon : Owner.EquippedWeapon;
+//		if (this == Owner.bareHands) return this;
+//		
+//		var found = false;
+//		System.Action<WeaponController> Lambda = w => {
+//			if (w.Description == Description) found = true;
+//		};
+//		Lambda(Owner.EquippedWeapon);
+//		Owner.EquippedWeapon.MapChildren(Lambda);
+//		if (found) return Owner.EquippedWeapon;
+//	
+//		if (Owner.EquippedSecondaryWeapon) {
+//			Lambda(Owner.EquippedSecondaryWeapon);
+//			Owner.EquippedSecondaryWeapon.MapChildren(Lambda);
+//		}
+//		if (found) return Owner.EquippedSecondaryWeapon;
+//		else {
+//			Debug.LogError(Description + "'s parent should never be null.");
+//			return null;
+//		}
+	} }
+	public string MultiLineDescription { get {
+		var rval = Name + "\n";
+		MapChildren(w => {
+			rval += "of " + w.Name + "\n";
+		}, true);
+		return rval;
+	} }
 	
 	public WeaponController payload;
 	public List<WeaponController> multiPayload = new List<WeaponController>();
@@ -107,6 +137,9 @@ public class WeaponController : ItemController {
 	#region update/trigger
 	bool wtf = false;
 	protected override void _FixedUpdate() {
+//		if (Root && this != Root) {
+//			print (Description + "'s parent: " + Root.Description);
+//		}
 		var emitter = GetComponentInChildren<ParticleSystem>();
 		if (emitter != null) {
 			var tmp = Quaternion.identity;
@@ -173,7 +206,7 @@ public class WeaponController : ItemController {
 		if (victim == null) return false;
 		if (attackVictims.Contains(victim)) return false;
 		
-		if (Parent != null && (Parent.friendly == victim.friendly && !friendlyFireActive)) {
+		if (Owner != null && (Owner.friendly == victim.friendly && !friendlyFireActive)) {
 			return false;
 		}
 		
@@ -188,7 +221,7 @@ public class WeaponController : ItemController {
 		
 		attackVictims.Add(victim);
 		
-		if (Parent == null) {	// && friendlyFireActive) {		// it's a trap, friendly fire is assumed
+		if (Owner == null) {	// && friendlyFireActive) {		// it's a trap, friendly fire is assumed
 			victim.TakeDamage(attackPower, damageType);
 			return true;
 		}
@@ -196,8 +229,8 @@ public class WeaponController : ItemController {
 //		if (Parent.friendly == victim.friendly && !friendlyFireActive) return;
 		
 		if (!IsProjectile && IsEquipped) {
-			OnHit(victim, Parent);
-			if (victim != Parent || friendlyFireActive) FirePayload(other);
+			OnHit(victim, Owner);
+			if (victim != Owner || friendlyFireActive) FirePayload(other);
 		}
 		else if (IsProjectile && (victim != thrownBy || friendlyFireActive)) {
 			OnHit(victim, thrownBy);
@@ -212,23 +245,28 @@ public class WeaponController : ItemController {
 	}
 	#endregion
 	#region helper
-	public void MapChildren (System.Action<WeaponController> Lambda) {
+	public void MapChildren (System.Action<WeaponController> Lambda, bool ignoreMultiPayload) {
 		var leaf = payload;
 		if (leaf == null) return;
 		Lambda(leaf);
 		leaf.MapChildren(Lambda);
-		foreach (var mp in multiPayload) {
-			Lambda(mp);
-			mp.MapChildren(Lambda);
+		if (!ignoreMultiPayload) {
+			foreach (var mp in multiPayload) {
+				Lambda(mp);
+				mp.MapChildren(Lambda);
+			}
 		}
 		
-//		while (leaf != null) {
-//			Lambda(leaf);
-//			foreach (var mp in leaf.multiPayload) {
-//				mp.MapChildren(Lambda);
-//			}
-//			leaf = leaf.payload;
-//		}
+		//		while (leaf != null) {
+		//			Lambda(leaf);
+		//			foreach (var mp in leaf.multiPayload) {
+		//				mp.MapChildren(Lambda);
+		//			}
+		//			leaf = leaf.payload;
+		//		}
+	}
+	public void MapChildren (System.Action<WeaponController> Lambda) {
+		MapChildren(Lambda, false);
 	}
 	public void ApplySpellpower () {
 		if (!thrownBy) { Debug.LogError("can't apply spellpower without knowing the caster"); return; }
@@ -257,7 +295,7 @@ public class WeaponController : ItemController {
 		lifetime = 1;
 	}
 	#endregion
-	
+	#region public
 	float originalLength;
 	public void PhantomRangeActive (bool active) {
 		var cc = GetComponent<CapsuleCollider>();
@@ -280,7 +318,8 @@ public class WeaponController : ItemController {
 //		if (!thrownBy.FacingRight) force.x *= -1;
 //		GetComponent<Rigidbody>().AddForce(force);
 	}
-	
+	#endregion
+	#region hitting things
 	void Fire(Collider impactPoint, WeaponController p) {
 		if (impactNoise != null) CameraController.Instance.PlaySound(impactNoise);
 //		var unburyFireball = p.name.Contains("fireball") && impactPoint.name.Contains("Tile");	// hax i know
@@ -338,4 +377,5 @@ public class WeaponController : ItemController {
 			Destroy(gameObject);	
 		}
 	}
+	#endregion
 }

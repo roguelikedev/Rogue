@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class FireWalkerController : PlayerController {
@@ -19,7 +19,7 @@ public class FireWalkerController : PlayerController {
 			}
 			var prev = book.Description;
 			book.payload.payload.attackPower = fireballBaseDamage * Mathf.Max(1, TerrainController.Instance.Depth);
-			if (prev != book.Description) announcer.NoteText(prev + " became " + book.Description);
+			if (prev != book.Description) cameraController.NoteText(prev + " became " + book.Description);
 		}
 		
 		base.HasExploredNewRoom ();

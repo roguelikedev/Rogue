@@ -26,10 +26,9 @@ public class DamageAnnouncer : MonoBehaviour {
 		if (mob != null) AnnounceText("+"+mob.ChallengeRating+" XP");
 		var pc = acter as PlayerController;
 		if (pc != null) {
-			pc.announcer.AnnounceText("YOU DIED...\npress escape to restart");
 			CameraController.Instance.PlaySound(playerDeath);
 		}
-		CameraController.Instance.PlaySound(splatter);
+		else CameraController.Instance.PlaySound(splatter);
 	}
 	
 	public void AnnounceDamage(float quantity, int damageType) {

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -87,7 +87,7 @@ public abstract class Acter : MonoBehaviour {
 		xpToLevel = (int)Math.Pow(baseXPToLevel, level * .75f);
 		damageAnnouncer.AnnounceText("reached level " + level);
 		if (this is PlayerController) {
-			PlayerController.Instance.announcer.ExpToLevelChanged(xpToLevel, level + 1);
+			PlayerController.Instance.cameraController.ExpToLevelChanged(xpToLevel, level + 1);
 		}
 	}
 	public virtual string MainClass
@@ -358,23 +358,25 @@ public abstract class Acter : MonoBehaviour {
 				LivingActers.Remove(this);
 				if (grappling != null) grappling.grappledBy.Remove(this);
 				damageAnnouncer.AnnounceDeath();
-				if (EquippedWeapon != bareHands) DropWeapon(EquippedWeapon);
-				DropWeapon(EquippedSecondaryWeapon);
-				ReleaseEquipment(GetArmor(torso));
-				ReleaseEquipment(GetArmor(head));
-				ReleaseEquipment(GetArmor(pelvis));
-				ReleaseEquipment(GetArmor(GetSlot("frontArm")));
-				ReleaseEquipment(GetArmor(GetSlot("frontShin")));
-				ReleaseEquipment(GetArmor(GetSlot("backArm")));
-				ReleaseEquipment(GetArmor(GetSlot("backShin")));
-				foreach (var item in GetSlot("Head").GetComponentsInChildren<TrinketController>()) {
-					item.transform.parent = null;
-					item.GetComponent<BoxCollider>().enabled = true;
-					item.GetComponent<Rigidbody>().isKinematic = false;
-					
-					var spr = item.GetComponent<SpriteRenderer>();
-					if (spr != null) {
-						spr.sortingLayerName = "Default";
+				if (!GetComponent<PlayerController>()) {
+					if (EquippedWeapon != bareHands) DropWeapon(EquippedWeapon);
+					DropWeapon(EquippedSecondaryWeapon);
+					ReleaseEquipment(GetArmor(torso));
+					ReleaseEquipment(GetArmor(head));
+					ReleaseEquipment(GetArmor(pelvis));
+					ReleaseEquipment(GetArmor(GetSlot("frontArm")));
+					ReleaseEquipment(GetArmor(GetSlot("frontShin")));
+					ReleaseEquipment(GetArmor(GetSlot("backArm")));
+					ReleaseEquipment(GetArmor(GetSlot("backShin")));
+					foreach (var item in GetSlot("Head").GetComponentsInChildren<TrinketController>()) {
+						item.transform.parent = null;
+						item.GetComponent<BoxCollider>().enabled = true;
+						item.GetComponent<Rigidbody>().isKinematic = false;
+						
+						var spr = item.GetComponent<SpriteRenderer>();
+						if (spr != null) {
+							spr.sortingLayerName = "Default";
+						}
 					}
 				}
 				equipASAP.Clear();
@@ -670,10 +672,14 @@ public abstract class Acter : MonoBehaviour {
 		}
 	}
 	
+//	bool playerHasHugenessHack = false;
 	protected void EquipTrinket (TrinketController trinket) {
 		if (isAquatic && trinket.waterWalking) return;
 		if (freeAction && trinket.freeAction) return;
-	
+		if (trinket.npcSlowdown != 1 && CameraController.Instance.npcSpeedModifier != 1) return;
+//		if (trinket.hugeness != 1 && playerHasHugenessHack) return;
+		if (trinket.hugeness != 1 && GetSlot("backForeArm").GetComponentInChildren<TrinketController>()) return;
+		
 		trinket.OnPickup(this);
 		trinket.GetComponent<BoxCollider>().enabled = false;
 		trinket.GetComponent<Rigidbody>().isKinematic = true;
@@ -710,7 +716,7 @@ public abstract class Acter : MonoBehaviour {
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = hand.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
 		if (trinket.hugeness != 1) {
-			Grow(1.5f);
+			Grow(trinket.hugeness);
 			var hand = GetSlot("backForeArm");
 			trinket.transform.parent = hand;
 			trinket.transform.localRotation = Quaternion.identity;
@@ -1098,15 +1104,20 @@ public abstract class Acter : MonoBehaviour {
 		var qty = weaponController.attackPower;
 		if (!weaponController.IsProjectile || weapon.tag == "Throwable Weapon") {
 			qty *= meleeMultiplier;
+			if (weaponController.Name.Contains("iltless")) print (qty);
 		}
 		
 		var prevState = other.State;
 		other.TakeDamage(qty, weaponController.damageType);
 		
 		if (other.State == ST_DEAD && prevState != ST_DEAD) {
+			
 			var player = other.GetComponent<PlayerController>();
-			if (other == this) {
-				if (this is PlayerController) player.Speak("i killed me...");
+			if (player) {
+				var str = player == this ? "commited suicide" : "killed by " + Name;
+				str += "\nwith a " + weaponController.Root.MultiLineDescription;
+				print (str);
+				CameraController.Instance.AnnounceDeath(str);
 				return;
 			}
 			

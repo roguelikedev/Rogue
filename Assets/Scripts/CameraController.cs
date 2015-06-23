@@ -46,11 +46,35 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 		else if (who == "fighter") player = Instantiate(beardMan);
 		else player = Instantiate(orc);
 		player.transform.position = new Vector3(10, 3.5f, 0);
-		player.announcer = this;
+		player.cameraController = this;
 		player.SetClass(who);
 	}
 	
+	bool isAnnouncingDeath = false;
+	const string DEATH_MSG = "YOU DIED...\npress escape to restart";
+	const string CREDITS = "\n\n\n\n\nRoguelike v.152 brought to you by\n---most skunked backer---\nRyan McHenry"
+						+ "\n---biggest pledge and best death scream---\nJustin \"Katak\" McKeon"
+						+ "\n---best mom and tied for biggest pledge---\nLaurie R. King"
+						+ "\n---programming and hair loss\nNate \"roguelikedev\" King";
+	void DidFadeOut () {
+		if (!isAnnouncingDeath || announcement.text == CREDITS) return;
+		AnnounceText(CREDITS);
+		announcement.transform.position = announcement.transform.position - new Vector3(0, 5);
+		delayBeforeFadeOut = 270;
+	}
+	
+	public void AnnounceDeath (string cause) {
+//		var lines = cause.Split(new char[]{'\n'}).Length;
+//		for (int lcv = 0; lcv < lines / 2; ++lcv) {
+//			cause = "\n" + cause;		
+//		}
+		AnnounceText(cause + "\n\npress escape to restart");
+		isAnnouncingDeath = true;
+		PlaySound(PlayerController.Instance.damageAnnouncer.playerDeath);
+	}
+	
 	public void AnnounceText(string text) {
+		if (isAnnouncingDeath && text != CREDITS) return;
 		announcement.text = text;
 		shouldFadeIn = true;
 		shouldFadeOut = false;
@@ -104,30 +128,7 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 		AudioSource.PlayClipAtPoint(sound, PlayerController.Instance.transform.position, Volume);
 	}
 	
-	void LateUpdate () {
-		if (player != null) {
-			transform.position = player.transform.position + offset;
-		}
-		var color = announcement.color;
-		if (shouldFadeIn) {
-			color.a += fadeSpeed;
-			if (color.a >= 1) {
-				shouldFadeIn = false;
-				shouldFadeOut = true;
-				delayBeforeFadeOut = baseDelayBeforeFadeOut;
-			}
-		}
-		if (shouldFadeOut) {
-			if (delayBeforeFadeOut > 0) delayBeforeFadeOut--;
-			else color.a -= fadeSpeed;
-			if (color.a <= 0) shouldFadeOut = false;
-		}
-		if (shouldFadeIn == shouldFadeOut && delayBeforeFadeOut <= 0 && color.a > 0) {
-			Debug.LogError("!!! WTF in announcement, " + announcement.text + " will never fade out!!!");
-		}
-		
-		announcement.color = color;
-		
+	void PlayMusic () {
 		if (!audioSource.isPlaying) {
 			switch(Random.Range(0,5)) {
 				case 0:
@@ -151,5 +152,41 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 			}
 			if (!muteSongs) audioSource.Play();
 		}
+	}
+	
+	void LateUpdate () {
+		if (player != null) {
+			transform.position = player.transform.position + offset;
+		}
+		if (isAnnouncingDeath) {
+			offset = offset + new Vector3(0, .05f);
+			if (announcement.text == CREDITS) {
+				announcement.transform.position = announcement.transform.position + new Vector3(0, .075f);
+			}
+		}
+		var color = announcement.color;
+		if (shouldFadeIn) {
+			color.a += fadeSpeed;
+			if (color.a >= 1) {
+				shouldFadeIn = false;
+				shouldFadeOut = true;
+				if (delayBeforeFadeOut < baseDelayBeforeFadeOut) delayBeforeFadeOut = baseDelayBeforeFadeOut;  // allow long credits
+			}
+		}
+		if (shouldFadeOut) {
+			if (delayBeforeFadeOut > 0) delayBeforeFadeOut--;
+			else color.a -= fadeSpeed;
+			if (color.a <= 0) {
+				shouldFadeOut = false;
+				DidFadeOut();
+			}
+		}
+		if (shouldFadeIn == shouldFadeOut && delayBeforeFadeOut <= 0 && color.a > 0) {
+			Debug.LogError("!!! WTF in announcement, " + announcement.text + " will never fade out!!!");
+		}
+		
+		announcement.color = color;
+		
+		PlayMusic();
 	}
 }

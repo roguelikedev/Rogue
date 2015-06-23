@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Utilities.Geometry;
@@ -7,7 +7,7 @@ public class BroomController : WeaponController {
 	public float pushDirection;
 	protected virtual Vector3 Center {
 		get {
-			if (Parent != null) return Parent.transform.position;
+			if (Owner != null) return Owner.transform.position;
 			else return transform.position;
 		}
 	}
@@ -20,8 +20,8 @@ public class BroomController : WeaponController {
 				if (victim.State == Acter.ST_CAKE) continue;
 				
 				Vec direction;
-				if (Parent != null) {
-					if (victim.friendly == Parent.friendly && !friendlyFireActive) continue;
+				if (Owner != null) {
+					if (victim.friendly == Owner.friendly && !friendlyFireActive) continue;
 				 	direction = (victim.transform.position - Center);
 				}
 				else direction = victim.transform.position - Center;		// it's a trap

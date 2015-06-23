@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerController : Acter {
-	public CameraController announcer;
+	public CameraController cameraController;
 	public bool infiniteHealth = false;
 	string mainClass = "";
 	public override string MainClass { get { return mainClass; } }
@@ -31,13 +31,7 @@ public class PlayerController : Acter {
 	
 	void Start () {
 		xpToLevel = baseXPToLevel;
-		announcer.ExpToLevelChanged(xpToLevel, level + 1);
-	}
-	
-	public void GainExperience (int quantity) {
-		xpToLevel -= quantity;
-		if (xpToLevel <= 0) GainLevel(MainClass);
-		announcer.ExpToLevelChanged(xpToLevel, level + 1);
+		cameraController.ExpToLevelChanged(xpToLevel, level + 1);
 	}
 	
 	public virtual void HasExploredNewRoom () {
@@ -49,7 +43,12 @@ public class PlayerController : Acter {
 			}
 		});
 	}
-	
+	#region munchkins
+	public void GainExperience (int quantity) {
+		xpToLevel -= quantity;
+		if (xpToLevel <= 0) GainLevel(MainClass);
+		cameraController.ExpToLevelChanged(xpToLevel, level + 1);
+	}
 	public void SetClass(string which) {
 		if (which == "priest") mainClass = C_WIZARD;
 		else if (which == "murderer" || which == "wretch") mainClass = C_GESTALT;
@@ -140,7 +139,7 @@ public class PlayerController : Acter {
 				Equip(murderWeapon);
 				Equip(Instantiate(murderMask));
 				speed += 200;
-				skinColor = announcer.pinkSkin;
+				skinColor = cameraController.pinkSkin;
 				ChangeSkinColor();
 				SpawnController.Instance.stinginess++;
 				TerrainController.Instance.statuesDestroyed--;
@@ -170,8 +169,8 @@ public class PlayerController : Acter {
 				break;
 			default: break;
 		}
-		
 	}
+	#endregion
 
 	public void Speak(string what) {
 		SpeechBubble.text = what;
@@ -198,7 +197,7 @@ public class PlayerController : Acter {
 	}
 	void Update () {
 		if (infiniteHealth) {
-			announcer.StatsChanged("acters", LivingActers.Count, Time.deltaTime);
+			cameraController.StatsChanged("acters", LivingActers.Count, Time.deltaTime);
 		}
 	
 		if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")) {
@@ -303,7 +302,9 @@ public class PlayerController : Acter {
 			if (MainClass == C_BRUTE && type == WeaponController.DMG_FIRE) {
 				Speak("argh!  fire!");
 			}
-			if (State == ST_DEAD && !dead) print(quantity + " type " + type + " damage");
+			if (State == ST_DEAD && !dead) {
+				print(quantity + " type " + type + " damage");
+			}
 		}
 	}
 
@@ -314,10 +315,10 @@ public class PlayerController : Acter {
 			;		// see Update()
 		}
 		else if (MainClass == C_WIZARD) {
-			announcer.StatsChanged("intelligence", spellpower, armorClass);
+			cameraController.StatsChanged("intelligence", spellpower, armorClass);
 		}
 		else {
-			announcer.StatsChanged("strength", meleeMultiplier, armorClass);
+			cameraController.StatsChanged("strength", meleeMultiplier, armorClass);
 		}
 		if (MainClass == C_GESTALT) poiseBreakCounter = 0;
 		
@@ -351,6 +352,6 @@ public class PlayerController : Acter {
 		
 			
 		base.WeaponDidCollide(other, weaponController, friendlyFireOK);
-		announcer.ExpToLevelChanged(xpToLevel, level + 1);
+		cameraController.ExpToLevelChanged(xpToLevel, level + 1);
 	}
 }
