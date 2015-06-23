@@ -13,9 +13,9 @@ public class TerrainEffectTrap : TerrainEffectFloor {
 	public float damageStaggering;
 	
 	void Awake() {
-		if (Random.Range(0, 4) == 0) payload = SpellGenerator.Instance().Explosion();
+		if (Random.Range(0, 4) == 0) payload = SpellGenerator.Instance.Explosion();
 		else if (Random.Range(0, 4) == 0) {
-			payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
+			payload = SpellGenerator.Instance.Pillar(WeaponController.DMG_PARA);
 			payload.transform.localPosition = Vector3.zero;
 			payload.GetComponent<CapsuleCollider>().center = Vector3.zero;
 			damageStaggering = 0;	

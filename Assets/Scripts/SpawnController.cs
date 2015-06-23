@@ -262,6 +262,8 @@ public class SpawnController : MonoBehaviour {
 		var boom = what.payload;
 		if (boom == null) return;
 		var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
+		if (possibleEmitters.Length == 0) possibleEmitters = boom.payload.GetComponentsInChildren<ParticleSystem>(true);
+		
 		//			foreach(var emitter in possibleEmitters) {
 		ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
 		if (possibleEmitters.Length == 0) emitter = SpellGenerator.purpleParticles;
@@ -292,52 +294,15 @@ public class SpawnController : MonoBehaviour {
 		if (what.bodySlot == WeaponController.EQ_WEAPON) {
 			what.depth += (int) depth;
 			
-			WeaponController boom;
 			if (what.payload != null && !what.IsMeleeWeapon) {		// replace previous enchantments on an arrow
 				what.payload = Instantiate(what.payload);			// or i guess all but the first spell on a book
 				SpellGenerator.Generate((int)depth, what.payload);
-				boom = what.payload.payload;
 			}
 			else {		// replace previous enchantments on a melee weapon
 				SpellGenerator.Generate((int)depth, what);
-				boom = what.payload;
 			}
-			
-//			boom.MapChildren(wc => wc.friendlyFireActive = false);
-			
-//			var leaf = boom;
-//			var control = 0;
-//			while (leaf != null) {
-//				if (leaf.damageType != WeaponController.DMG_HEAL) leaf.friendlyFireActive = false;
-//				leaf = leaf.payload;
-//				if (control > 100) {
-//					Debug.LogError("infinite loop");
-//					break;
-//				}
-//			}
+
 			ApplyParticles(what);
-//			var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
-////			foreach(var emitter in possibleEmitters) {
-//			ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
-//			if (possibleEmitters.Length == 0) emitter = SpellGenerator.purpleParticles;
-//			else emitter = possibleEmitters[0];
-//			
-//			emitter = Instantiate(emitter);
-//			var prev = what.GetComponentInChildren<ParticleSystem>();
-//			if (prev != null) {
-//				prev.transform.parent = null;
-//				Destroy(prev.gameObject);
-//			}
-//			
-//			emitter.transform.parent = what.transform;
-//			var box = what.GetComponent<BoxCollider>();
-//			emitter.transform.localPosition = box.center;
-//			emitter.transform.localScale = new Vector3(box.size.magnitude, 1, 1);
-////			emitter.startSize *= (box.size.magnitude / 27);
-////			emitter.emissionRate *= box.size.magnitude;
-//			var c = emitter.startColor;
-//			c.a *= .25f + what.Depth / 20;
-//			emitter.startColor = c;
 		}
 		
 		return what;
@@ -392,7 +357,7 @@ public class SpawnController : MonoBehaviour {
 		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
 		possibilities.Add(itemEstusFlask as WeaponController);
 		if (PlayerController.Instance.spellpower > 1) {
-			possibilities.Add(SpellGenerator.Instance().blankBook);
+			possibilities.Add(SpellGenerator.Instance.blankBook);
 		}
 		for (int lcv = 0; lcv <= depth;) {
 			if (possibilities.Count == 0) break;
@@ -532,6 +497,7 @@ public class SpawnController : MonoBehaviour {
 		bool isCaptain = Random.Range(0, 4) == 0;		// huge enemies are always captains
 		while (encounterLevel <= depth) {
 			EnemyController whichMob = ChooseMob(depth, areaType);
+			whichMob.transform.position = RandomLocation();
 			if (whichMob == enemyIronLich || whichMob == enemyWoman) isCaptain = true;
 			
 			var remainingEL = encounterLevel - whichMob.racialLevel;
@@ -558,7 +524,6 @@ public class SpawnController : MonoBehaviour {
 			AddEquipment(whichMob, isCaptain);
 			isCaptain = false;
 			encounterLevel += whichMob.ChallengeRating;
-			whichMob.transform.position = RandomLocation();
 		}
 	}
 }

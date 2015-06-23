@@ -20,7 +20,7 @@ public class ItemController : MonoBehaviour, IDepthSelectable {
 	}
 	public System.Action<Acter> OnPickup = a => {} ;
 
-	public bool IsEquipped {
+	public virtual bool IsEquipped {
 		get {
 			return GetComponentsInParent<Acter>().Length != 0;
 		}

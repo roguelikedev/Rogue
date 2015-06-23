@@ -625,11 +625,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 198304}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d75fc352fb39c8c42be35a8208fd8c07, type: 3}
+  m_Script: {fileID: 11500000, guid: 8622350140167ed44bde86d4635094dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 300
-  racialBaseHitPoints: 8
+  racialBaseHitPoints: 6
   meleeMultiplier: 4
   spellpower: 0
   level: 0
@@ -653,6 +653,8 @@ MonoBehaviour:
   commonness: 10
   fleeDistance: 0
   isUnliving: 0
+  regenRate: 1
+  freeArmor: 1
 --- !u!135 &13581592
 SphereCollider:
   m_ObjectHideFlags: 1
@@ -2189,7 +2191,19 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: regenRate
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: freeArmor
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: racialBaseHitPoints
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 198304}

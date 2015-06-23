@@ -46,6 +46,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 406838}
   - 65: {fileID: 6500866}
+  - 114: {fileID: 11475356}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Wall
@@ -195,7 +196,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 10, z: 1}
+  m_Size: {x: 1, y: 11, z: 1}
   m_Center: {x: 0, y: -5.5, z: 0}
 --- !u!102 &10245724
 TextMesh:
@@ -218,6 +219,18 @@ TextMesh:
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
+--- !u!114 &11475356
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 192776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6df893cc3359c2c45ba12e93becd0dbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shoveDirection: {x: 0, y: 0, z: -1}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

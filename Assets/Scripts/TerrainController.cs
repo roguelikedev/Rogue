@@ -151,7 +151,6 @@ public class TerrainController : MonoBehaviour {
 	
 	#region long switch statements
 	int ChooseNextRoomType (int areaType) {
-		if (Random.Range(0,Depth) < 2) return D_TROG;
 		if (Depth == 27) return D_HELL;
 		int rval;
 		bool specialRoomOK = areaType < D_CHRISTMAS;
@@ -191,10 +190,10 @@ public class TerrainController : MonoBehaviour {
 				visitedSpecialRooms.Add(specialType);
 				rval = specialType;
 			}
+			if (rval == D_THORNS && Depth < 1) continue;
 			if (rval == D_WATER && Depth < 2) continue;
 			if (rval == D_FOREST && Depth < 4) continue;
 			if (rval == D_TOMB && Depth < 5) continue;
-			if (rval == D_THORNS && Depth < 1) continue;
 			else break;
 		}
 		return rval;
@@ -512,12 +511,12 @@ public class TerrainController : MonoBehaviour {
 				WeaponController punishment = null;
 				switch(fate) {
 					case 0:
-						punishment = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
+						punishment = SpellGenerator.Instance.Pillar(WeaponController.DMG_FIRE);
 						punishment.attackPower = a.MaxHitPoints / Acter.GLOBAL_DMG_SCALING;
 						punishment.attackPower *= 2;	// overcome doubling of intrinsic 1 AC
 						break;
 					case 1:
-						punishment = SpellGenerator.Instance().Pillar(WeaponController.DMG_DEATH);
+						punishment = SpellGenerator.Instance.Pillar(WeaponController.DMG_DEATH);
 						punishment.attackPower = (a.HitPoints - 0.1f) / Acter.GLOBAL_DMG_SCALING;
 						break;
 					case 2:

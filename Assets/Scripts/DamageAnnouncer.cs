@@ -43,10 +43,10 @@ public class DamageAnnouncer : MonoBehaviour {
 		damageText.transform.localPosition = Vector3.zero;
 		var clip = thump;
 		if (damageType == WeaponController.DMG_NOT) {		// thorns floor
-			clip = SpellGenerator.Instance().rippingSound;
+			clip = SpellGenerator.Instance.rippingSound;
 		}
 		else if (damageType == WeaponController.DMG_FIRE) {
-			clip = SpellGenerator.Instance().fireSound;
+			clip = SpellGenerator.Instance.fireSound;
 		}
 		if (damageType != WeaponController.DMG_GRAP) {
 			CameraController.Instance.PlaySound(clip);

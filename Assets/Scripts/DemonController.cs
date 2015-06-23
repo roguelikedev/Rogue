@@ -8,7 +8,7 @@ public class DemonController : EnemyController {
 	public float auraDamage;
 	
 	protected void InitializeAura(int damageType, float power) {
-		damageAura = SpellGenerator.Instance().Pillar(damageType);
+		damageAura = SpellGenerator.Instance.Pillar(damageType);
 		damageAura.lifetime = -1;
 		damageAura.attackPower += power;
 		damageAura.transform.parent = transform;

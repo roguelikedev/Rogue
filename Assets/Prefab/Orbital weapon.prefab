@@ -118,7 +118,7 @@ MonoBehaviour:
   attackVictims: []
   attackActive: 1
   armorClass: 0
-  attackPower: 2
+  attackPower: 5
   impactNoise: {fileID: 0}
   firedNoise: {fileID: 0}
   constantNoise: {fileID: 0}

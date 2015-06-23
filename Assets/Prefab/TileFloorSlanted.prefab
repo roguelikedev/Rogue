@@ -29,9 +29,10 @@ GameObject:
   - 65: {fileID: 6539582}
   - 23: {fileID: 2397280}
   - 54: {fileID: 5459344}
+  - 114: {fileID: 11436382}
   m_Layer: 0
   m_Name: ringOutPrevention
-  m_TagString: Wall
+  m_TagString: ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -222,8 +223,20 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 1.10000002, y: 2.25, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &11436382
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 187734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6df893cc3359c2c45ba12e93becd0dbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shoveDirection: {x: 0, y: 1, z: 0}
 --- !u!114 &11485380
 MonoBehaviour:
   m_ObjectHideFlags: 1

@@ -229,6 +229,7 @@ MonoBehaviour:
   audioSource: {fileID: 8221232}
   charges: -1
   speedCoefficient: 1
+  pushDirection: -.330000013
 --- !u!136 &13623010
 CapsuleCollider:
   m_ObjectHideFlags: 1
@@ -1367,6 +1368,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: depth
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: pushDirection
+      value: -.330000013
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

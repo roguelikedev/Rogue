@@ -16,7 +16,7 @@ public class SignpostController : ItemController {
 
 
 	public void Speak() {		// FIXME:  DRY
-		if (spawnIn != null) {
+		if (spawnIn != null && !wasRead) {
 			var punish = fixedSpeech == -1 && PlayerController.Instance.IsJason;
 			if (punish) {
 				spawnIn = SpawnController.Instance.enemyDemon;
@@ -50,10 +50,6 @@ public class SignpostController : ItemController {
 			timeToFadeout = 45;
 		}
 		
-		if (fixedSpeech == -3) {
-			PlayerController.Instance.GainLevel(PlayerController.Instance.MainClass);
-		}
-		
 		if (payload != null) {
 			var e = Instantiate(payload);
 			e.gameObject.SetActive(true);
@@ -65,10 +61,15 @@ public class SignpostController : ItemController {
 			}
 			payload = null;
 		}
+		
 		if (!wasRead) {
 			wasRead = true;
-			PlayerController.Instance.GainExperience(PlayerController.Instance.level + 1);
+			if (fixedSpeech == -3) {
+				PlayerController.Instance.GainLevel(PlayerController.Instance.MainClass);
+			}
+			else PlayerController.Instance.GainExperience(PlayerController.Instance.level + 1);
 		}
+//		PlayerController.Instance.exp
 	}
 	
 	protected override void _FixedUpdate ()
@@ -142,12 +143,12 @@ public class SignpostController : ItemController {
 				case 14:
 					if (PlayerController.Instance.friendless) {
 						info = "die, you\nmurderer";
-						payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_DEATH);
+						payload = SpellGenerator.Instance.Pillar(WeaponController.DMG_DEATH);
 						payload.attackPower = 10;
 					}
 					else {
 						info = "stay strong";
-						payload = SpellGenerator.Instance().Heal();
+						payload = SpellGenerator.Instance.Heal();
 					}
 					break;
 				case 15:

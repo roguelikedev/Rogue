@@ -25,9 +25,9 @@ public class SpellGenerator : MonoBehaviour {
 	public WandController blankWand;
 	public FireballController fireball;
 	public PullController pullIn;
-	public static SpellGenerator Instance() {
+	public static SpellGenerator Instance { get {
 		return GameObject.FindObjectOfType<SpellGenerator>();
-	}
+	} }
 	
 	#region modular spells
 	WeaponController Defaults(int damageType, float radius, float height) {
@@ -47,7 +47,7 @@ public class SpellGenerator : MonoBehaviour {
 			case WeaponController.DMG_DEATH:
 				emitter = necroBeamParticles;
 				rval.name = "death";
-				rval.attackPower *= .1f;
+				rval.attackPower *= .15f;
 				rval.firedNoise = moanSound;
 				break;
 			case WeaponController.DMG_RAISE:
@@ -138,7 +138,7 @@ public class SpellGenerator : MonoBehaviour {
 			case WeaponController.DMG_DEATH:
 				emitter = necroBeamParticles;
 				rval.name = "death";
-				rval.attackPower *= .1f;
+				rval.attackPower *= .15f;
 				rval.constantNoise = moanSound;
 				break;
 			case WeaponController.DMG_RAISE:

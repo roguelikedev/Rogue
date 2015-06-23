@@ -25,6 +25,15 @@ public class FireWalkerController : PlayerController {
 		base.HasExploredNewRoom ();
 	}
 
+	protected override bool _FixedUpdate ()
+	{
+		if (infiniteHealth) {
+			var wand = EquippedSecondaryWeapon.GetComponent<WandController>();
+			if (wand) wand.charges = wand.maxCharges;
+		}
+		return base._FixedUpdate ();
+	}
+
 	public override void TakeDamage (float quantity, int type)
 	{
 		if (type == WeaponController.DMG_FIRE) {

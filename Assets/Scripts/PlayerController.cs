@@ -64,47 +64,52 @@ public class PlayerController : Acter {
 				TerrainController.Instance.ShowTraps = true;
 				freeAction = true;
 				var bow = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemBow);
-				bow.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_PARA);
-				bow.payload.payload.payload = SpellGenerator.Instance().Pillar(WeaponController.DMG_FIRE);
+				bow.payload.payload = SpellGenerator.Instance.Pillar(WeaponController.DMG_PARA);
+				bow.payload.payload.payload = SpellGenerator.Instance.Pillar(WeaponController.DMG_FIRE);
 				bow.payload.payload.payload.attackPower *= 4;
 				SpawnController.Instance.ApplyParticles(bow);
 				Equip(bow);
 				speed += 50;
 				break;
 			case "firewalker":
-				var boom = Instantiate(SpellGenerator.Instance().blankWand);
-				boom.payload = SpellGenerator.Instance().Vortex();
-				boom.payload.payload = SpellGenerator.Instance().Explosion();
-				boom.payload.payload.attackPower *= 4;
-				boom.payload.payload.tag = "spell";
-				SpellGenerator.Instance().Fan(boom.payload, 2);
+				var boom = Instantiate(SpellGenerator.Instance.blankWand);
+				boom.payload = SpellGenerator.Instance.Vortex();
+//				boom.payload.payload = SpellGenerator.Instance.Explosion();
+//				boom.payload.payload.attackPower *= 4;
+//				boom.payload.payload.tag = "spell";
+				SpellGenerator.Instance.Fan(boom.payload, 2);
 				boom.charges = boom.maxCharges = 3;
 				Equip(boom);
 				speed += 50;
 				spellpower += 1;
 				break;
 			case C_WIZARD:
-			    book = Instantiate(SpellGenerator.Instance().blankBook);
-				book.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_FIRE);
+			    book = Instantiate(SpellGenerator.Instance.blankBook);
+				book.payload = SpellGenerator.Instance.Bolt(WeaponController.DMG_FIRE);
 				book.payload.attackPower *= 2;
-				book.payload.payload = SpellGenerator.Instance().Explosion();
+				book.payload.payload = SpellGenerator.Instance.Explosion();
 				book.MapChildren(pl => pl.attackPower *= 2);
 				book.payload.payload.attackPower *= 2;
-				SpellGenerator.Instance().Fan(book, 4);
+				SpellGenerator.Instance.Fan(book, 4);
 				Equip(book);
+				var broom = Instantiate(SpawnController.Instance.itemBroom);
+				broom.payload = SpellGenerator.Instance.Vortex();
+				SpawnController.Instance.ApplyParticles(broom);
+				Equip (broom);
+				
 				spellpower += 6;
 				break;
 			case "priest":
-				book = Instantiate(SpellGenerator.Instance().blankBook);
-				book.payload = SpellGenerator.Instance().RaiseDead();
-				book.payload.payload = SpellGenerator.Instance().Heal();
-				book.payload.payload.attackPower *= 5;
+				book = Instantiate(SpellGenerator.Instance.blankBook);
+				book.payload = SpellGenerator.Instance.Heal();
+				book.payload.attackPower *= 5;
 				Equip(book);
 				spellpower += 4;
-				meleeMultiplier += 0.5f;
-				Equip (Instantiate(SpawnController.Instance.itemShillalegh));
 				var pet = Instantiate (SpawnController.Instance.enemyTreant);
 				pet.friendly = true;
+				var saw = Instantiate(TerrainController.Instance.buzzsaw);
+				saw.weapon.payload = SpellGenerator.Instance.RaiseDead();
+				saw.weapon.thrownBy = this;
 				break;
 			case C_BRUTE:
 				BeginRegenerate(1 / GLOBAL_DMG_SCALING);
@@ -113,7 +118,7 @@ public class PlayerController : Acter {
 				break;
 			case C_FIGHT:
 				var weapon = Instantiate(SpawnController.Instance.itemBarMace);
-				weapon.payload = SpellGenerator.Instance().Heal();
+				weapon.payload = SpellGenerator.Instance.Heal();
 				SpawnController.Instance.ApplyParticles(weapon);
 				Equip (weapon);
 				Equip (Instantiate(SpawnController.Instance.itemGreaves));
@@ -125,9 +130,9 @@ public class PlayerController : Acter {
 			case "murderer":
 				freeAction = friendless = isAquatic = true;
 				var murderWeapon = Instantiate(GameObject.FindObjectOfType<SpawnController>().itemMachete);
-				murderWeapon.payload = SpellGenerator.Instance().Bolt(WeaponController.DMG_DEATH);
-				murderWeapon.payload.payload = SpellGenerator.Instance().RaiseDead();
-				murderWeapon.payload.payload.firedNoise = SpellGenerator.Instance().rippingSound;
+				murderWeapon.payload = SpellGenerator.Instance.Bolt(WeaponController.DMG_DEATH);
+				murderWeapon.payload.payload = SpellGenerator.Instance.RaiseDead();
+				murderWeapon.payload.payload.firedNoise = SpellGenerator.Instance.rippingSound;
 				SpawnController.Instance.ApplyParticles(murderWeapon);
 				lockMainHand = true;
 				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(true, lockMainHand);
@@ -147,13 +152,13 @@ public class PlayerController : Acter {
 				break;
 			case "executioner":
 				Equip (Instantiate(SpawnController.Instance.itemExecutionerSword));
-				var wand = Instantiate(SpellGenerator.Instance().blankWand);
+				var wand = Instantiate(SpellGenerator.Instance.blankWand);
 				wand.charges = wand.maxCharges = 18;
-				wand.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_DEATH);
+				wand.payload = SpellGenerator.Instance.Beam(WeaponController.DMG_DEATH);
 				wand.payload.attackPower = 100 / GLOBAL_DMG_SCALING;
-				wand.payload.payload = SpellGenerator.Instance().Heal();
+				wand.payload.payload = SpellGenerator.Instance.Heal();
 				wand.payload.payload.attackPower = 100 / GLOBAL_DMG_SCALING;
-				SpellGenerator.Instance().Split(wand, 6);
+				SpellGenerator.Instance.Split(wand, 6);
 				lockOffHand = true;
 				healthBar.GetComponent<PlayerHealthBarController>().ShowLock(true, false);
 				Equip (wand);
@@ -217,10 +222,14 @@ public class PlayerController : Acter {
 			else hbar.wandIcon.gameObject.SetActive(false);
 			var myPot = EquippedSecondaryWeapon.GetComponent<EstusController>();
 			if (myPot != null) {
+				print (myPot);
 				hbar.itemCharges.text = myPot.charges + "";
 				hbar.potionIcon.gameObject.SetActive(true);
 			}
-			else hbar.potionIcon.gameObject.SetActive(false);
+			else {
+				hbar.itemCharges.text = "";
+				hbar.potionIcon.gameObject.SetActive(false);
+			}
 		}
 		
 		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0) 
@@ -334,7 +343,7 @@ public class PlayerController : Acter {
 	
 	public override void WeaponDidCollide (Acter other, WeaponController weaponController, bool friendlyFireOK)
 	{
-		if (infiniteHealth) {
+		if (infiniteHealth && weaponController.attackPower > 0) {
 			other.TakeDamage(100, WeaponController.DMG_DEATH);
 			other.TakeDamage(100, WeaponController.DMG_RAISE);
 			return;

@@ -8,10 +8,11 @@ public abstract class Acter : MonoBehaviour {
 	#region munchkin stats
 	public float speed = 200;
 	protected virtual float Speed { get { return speed == SPEED_WHEN_PARALYZED ? speed :
+												 friendly ? speed :
 												 speed * CameraController.Instance.npcSpeedModifier; } }
 	public float racialBaseHitPoints;
 	protected int xpToLevel;
-	protected readonly int baseXPToLevel = 3;
+	protected readonly int baseXPToLevel = 5;
 	float hpFromLevels;
 	public float MaxHitPoints { get { return racialBaseHitPoints + hpFromLevels; }
 							set { hpFromLevels = value - racialBaseHitPoints; } }
@@ -85,6 +86,9 @@ public abstract class Acter : MonoBehaviour {
 		++level;
 		xpToLevel = (int)Math.Pow(baseXPToLevel, level * .75f);
 		damageAnnouncer.AnnounceText("reached level " + level);
+		if (this is PlayerController) {
+			PlayerController.Instance.announcer.ExpToLevelChanged(xpToLevel, level + 1);
+		}
 	}
 	public virtual string MainClass
 	{
@@ -271,6 +275,7 @@ public abstract class Acter : MonoBehaviour {
 						
 						if (EquippedSecondaryWeapon.isSpellbook) {
 							pendingSpell = StartCoroutine(CastSpell());
+							attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(5));
 						}
 						else {
 							var animSpeed = Speed * EquippedSecondaryWeapon.speedCoefficient / 400;
@@ -299,7 +304,9 @@ public abstract class Acter : MonoBehaviour {
 					}
 				}
 				shouldUseMainHand = shouldUseOffhand = false;
-				attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(10));//.5f / anim.speed));
+				if (attackFinishGuarantee == null) {
+				    attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(2));//.5f / anim.speed));
+			  	}
 				break;
 			case ST_WALK:
 				if (state == ST_ATTACK) return false;
@@ -327,6 +334,7 @@ public abstract class Acter : MonoBehaviour {
 					StopCoroutine(pendingSpell);
 					pendingSpell = null;
 				}
+				attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(1));//.5f / anim.speed));
 				break;
 			case ST_CAKE:
 				isBlocking = false;
@@ -338,6 +346,7 @@ public abstract class Acter : MonoBehaviour {
 					StopCoroutine(pendingSpell);
 					pendingSpell = null;
 				}
+				attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(1.5f));//.5f / anim.speed));
 				break;
 			case ST_DEAD:
 				isBlocking = false;
@@ -766,8 +775,6 @@ public abstract class Acter : MonoBehaviour {
 	void TryGetItem () {
 		if (shouldPickUpItem && eligiblePickups.Count > 0) {
 			foreach(var eligible in eligiblePickups.FindAll(w => !w.IsEquipped)) {
-				print (eligible);
-				
 				if (eligible.tag == "NonEquipmentItem") {		// food
 					var food = eligible as FoodController;
 					bool shouldEat = false;
@@ -826,8 +833,7 @@ public abstract class Acter : MonoBehaviour {
 			StopCoroutine(pendingSpell);
 			pendingSpell = null;
 		}
-		if (State == ST_ATTACK) ExitState();
-		print ("left attack state");
+		ExitState();
 	}
 	
 	public virtual void AttackActiveFramesDidFinish() {
@@ -876,7 +882,6 @@ public abstract class Acter : MonoBehaviour {
 			if (EquippedSecondaryWeapon.charges != -1) --EquippedSecondaryWeapon.charges;
 		}
 		else {
-			print ("blocking...");
 			if (!EquippedSecondaryWeapon.name.Contains("Shield")) Debug.LogError("only shields should fall through to here");
 			isBlocking = true;
 		}
@@ -970,7 +975,7 @@ public abstract class Acter : MonoBehaviour {
 			Anim.CrossFade("spell_complete", 0.5f);
 			yield return new WaitForSeconds(0.5f);
 			
-			if (!isWand) {
+			if (!isWand && EquippedSecondaryWeapon) {
 				EquippedSecondaryWeapon.MapChildren(w => w.tag = "spell");
 			}
 			Action<WeaponController> Fire = wc => {
@@ -1121,6 +1126,9 @@ public abstract class Acter : MonoBehaviour {
 	
 	// returns whether to continue child's fixedupdate()
 	protected virtual bool _FixedUpdate() {
+//		if (state == null || state.Length == 0) state = ST_REST;
+//		print (State);
+		
 		if (hitPoints > MaxHitPoints) hitPoints = MaxHitPoints;	// can happen with a curse
 		healthBar.SetCurrentHP(hitPoints, racialBaseHitPoints);
 		
@@ -1177,9 +1185,11 @@ public abstract class Acter : MonoBehaviour {
 	void OnTriggerStay (Collider collider) {
 //		print (collider);
 		if (collider.tag == "Wall") {
+			print ("get back in there");
 			var zDir = transform.position.z > 5? -1 : 1;
 			transform.position = transform.position + new Vector3(0, 0, zDir);
 		}
+		
 //		if (collider.tag == "Wall") {
 //			var zDir = transform.position.z > 5? -1 : 1;
 //			transform.position = transform.position + new Vector3(0, 0, zDir);

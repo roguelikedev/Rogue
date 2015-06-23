@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Utilities.Geometry;
 
 public class BroomController : WeaponController {
-	protected virtual float PushDirection { get { return 1; } }
+	public float pushDirection;
 	protected virtual Vector3 Center {
 		get {
 			if (Parent != null) return Parent.transform.position;
@@ -26,13 +26,14 @@ public class BroomController : WeaponController {
 				}
 				else direction = victim.transform.position - Center;		// it's a trap
 				direction.y = 0;
-				direction *= PushDirection;
 				
 //				direction.z = Mathf.Abs(direction.z);
 				if (direction.Len3 > 9) {
 					continue;
 				}
 				direction = direction.Normalish;
+				direction *= pushDirection;
+				
 				direction /= Mathf.Sqrt(victim.Poise);
 				victim.transform.position = victim.transform.position + direction;
 			}

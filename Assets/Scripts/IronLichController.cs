@@ -11,8 +11,8 @@ public class IronLichController : DemonController {
 	void Start() {
 		InitializeAura(WeaponController.DMG_DEATH, auraDamage);
 		damageAura.GetComponent<CapsuleCollider>().radius *= 2;
-		var book = Instantiate(SpellGenerator.Instance().blankBook);
-		book.payload = SpellGenerator.Instance().Beam(WeaponController.DMG_FIRE);
+		var book = Instantiate(SpellGenerator.Instance.blankBook);
+		book.payload = SpellGenerator.Instance.Beam(WeaponController.DMG_FIRE);
 		book.payload.attackPower *= 3;
 		book.payload.depth = 1;	// make this always choose to cast rather than ineffectual melee
 		Equip (book);

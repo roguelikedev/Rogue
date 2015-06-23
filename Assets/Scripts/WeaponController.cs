@@ -33,6 +33,12 @@ public class WeaponController : ItemController {
 			}	
 		}
 	}
+	public override bool IsEquipped {
+		get {
+			if (Parent) return Parent;
+			return base.IsEquipped;
+		}
+	}
 	protected Acter Parent { get { return IsProjectile ? thrownBy : GetComponentInParent<Acter>(); } }
 	
 	public WeaponController payload;
