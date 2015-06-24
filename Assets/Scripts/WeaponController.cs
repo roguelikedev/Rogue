@@ -150,7 +150,7 @@ public class WeaponController : ItemController {
 				var holyShitWhy = Instantiate(emitter);
 				Destroy(holyShitWhy.gameObject);
 			}
-		}
+		} 
 		
 		if (constantNoise != null) {
 			if (audioSource == null) {

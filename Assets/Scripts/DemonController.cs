@@ -7,6 +7,19 @@ public class DemonController : EnemyController {
 	protected int auraRefreshCountdown;
 	public float auraDamage;
 	
+	public static WeaponController CreateAura(int damageType, float power) {
+		var rval = SpellGenerator.Instance.Pillar(damageType);
+		rval.lifetime = -1;
+		rval.attackPower *= power;
+		rval.transform.localPosition = Vector3.zero;
+		var ctr = rval.GetComponent<CapsuleCollider>().center;
+		ctr.x = 0;
+		rval.GetComponent<CapsuleCollider>().center = ctr;
+		rval.gameObject.SetActive(true);
+		rval.attackActive = true;
+		return rval;
+	}
+	
 	protected void InitializeAura(int damageType, float power) {
 		damageAura = SpellGenerator.Instance.Pillar(damageType);
 		damageAura.lifetime = -1;
@@ -17,6 +30,7 @@ public class DemonController : EnemyController {
 		ctr.x = 0;
 		damageAura.GetComponent<CapsuleCollider>().center = ctr;
 		damageAura.gameObject.SetActive(true);
+		damageAura.attackActive = true;
 		damageAura.thrownBy = this;
 	}
 	

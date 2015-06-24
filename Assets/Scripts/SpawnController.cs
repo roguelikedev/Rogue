@@ -23,7 +23,7 @@ public class SpawnController : MonoBehaviour {
 	public EnemyController enemyCHUD;
 	public EnemyController enemyWoman;
 	public EnemyController enemyTroll;
-	public EnemyController enemyDemon;
+	public DemonController enemyDemon;
 	public EnemyController enemySuccubus;
 	public EnemyController enemyGhoul;
 	public EnemyController enemyTreant;
@@ -71,6 +71,7 @@ public class SpawnController : MonoBehaviour {
 	public SignpostController signPost;
 	public List<int> previouslyPosted = new List<int>();
 	SpellGenerator SpellGenerator { get { return GetComponentInParent<SpellGenerator>(); } }
+	public Sprite beltSprite;
 	#endregion
 	#region fetch
 	public static SpawnController Instance { get { return GameObject.FindObjectOfType<SpawnController>(); } }
@@ -262,7 +263,13 @@ public class SpawnController : MonoBehaviour {
 		var boom = what.payload;
 		if (boom == null) return;
 		var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
-		if (possibleEmitters.Length == 0) possibleEmitters = boom.payload.GetComponentsInChildren<ParticleSystem>(true);
+		if (possibleEmitters.Length == 0) {
+			if (!boom.payload) {
+				Debug.LogError("can't apply particles to " + what.Description);
+				return;
+			}
+			possibleEmitters = boom.payload.GetComponentsInChildren<ParticleSystem>(true);
+		}
 		
 		//			foreach(var emitter in possibleEmitters) {
 		ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
@@ -327,7 +334,7 @@ public class SpawnController : MonoBehaviour {
 	
 	bool hasSpawnedHugeness = false;
 	TrinketController MakeTrinket (float depth) {
-		switch(Random.Range(0,5)) {
+		switch(Random.Range(0,6)) {
 			case 0:
 				if (PlayerController.Instance.isAquatic) goto case 1;
 				return Instantiate(boot);
@@ -346,15 +353,71 @@ public class SpawnController : MonoBehaviour {
 				if (hasSpawnedHugeness) goto case 2;
 				hasSpawnedHugeness = true;
 				return Instantiate(rearGlove);
+			case 5:
+				return MakeBelt(depth);
 			default:
 				Debug.LogError("broken switch");
 				return null;
 		}
 	}
 	
+	TrinketController MakeBelt (float depth) {
+		TrinketController rval = Instantiate(amulet);
+		rval.GetComponent<SpriteRenderer>().sprite = Instantiate(beltSprite);
+		rval.GetComponent<SpriteRenderer>().sortingOrder = 5;
+		
+		WeaponController damageAura;
+		int damagetype;
+		switch (Random.Range(0, 3)) {
+			case 0:
+				damagetype = WeaponController.DMG_FIRE;
+				break;
+			case 1:
+				damagetype = WeaponController.DMG_DEATH;
+				break;
+			case 2:
+				damagetype = WeaponController.DMG_PARA;
+				break;
+//			case 3:
+//				damagetype = WeaponController.DMG_RAISE;
+//				break;
+//			case 4:
+//				damagetype = WeaponController.DMG_HEAL;
+//				break;
+//			case 5:
+//				break;
+//			case 6:
+//				break;
+			default: Debug.LogError("fell through case statement!"); damagetype = WeaponController.DMG_PHYS; break;
+		}
+		damageAura = DemonController.CreateAura(damagetype, Mathf.Sqrt(depth));
+		damageAura.transform.parent = rval.transform;
+		damageAura.transform.localPosition = new Vector3(0,2,0);
+		damageAura.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vector3.zero;
+		damageAura.impactNoise = damageAura.constantNoise;
+		damageAura.constantNoise = null;
+		
+		rval.OnPickup += a => {
+			damageAura.thrownBy = a;
+			a.OnFixedUpdate += () => {
+				damageAura.transform.position = a.transform.position;
+				if (damageAura.GetComponentInChildren<ParticleSystem>() != null) {
+					damageAura.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vector3.zero;
+				}
+//				if (damageAura.lifetime <= 10) {
+//					damageAura.attackVictims.Clear();
+//					damageAura.lifetime = 60;
+//				}
+			};
+		};
+		
+		return rval;
+	}
+	
 	TreasureChest MakeTreasureChest (float depth) {
 		var rval = Instantiate(treasureChest);
-		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
+		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth)
+										.ConvertAll(i => i as WeaponController);
 		possibilities.Add(itemEstusFlask as WeaponController);
 		if (PlayerController.Instance.spellpower > 1) {
 			possibilities.Add(SpellGenerator.Instance.blankBook);
@@ -373,7 +436,7 @@ public class SpawnController : MonoBehaviour {
 			rval.contents.Add(itemInstance);
 			lcv += itemInstance.Depth;
 		}
-		if (Random.Range(0,3) != 0) rval.contents.Add(MakeTrinket(depth));
+		if (Random.Range(0, stinginess) < 1) rval.contents.Add(MakeTrinket(depth));
 		
 		rval.contents.ForEach(i => {
 			i.gameObject.SetActive(false);
@@ -394,14 +457,13 @@ public class SpawnController : MonoBehaviour {
 			}
 			
 			if (contents.Count == 0) {
-				contents = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth).ConvertAll(i => i as WeaponController);
+				contents = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth + 9)
+							.ConvertAll(i => i as WeaponController);
 				continue;
 			}
 			
 			itemInstance = Instantiate(contents[Random.Range(0, contents.Count)]);
 		}
-		if (guaranteeArmor) print (itemInstance.Description);
-//		itemInstance = Instantiate(contents[Random.Range(0, contents.Count)]);
 		
 		var enchantDepth = Random.Range(0, Mathf.Sqrt(depth)) - Random.Range(1, 10);
 		if (enchantDepth > 0 && itemInstance.GetComponent<EstusController>() == null) {
@@ -421,6 +483,7 @@ public class SpawnController : MonoBehaviour {
 		};
 		#region pinata
 		if (itemPinata) {
+//			amulet.MakeAmulet(1).transform.position = RandomLocation();
 //			MakeTreasureChest(6).transform.position = RandomLocation();
 //			MakeTreasureChest(6).transform.position = RandomLocation();
 //			MakeTreasureChest(6).transform.position = RandomLocation();
@@ -430,12 +493,14 @@ public class SpawnController : MonoBehaviour {
 //			MakeTreasureChest(27).transform.position = RandomLocation();			
 			
 			for (int lcv = 0; lcv < 9; ++lcv) {
-//				var b = Instantiate(barrel);
-//				b.transform.position = RandomLocation();
-				var book = Instantiate(SpellGenerator.blankBook);
-				print ("pinata'ing " + book.Description);
-				SpellGenerator.Generate((lcv + 1) * 3, book);
-				book.transform.position = RandomLocation();
+////				var b = Instantiate(barrel);
+////				b.transform.position = RandomLocation();
+//				var book = Instantiate(SpellGenerator.blankBook);
+//				print ("pinata'ing " + book.Description);
+//				SpellGenerator.Generate((lcv + 1) * 3, book);
+//				book.transform.position = RandomLocation();
+				MakeTrinket(depth).transform.position = RandomLocation();
+				
 			}
 
 //			AllEquipment.ForEach(i => Instantiate(i).transform.position = RandomLocation());
@@ -478,12 +543,12 @@ public class SpawnController : MonoBehaviour {
 //			b.meleeMultiplier = 0.01f;
 //			b.Equip(Instantiate(itemKnife));
 			for (int lcv = 0; lcv < 1; ++lcv) {
-				var b = Instantiate(enemySnake);
-				b.Equip(Instantiate(itemBow));
+//				var b = Instantiate(enemySnake);
+//				b.Equip(Instantiate(itemBow));
 //				var b = MakeEquipmentBox(depth);
-//				var b = Instantiate(barrel);
+				var b = Instantiate(barrel);
 //				var b = Instantiate(enemyShieldGolem);
-//				b.transform.position = RandomLocation();
+				b.transform.position = RandomLocation();
 //				b = Instantiate(enemyTroll);
 //				b.transform.position = RandomLocation();
 			}

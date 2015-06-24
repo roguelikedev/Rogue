@@ -165,24 +165,24 @@ public class TerrainController : MonoBehaviour {
 			else {
 				int specialType;
 				switch(areaType) {
-				case D_CAVE:
-					specialType = D_MERCY;
-					break;
-				case D_THORNS:
-					specialType = D_TROG;
-					break;
-				case D_WATER:
-					specialType = D_ARMORY;
-					break;
-				case D_TOMB:
-					specialType = D_TROVE;
-					break;
-				case D_FOREST:
-					specialType = D_ENCHANT;
-					break;
-				default:
-					specialType = D_CHRISTMAS;					
-					break;
+					case D_CAVE:
+						specialType = D_MERCY;
+						break;
+					case D_THORNS:
+						specialType = D_TROG;
+						break;
+					case D_WATER:
+						specialType = D_ARMORY;
+						break;
+					case D_TOMB:
+						specialType = D_TROVE;
+						break;
+					case D_FOREST:
+						specialType = D_ENCHANT;
+						break;
+					default:
+						specialType = D_CHRISTMAS;					
+						break;
 				}
 				var chanceOfMunchkinLand = 2;
 				chanceOfMunchkinLand += visitedSpecialRooms.FindAll(t => t == specialType).Count;

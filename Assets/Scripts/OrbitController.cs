@@ -11,6 +11,7 @@ public class OrbitController : MonoBehaviour {
 	float zVelocity = 0;
 	float xVelocity = -1f;
 	Vec offset;
+	
 	void Update () {
 		if (PlayerController.Instance == null) return;
 		if (goDown) {
@@ -45,17 +46,7 @@ public class OrbitController : MonoBehaviour {
 		offset += Vec.New(xVelocity, 0, zVelocity);
 		transform.position = offset + PlayerController.Instance.transform.localPosition - Vec.New(0,2,6);
 		
-//		transform.localPosition = Vec.Zero;
-//		transform.Rotate(xWorld, yWorld, zWorld, Space.World);// *= Vec.New(1, 1, 1f, 1).ToQ;
-//		transform.Rotate(xWorld, yWorld, zWorld, Space.World);// *= Vec.New(1, 1, 1f, 1).ToQ;
-//		transform.Rotate(xWorld, yWorld, zWorld, Space.World);// *= Vec.New(1, 1, 1f, 1).ToQ;
-//		transform.Rotate(xWorld, yWorld, zWorld, Space.Self);// *= Vec.New(1, 1, 1f, 1).ToQ;
-//		print ("wpn " + GetComponentInChildren<WeaponController>());
-//		print (" spr " + GetComponentInChildren<WeaponController>().GetComponent<SpriteRenderer>());
-//		print ("head " + PlayerController.Instance.head);
-//		print ("head spr " + PlayerController.Instance.head.GetComponent<SpriteRenderer>());
 		GetComponentInChildren<WeaponController>().GetComponent<SpriteRenderer>().sortingOrder =
 					PlayerController.Instance.head.GetComponent<SpriteRenderer>().sortingOrder;
-//		transform.RotateAround(PlayerController.Instance.transform.position, Vec.New(xSelf, ySelf, zSelf), 1);// *= Vec.New(1, 1, 1f, 1).ToQ;
 	}
 }

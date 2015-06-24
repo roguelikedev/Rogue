@@ -152,7 +152,7 @@ public abstract class Acter : MonoBehaviour {
 	Coroutine attackFinishGuarantee;
 	Coroutine decay;
 	public Action<Acter> OnHitEffects = other => {};
-	protected Action OnFixedUpdate = () => {};
+	public Action OnFixedUpdate = () => {};
 	Dictionary<SpriteRenderer, int> bodyParts = new Dictionary<SpriteRenderer, int>();
 	bool isBlocking;
 	public bool huge;
@@ -688,42 +688,43 @@ public abstract class Acter : MonoBehaviour {
 		trinket.transform.localRotation = Quaternion.identity;
 		trinket.transform.localScale = Vector3.one;
 		trinket.GetComponent<SpriteRenderer>().sortingLayerName = "Character";
-		trinket.GetComponent<SpriteRenderer>().sortingOrder = head.GetComponent<SpriteRenderer>().sortingOrder - 1;
 		
-		meleeMultiplier += trinket.meleeMultiplier;
 		if (!isAquatic && trinket.waterWalking) {
 			isAquatic = true;
 			var foot = GetSlot("backFoot");
 			trinket.transform.parent = foot;
-			trinket.transform.localRotation = Quaternion.identity;
-			trinket.transform.localPosition = Vector3.zero;
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = foot.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
 		if (!freeAction && trinket.freeAction) {
 			freeAction = true;
 			var foot = GetSlot("frontFoot");
 			trinket.transform.parent = foot;
-			trinket.transform.localRotation = Quaternion.identity;
-			trinket.transform.localPosition = Vector3.zero;
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = foot.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
 		if (trinket.npcSlowdown != 1 && CameraController.Instance.npcSpeedModifier == 1) {
 			CameraController.Instance.npcSpeedModifier *= trinket.npcSlowdown;
 			var hand = GetSlot("frontForeArm");
 			trinket.transform.parent = hand;
-			trinket.transform.localRotation = Quaternion.identity;
-			trinket.transform.localPosition = Vector3.zero;
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = hand.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
 		if (trinket.hugeness != 1) {
 			Grow(trinket.hugeness);
 			var hand = GetSlot("backForeArm");
 			trinket.transform.parent = hand;
-			trinket.transform.localRotation = Quaternion.identity;
-			trinket.transform.localPosition = Vector3.zero;
 			trinket.GetComponent<SpriteRenderer>().sortingOrder = hand.GetComponent<SpriteRenderer>().sortingOrder + 1;
 		}
+		if (trinket.GetComponentInChildren<WeaponController>()) {
+			var waist = GetSlot("pelvis");
+			trinket.transform.parent = waist;
+			trinket.GetComponent<SpriteRenderer>().sortingOrder = torso.GetComponent<SpriteRenderer>().sortingOrder + 3;
+		}
+//		trinket.GetComponent<SpriteRenderer>().sortingOrder = head.GetComponent<SpriteRenderer>().sortingOrder - 1;
 		
+		
+		trinket.transform.localRotation = Quaternion.identity;
+		trinket.transform.localPosition = Vector3.zero;
+		
+		meleeMultiplier += trinket.meleeMultiplier;
 		armorClass += trinket.armorClass;
 		speed += trinket.speed;
 		spellpower += trinket.spellPower;
@@ -1182,6 +1183,12 @@ public abstract class Acter : MonoBehaviour {
 		}// else print ("paralyze scaling " + paralyzeScaling);
 		
 		OnFixedUpdate();
+		
+		if ((State == ST_HURT || State == ST_ATTACK || State == ST_CAKE) && attackFinishGuarantee == null) {
+			Debug.LogError (Name + " recovered from " + State + " coma");
+			attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(1));
+		}
+		
 		if (State == ST_ATTACK) {
 			GetComponent<Rigidbody>().velocity = Vector3.zero;
 			return false;

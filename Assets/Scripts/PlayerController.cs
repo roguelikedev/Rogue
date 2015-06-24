@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class PlayerController : Acter {
+	#region variables and properties
 	public CameraController cameraController;
 	public bool infiniteHealth = false;
 	string mainClass = "";
@@ -28,6 +29,7 @@ public class PlayerController : Acter {
 		var jasonMask = GetArmor(GetSlot("Head"));
 		return (jasonMask != null && jasonMask.name.Contains("Mask")); 
 	} }
+	#endregion
 	
 	void Start () {
 		xpToLevel = baseXPToLevel;
@@ -324,6 +326,7 @@ public class PlayerController : Acter {
 		
 		
 		if (!_FixedUpdate()) return;
+		
 //		print ("should " + (shouldUseMainHand ? " attack " : "") + (shouldUseOffhand ? " shoot " : ""));
 		if (MainClass == "") return;
 
