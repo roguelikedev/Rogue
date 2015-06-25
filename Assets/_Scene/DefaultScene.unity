@@ -498,7 +498,7 @@ MonoBehaviour:
   song4: {fileID: 8300000, guid: dc54d1f7780d0964db43014071c3000c, type: 3}
   song5: {fileID: 8300000, guid: 105ca1a2970cdaa4890400b68ef112ff, type: 3}
   muteSoundFX: 0
-  muteSongs: 1
+  muteSongs: 0
   volume: .100000001
 --- !u!4 &183704368 stripped
 Transform:
@@ -1625,8 +1625,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 776a9ba0349a1bb4e96a56fad039610c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  preventSpawn: 1
-  itemPinata: 1
+  preventSpawn: 0
+  itemPinata: 0
   stinginess: 2.5
   enemyOrc: {fileID: 11498326, guid: 8dbbc6dd81f71774583c63e9191a9473, type: 2}
   enemyGoblin: {fileID: 11498326, guid: 96fc54eeec1a8ce43a78ec80f2053e92, type: 2}
