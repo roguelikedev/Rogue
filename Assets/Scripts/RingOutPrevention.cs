@@ -6,7 +6,7 @@ public class RingOutPrevention : MonoBehaviour {
 
 	void OnTriggerStay (Collider collider) {
 		var act = collider.GetComponent<Acter>();
-		if (act) {
+		if (act && act.State != Acter.ST_DEAD) {
 			act.transform.position = act.transform.position + shoveDirection;
 		}
 	}

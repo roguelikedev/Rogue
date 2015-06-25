@@ -31,6 +31,7 @@ public class TerrainController : MonoBehaviour {
 	public EnchanterStatue enchanterStatue;
 	public OrbitController buzzsaw;
 	public static TerrainController Instance { get { return GameObject.FindObjectOfType<TerrainController>(); } }
+	public Room roomPrefab;
 	public bool ShowTraps {
 		get {
 			return showTraps;
@@ -63,7 +64,7 @@ public class TerrainController : MonoBehaviour {
 	int generatedCount = 0;
 	int previousAreaType = 0;
 	public bool fuckTheWaterLevel;
-	List<Room> rooms = new List<Room>();
+	public List<Room> rooms = new List<Room>();
 	#endregion
 	#region constants
 	const int TILE_SZ = 5;
@@ -73,17 +74,10 @@ public class TerrainController : MonoBehaviour {
 					, D_MERCY = 7, D_TROG = 8, D_ENCHANT = 9, D_TROVE = 10, D_HELL = -1;
 	List<int> visitedSpecialRooms = new List<int>();
 	#endregion	
-	#region Room	
-	public class Room {
-		public List<GameObject> tiles = new List<GameObject>();
-		public int xIndex;
-		public int terrainType;
-		public int nextRoomType;
-	}
 	Room LeftmostRoom {
 		get {
 			Room rval = rooms[0];
-			rooms.ForEach(r => { if(r.xIndex < rval.xIndex) rval = r; });
+			rooms.ForEach(r => { if (r.xIndex < rval.xIndex) rval = r; });
 			return rval;
 		}
 	}
@@ -94,7 +88,6 @@ public class TerrainController : MonoBehaviour {
 			return rval;
 		}
 	}
-	#endregion
 	#region life cycle
 	void Start ()
 	{
@@ -325,14 +318,13 @@ public class TerrainController : MonoBehaviour {
 	Room GenerateAtIndex(int index, Rigidbody floorType, Texture texture, int areaType)
 	{
 		if (rooms.Exists(r => r.xIndex == index)) return null;
-//		print ("make index " + index + " depth " + Depth);
 		if (texture == null) {
 			var tmp = floorType.GetComponent<MeshRenderer>();
 			if (tmp == null) tmp = floorType.GetComponentInChildren<MeshRenderer>();
 			texture = tmp.sharedMaterial.GetTexture("_MainTex");
 		}
 		
-		var room = new Room();
+		var room = Instantiate(roomPrefab);
 		room.nextRoomType = ChooseNextRoomType(areaType);
 										
 		room.terrainType = areaType;

@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 public class TrinketController : ItemController {
-	public CameraController cameraController;
 	public float meleeMultiplier;
 	public bool waterWalking;
 	public float armorClass;
@@ -15,19 +14,19 @@ public class TrinketController : ItemController {
 	public float npcSlowdown = 1;
 	public float hugeness = 1;
 	public WeaponController aura;
+	public OrbitController buzzsaw = null;
 	bool hasGyppedPlayer = false;
 	bool friendless = false;
 	bool hasStrangledPlayer = false;
+	bool blindness = false;
+	const float BLIND_SCREEN_SIZE = 5;
 	
-	void Start() {
-		cameraController = FindObjectOfType<CameraController>();
+	public void Forget () {
+		blindness = hasGyppedPlayer = hasStrangledPlayer = false;
 	}
 	
 	public TrinketController MakeAmulet (float depth) {
 		var rval = Instantiate(this);
-		rval.regeneration = -Mathf.Sqrt(depth);
-		hasStrangledPlayer = true;
-		return rval;
 		
 		switch (Random.Range (0, 5)) {
 			case 0:
@@ -53,8 +52,8 @@ public class TrinketController : ItemController {
 				}
 				break;
 			case 3:
-				if (!hasStrangledPlayer) {
-					rval.regeneration = -Mathf.Sqrt(depth);
+				if (!hasStrangledPlayer && PlayerController.Instance.friendless) {
+					rval.regeneration = -Mathf.Pow(depth, .33f);
 					hasStrangledPlayer = true;
 					return rval;
 				}
@@ -65,12 +64,12 @@ public class TrinketController : ItemController {
 		float value = 0;
 		while (value < depth) {
 			float magnitude = Mathf.Max(2, Random.Range(depth / 2, depth));
-			switch(Random.Range(0, 5)) {
+			switch(Random.Range(0, 6)) {
 				case 0:
 					rval.meleeMultiplier += magnitude / (SpawnController.Instance.stinginess * 2);
 					break;
 				case 1:
-					rval.armorClass += magnitude / SpawnController.Instance.stinginess;
+					rval.armorClass += (magnitude / SpawnController.Instance.stinginess) / WeaponController.GLOBAL_ARMOR_SCALING;
 					break;
 				case 2:
 					rval.speed += magnitude * 30 / SpawnController.Instance.stinginess;
@@ -80,6 +79,14 @@ public class TrinketController : ItemController {
 					break;
 				case 4:
 					rval.regeneration = Mathf.Sqrt(magnitude / SpawnController.Instance.stinginess);
+					break;
+				case 5:
+					rval.buzzsaw = TerrainController.Instance.buzzsaw;
+					rval.OnPickup += a => {
+						rval.buzzsaw = Instantiate(rval.buzzsaw);
+						rval.buzzsaw.weapon.thrownBy = PlayerController.Instance;
+						SpawnController.Instance.EnchantEquipment(rval.buzzsaw.weapon, depth);
+					};
 					break;
 				default:
 					Debug.LogError("fell through switch statement");
@@ -91,7 +98,6 @@ public class TrinketController : ItemController {
 	}
 	
 	public void OnIdentify () {
-		print (this);
 		System.Func<float, string> Abbreviate = f => {
 			var rval = f.ToString();
 			return rval.Substring(0, Mathf.Min(3, rval.Length));
@@ -110,7 +116,8 @@ public class TrinketController : ItemController {
 		if (friendless) properties.Add (" hatred");
 		if (regeneration > 0) properties.Add(" regeneration+" + Abbreviate(regeneration));
 		if (regeneration < 0) properties.Add(" strangulation" + Abbreviate(regeneration));
-		
+		if (buzzsaw != null) properties.Add(" slashing");
+			
 		if (properties.Count == 0) {
 			properties.Add(" adornment");
 		}
@@ -127,6 +134,6 @@ public class TrinketController : ItemController {
 		}
 		if (friendless || regeneration < 0) noun = "cursed " + noun;
 		
-		cameraController.NoteText("identified " + noun + " of" + _properties);
+		CameraController.Instance.NoteText("identified " + noun + " of" + _properties);
 	}
 }

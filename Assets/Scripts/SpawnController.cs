@@ -262,18 +262,14 @@ public class SpawnController : MonoBehaviour {
 	public void ApplyParticles (WeaponController what) {
 		var boom = what.payload;
 		if (boom == null) return;
-		var possibleEmitters = boom.GetComponentsInChildren<ParticleSystem>(true);
-		if (possibleEmitters.Length == 0) {
-			if (!boom.payload) {
-				Debug.LogError("can't apply particles to " + what.Description);
-				return;
-			}
-			possibleEmitters = boom.payload.GetComponentsInChildren<ParticleSystem>(true);
+		var possibleEmitters = new List<ParticleSystem>(boom.GetComponentsInChildren<ParticleSystem>(true));
+		if (possibleEmitters.Count == 0 && boom.payload) {
+			boom.MapChildren(pl => possibleEmitters.AddRange(pl.GetComponentsInChildren<ParticleSystem>(true)));
 		}
 		
 		//			foreach(var emitter in possibleEmitters) {
 		ParticleSystem emitter;// boom.GetComponentInChildren<ParticleSystem>();
-		if (possibleEmitters.Length == 0) emitter = SpellGenerator.purpleParticles;
+		if (possibleEmitters.Count == 0) emitter = SpellGenerator.purpleParticles;
 		else emitter = possibleEmitters[0];
 		
 		emitter = Instantiate(emitter);
@@ -333,31 +329,36 @@ public class SpawnController : MonoBehaviour {
 	}
 	
 	bool hasSpawnedHugeness = false;
+	bool originalHasForgotten = false;
 	TrinketController MakeTrinket (float depth) {
+		if (!originalHasForgotten) {
+			amulet.Forget();
+			originalHasForgotten = true;
+		}
+	
 		switch(Random.Range(0,6)) {
 			case 0:
-				if (PlayerController.Instance.isAquatic) goto case 1;
+				if (PlayerController.Instance.isAquatic) goto default;
 				return Instantiate(boot);
 			case 1:
-				if (PlayerController.Instance.freeAction) goto case 2;
+				if (PlayerController.Instance.freeAction) goto default;
 				var _boot = Instantiate(boot);
 				_boot.waterWalking = false;
 				_boot.freeAction = true;
 				return _boot;
-			case 2:
-				return amulet.MakeAmulet(depth);
+//			case 2:		this is now default
+//				return amulet.MakeAmulet(depth);
 			case 3:
-				if (CameraController.Instance.npcSpeedModifier != 1) goto case 2;
+				if (CameraController.Instance.npcSpeedModifier != 1) goto default;
 				return Instantiate(glove);
 			case 4:
-				if (hasSpawnedHugeness) goto case 2;
+				if (hasSpawnedHugeness) goto default;
 				hasSpawnedHugeness = true;
 				return Instantiate(rearGlove);
 			case 5:
 				return MakeBelt(depth);
 			default:
-				Debug.LogError("broken switch");
-				return null;
+				return amulet.MakeAmulet(depth);
 		}
 	}
 	
@@ -399,15 +400,17 @@ public class SpawnController : MonoBehaviour {
 		
 		rval.OnPickup += a => {
 			damageAura.thrownBy = a;
+			var refreshRate = 60;
+			var refreshCountdown = refreshRate;
 			a.OnFixedUpdate += () => {
 				damageAura.transform.position = a.transform.position;
 				if (damageAura.GetComponentInChildren<ParticleSystem>() != null) {
 					damageAura.GetComponentInChildren<ParticleSystem>().transform.localPosition = Vector3.zero;
 				}
-//				if (damageAura.lifetime <= 10) {
-//					damageAura.attackVictims.Clear();
-//					damageAura.lifetime = 60;
-//				}
+				if (refreshCountdown-- <= 0) {
+					damageAura.attackVictims.Clear();
+					refreshCountdown = refreshRate;
+				}
 			};
 		};
 		
@@ -416,7 +419,7 @@ public class SpawnController : MonoBehaviour {
 	
 	TreasureChest MakeTreasureChest (float depth) {
 		var rval = Instantiate(treasureChest);
-		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth)
+		var possibilities = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth + 9)
 										.ConvertAll(i => i as WeaponController);
 		possibilities.Add(itemEstusFlask as WeaponController);
 		if (PlayerController.Instance.spellpower > 1) {
@@ -457,7 +460,7 @@ public class SpawnController : MonoBehaviour {
 			}
 			
 			if (contents.Count == 0) {
-				contents = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth + 9)
+				contents = ChooseByDepth(AllEquipment.ConvertAll(i => i as IDepthSelectable), depth)
 							.ConvertAll(i => i as WeaponController);
 				continue;
 			}
@@ -483,7 +486,7 @@ public class SpawnController : MonoBehaviour {
 		};
 		#region pinata
 		if (itemPinata) {
-//			amulet.MakeAmulet(1).transform.position = RandomLocation();
+			amulet.MakeAmulet(1).transform.position = RandomLocation();
 //			MakeTreasureChest(6).transform.position = RandomLocation();
 //			MakeTreasureChest(6).transform.position = RandomLocation();
 //			MakeTreasureChest(6).transform.position = RandomLocation();
@@ -500,7 +503,6 @@ public class SpawnController : MonoBehaviour {
 //				SpellGenerator.Generate((lcv + 1) * 3, book);
 //				book.transform.position = RandomLocation();
 				MakeTrinket(depth).transform.position = RandomLocation();
-				
 			}
 
 //			AllEquipment.ForEach(i => Instantiate(i).transform.position = RandomLocation());

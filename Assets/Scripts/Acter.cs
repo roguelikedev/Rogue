@@ -105,6 +105,7 @@ public abstract class Acter : MonoBehaviour {
 			if (State != ST_DEAD) {
 				hitPoints += (qtyPerSecond / 60) * GLOBAL_DMG_SCALING;
 				if (hitPoints > MaxHitPoints - fireDamageTaken) hitPoints = MaxHitPoints - fireDamageTaken;
+				if (hitPoints < 0) hitPoints = 0;	// strangulation
 			}
 		};
 	}
@@ -672,12 +673,10 @@ public abstract class Acter : MonoBehaviour {
 		}
 	}
 	
-//	bool playerHasHugenessHack = false;
 	protected void EquipTrinket (TrinketController trinket) {
 		if (isAquatic && trinket.waterWalking) return;
 		if (freeAction && trinket.freeAction) return;
 		if (trinket.npcSlowdown != 1 && CameraController.Instance.npcSpeedModifier != 1) return;
-//		if (trinket.hugeness != 1 && playerHasHugenessHack) return;
 		if (trinket.hugeness != 1 && GetSlot("backForeArm").GetComponentInChildren<TrinketController>()) return;
 		
 		trinket.OnPickup(this);

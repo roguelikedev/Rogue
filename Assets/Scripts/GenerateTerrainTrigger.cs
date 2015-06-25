@@ -4,20 +4,14 @@ using System.Collections;
 public class GenerateTerrainTrigger : MonoBehaviour {
 	public TerrainController terrainController;
 	public int index;
-	public object room;
-	int NextRoomType { get { return (room as TerrainController.Room).nextRoomType; } }
+	public Room room;
+	int NextRoomType { get { return room.nextRoomType; } }
 	public SpriteRenderer dangerSign;
 	public Sprite leftArrow;
 	public Sprite rightArrow;
 	public SpriteRenderer arrow;
 	public TextMesh nextRoomName;
 	public bool shouldNotWarn = false;
-//	bool waitingOnDestroy = false;
-	
-//	void FixedUpdate () {
-//		if (
-//	
-//	}
 	
 	public void Warn () {
 		if (shouldNotWarn) return;
@@ -30,7 +24,7 @@ public class GenerateTerrainTrigger : MonoBehaviour {
 				if (w.damageType == WeaponController.DMG_HEAL || w.damageType == WeaponController.DMG_RAISE) shouldNotWarn = true;
 			};
 			pc.EquippedWeapon.MapChildren(CheckTurnGhosts);
-			pc.EquippedSecondaryWeapon.MapChildren(CheckTurnGhosts);
+			if (pc.EquippedSecondaryWeapon) pc.EquippedSecondaryWeapon.MapChildren(CheckTurnGhosts);
 		}
 		else if (NextRoomType == TerrainController.D_FOREST) {
 			System.Action<WeaponController> CheckKillTreants = w => {

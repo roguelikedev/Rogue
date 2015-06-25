@@ -75,9 +75,9 @@ public class PlayerController : Acter {
 			case "firewalker":
 				var boom = Instantiate(SpellGenerator.Instance.blankWand);
 				boom.payload = SpellGenerator.Instance.Vortex();
-//				boom.payload.payload = SpellGenerator.Instance.Explosion();
-//				boom.payload.payload.attackPower *= 4;
-//				boom.payload.payload.tag = "spell";
+				boom.payload.payload = SpellGenerator.Instance.Explosion();
+				boom.payload.payload.attackPower *= 4;
+				boom.payload.payload.tag = "spell";
 				SpellGenerator.Instance.Fan(boom.payload, 2);
 				boom.charges = boom.maxCharges = 3;
 				Equip(boom);
@@ -198,13 +198,15 @@ public class PlayerController : Acter {
 		Application.LoadLevel("DefaultScene");
 	}
 	void Update () {
-		if (infiniteHealth) {
-			cameraController.StatsChanged("acters", LivingActers.Count, Time.deltaTime);
-		}
-	
 		if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")) {
 			StartCoroutine(wtfCmon());
 		}
+		
+		#region HUD
+		if (infiniteHealth) {
+			cameraController.StatsChanged("acters", LivingActers.Count, Time.deltaTime);
+		}
+		
 		SpeechBubble.transform.rotation = Quaternion.identity;
 		SpeechBubble.GetComponentInChildren<SpriteRenderer>().sortingOrder = -10;
 		var fade = new Color(0, 0, 0, 1f/120);
@@ -213,8 +215,8 @@ public class PlayerController : Acter {
 		
 		if (MainClass == "") return;
 		
+		var hbar = healthBar.GetComponent<PlayerHealthBarController>();
 		if (EquippedSecondaryWeapon != null) {
-			var hbar = healthBar.GetComponent<PlayerHealthBarController>();
 			var myWand = EquippedSecondaryWeapon.GetComponent<WandController>();
 			if (myWand != null) {
 				hbar.itemCharges.text = myWand.charges + "/" + myWand.maxCharges;
@@ -223,16 +225,21 @@ public class PlayerController : Acter {
 			else hbar.wandIcon.gameObject.SetActive(false);
 			var myPot = EquippedSecondaryWeapon.GetComponent<EstusController>();
 			if (myPot != null) {
-				print (myPot);
 				hbar.itemCharges.text = myPot.charges + "";
 				hbar.potionIcon.gameObject.SetActive(true);
 			}
 			else {
-				hbar.itemCharges.text = "";
 				hbar.potionIcon.gameObject.SetActive(false);
 			}
+			if (myPot == null && myWand == null) hbar.itemCharges.text = "";
 		}
-		
+		else {
+			hbar.itemCharges.text = "";
+			hbar.potionIcon.gameObject.SetActive(false);
+			hbar.wandIcon.gameObject.SetActive(false);
+		}
+		#endregion
+		#region left/right click
 		if (!shouldUseOffhand && (Input.GetKeyDown ("e") || Input.GetKeyDown(KeyCode.Mouse0) 
 		                          || Input.GetKeyDown ("j") || Input.GetButtonDown("Fire1"))) 
 		{
@@ -264,6 +271,7 @@ public class PlayerController : Acter {
 			}
 		}
 		else lockOffHandCounter = 0;
+		#endregion
 		
 		if (Input.GetKeyDown (KeyCode.Space) || Input.GetButtonDown("Fire3")) {
 			shouldPickUpItem = true;
