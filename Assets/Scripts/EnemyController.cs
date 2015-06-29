@@ -170,7 +170,7 @@ public class EnemyController : Acter, IDepthSelectable
 		}
 	}
 	public int ChallengeRating { get { return racialLevel + level; } }
-	public void AwardExpForMyDeath () {
+	public virtual void AwardExpForMyDeath () {
 		LivingActers.FindAll(a => a.friendly != friendly).ForEach(a => {
 			a.RewardExperience(ChallengeRating);
 		});

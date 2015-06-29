@@ -187,7 +187,9 @@ public class WeaponController : ItemController {
 				audioSource.Play();
 			}
 		}
-		base._FixedUpdate();
+		if (Owner != null && Owner.GetComponent<PlayerController>() == null) {	// don't delete the player's items when they fall through floor
+			base._FixedUpdate();
+		}
 	}
 	
 	/// <summary>returns whether 'other' took damage.</summary>

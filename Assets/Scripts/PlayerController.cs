@@ -18,12 +18,13 @@ public class PlayerController : Acter {
 	public bool friendless;
 	public WeaponController murderMask;
 	public WeaponController executionerCowl;
-	bool isTerrifying;
-	public bool IsTerrifying { get { return isTerrifying; } }
+	bool isSilent;
+	public bool IsSilent { get { return isSilent; } }
 	int lockMainHandCounter;
 	bool lockMainHand;
 	int lockOffHandCounter;
 	bool lockOffHand;
+	public bool starving;
 	
 	public bool IsJason { get {
 		var jasonMask = GetArmor(GetSlot("Head"));
@@ -45,6 +46,64 @@ public class PlayerController : Acter {
 			}
 		});
 	}
+	
+	public const int CURSE_HATE = 0, CURSE_LEPROSY = 1, CURSE_STARVE = 2, CURSE_DRAIN_CHARGE = 3, CURSE_TRAPS = 4
+						, CURSE_STINGY = 5, CURSE_DEPTH = 6, CURSE_SILENT = 7, CURSE_NIGHTGAUNT = 8, CURSE_MAX_ROOMS = 9
+						, CURSE_LEVEL = 10
+						, CURSE_LAST_PLUS_ONE = 11;
+	public void InflictCurse (int curseType) {
+		switch (curseType) {
+			case CURSE_HATE:
+				friendless = true;
+				CameraController.Instance.AnnounceText("you are friendless\nyou murderer");
+				break;
+			case CURSE_LEPROSY:
+				healthBar.GetComponent<PlayerHealthBarController>().neverShowHealth = true;
+				healthBar.SetCurrentHP(0, 0);
+				CameraController.Instance.AnnounceText("you go numb");
+				break;
+			case CURSE_STARVE:
+				starving = true;
+				CameraController.Instance.AnnounceText("you're starving");
+				break;
+			case CURSE_DRAIN_CHARGE:
+				if (EquippedSecondaryWeapon && EquippedSecondaryWeapon.charges != -1) {
+					EquippedSecondaryWeapon.charges = 0;
+					CameraController.Instance.NoteText("charges drained from " + EquippedSecondaryWeapon.Name);
+				}
+				break;
+			case CURSE_TRAPS:
+				TerrainController.Instance.trapRarity = Mathf.Max(1, TerrainController.Instance.trapRarity - 1);
+				CameraController.Instance.AnnounceText("traps have multiplied");
+				break;
+			case CURSE_STINGY:
+				SpawnController.Instance.stinginess += 0.5f;
+				CameraController.Instance.AnnounceText("treasures flee\nfrom you");
+				break;
+			case CURSE_DEPTH:
+				TerrainController.Instance.statuesDestroyed -= .25f;
+				CameraController.Instance.AnnounceText("things are\nharder");
+				break;
+			case CURSE_SILENT:
+				isSilent = true;
+				CameraController.Instance.AnnounceText("you are struck dumb");
+				break;
+			case CURSE_NIGHTGAUNT:
+				TerrainController.Instance.baseNightgauntRate *= 0.75f;
+				CameraController.Instance.AnnounceText("the nightgaunts\nfavor you");
+				TerrainController.Instance.SpawnNightgaunt();
+				break;
+			case CURSE_MAX_ROOMS:
+				TerrainController.Instance.maxRooms = 2;		// going lower than 2 does nothing
+				CameraController.Instance.AnnounceText("you feel claustrophobic");
+				break;
+			case CURSE_LEVEL:
+				GainLevel("mummy curse");
+				CameraController.Instance.AnnounceText("your mind fills with\nuseless knowledge");
+				break;
+		}
+	}
+	
 	#region munchkins
 	public void GainExperience (int quantity) {
 		xpToLevel -= quantity;
@@ -145,7 +204,7 @@ public class PlayerController : Acter {
 				ChangeSkinColor();
 				SpawnController.Instance.stinginess++;
 				TerrainController.Instance.statuesDestroyed--;
-				isTerrifying = true;
+				isSilent = true;
 				break;
 			case "wretch":
 				CameraController.Instance.AnnounceText ("are you really\nup to this\nchallenge?");
@@ -167,7 +226,7 @@ public class PlayerController : Acter {
 				Equip (Instantiate(executionerCowl));
 				skinColor = new Color(.95f, .85f, .9f);
 				ChangeSkinColor();
-				isTerrifying = true;
+				isSilent = true;
 				break;
 			default: break;
 		}
@@ -198,10 +257,19 @@ public class PlayerController : Acter {
 		Application.LoadLevel("DefaultScene");
 	}
 	void Update () {
+		#region bug hax
 		if (Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")) {
 			StartCoroutine(wtfCmon());
 		}
-		
+		if (transform.position.y < -10) {
+			CameraController.Instance.AnnounceText("you have fallen\nthrough the world");
+			transform.position = new Vector3 (transform.position.x, 50, transform.position.z);
+			torso.GetComponent<SphereCollider>().isTrigger = true;
+		}
+		if (transform.position.y < 20) {
+			torso.GetComponent<SphereCollider>().isTrigger = false;
+		}
+		#endregion
 		#region HUD
 		if (infiniteHealth) {
 			cameraController.StatsChanged("acters", LivingActers.Count, Time.deltaTime);
@@ -346,7 +414,10 @@ public class PlayerController : Acter {
 		if (v.x != 0 || v.z != 0) {
 			if (EnterStateAndAnimation(ST_WALK)) Move(v);
 		}
-		else GetComponent<Rigidbody>().velocity = Vector3.zero;
+		else {
+			Move (Vector3.zero);
+		}
+		if (State != ST_WALK && State != ST_REST) GetComponent<Rigidbody>().velocity = Vector3.zero;
 		
 		if (v == Vector3.zero && State != ST_CAST) {
 			EnterStateAndAnimation(ST_REST);
@@ -360,7 +431,6 @@ public class PlayerController : Acter {
 			other.TakeDamage(100, WeaponController.DMG_RAISE);
 			return;
 		}
-		
 			
 		base.WeaponDidCollide(other, weaponController, friendlyFireOK);
 		cameraController.ExpToLevelChanged(xpToLevel, level + 1);

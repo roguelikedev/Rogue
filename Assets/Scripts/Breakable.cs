@@ -8,7 +8,7 @@ public class Breakable : MonoBehaviour {
 	public ItemController smallMeal;
 	public ItemController largeMeal;
 	public ItemController hugeMeal;
-	public bool broken= false;
+	public bool broken = false;
 	
 	void Start() {
 		GetComponentInChildren<SpriteRenderer>().sortingOrder -= (int)(transform.position.z * 10);
@@ -30,14 +30,19 @@ public class Breakable : MonoBehaviour {
 		broken = true;
 		CameraController.Instance.PlaySound(smash);
 		if (smallMeal != null || largeMeal != null || hugeMeal != null) {
-			var meals = new List<IDepthSelectable>();
-			meals.Add(smallMeal);
-			meals.Add(largeMeal);
-			meals.Add(hugeMeal);
-			meals = SpawnController.Instance.ChooseByDepth(meals, TerrainController.Instance.Depth, 1);
-			var meal = meals[Random.Range(0, meals.Count)];
-			Instantiate(meal as ItemController, transform.position, Quaternion.identity);
-			smallMeal = largeMeal = hugeMeal = null;
+			if (PlayerController.Instance.starving) {
+				;
+			}
+			else {
+				var meals = new List<IDepthSelectable>();
+				meals.Add(smallMeal);
+				meals.Add(largeMeal);
+				meals.Add(hugeMeal);
+				meals = SpawnController.Instance.ChooseByDepth(meals, TerrainController.Instance.Depth, 1);
+				var meal = meals[Random.Range(0, meals.Count)];
+				Instantiate(meal as ItemController, transform.position, Quaternion.identity);
+				smallMeal = largeMeal = hugeMeal = null;
+			}
 		}
 		else { 	// statue
 			if (PlayerController.Instance.IsJason) {

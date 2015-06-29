@@ -60,16 +60,16 @@ public class TerrainController : MonoBehaviour {
 			return (int)Mathf.Max(1, Mathf.Min(27, rval));
 		}
 	}
-	public int statuesDestroyed = 0;
+	public float statuesDestroyed = 0;
 	int generatedCount = 0;
 	int previousAreaType = 0;
 	public bool fuckTheWaterLevel;
 	public List<Room> rooms = new List<Room>();
+	public int maxRooms = 3;
 	#endregion
 	#region constants
 	const int TILE_SZ = 5;
 	const int TILES_PER_ROOM = 5;
-	const int MAX_ROOMS = 3;
 	public const int D_FOREST = 0, D_WATER = 1, D_CAVE = 2, D_THORNS = 3, D_TOMB = 4, D_CHRISTMAS = 5, D_ARMORY = 6
 					, D_MERCY = 7, D_TROG = 8, D_ENCHANT = 9, D_TROVE = 10, D_HELL = -1;
 	List<int> visitedSpecialRooms = new List<int>();
@@ -88,30 +88,34 @@ public class TerrainController : MonoBehaviour {
 			return rval;
 		}
 	}
-	#region life cycle
+	#region life cycle/update
 	void Start ()
 	{
 		rooms.Add(GenerateAtIndex(0, tilePrefab, stone, D_CAVE));
 		announcer.AnnounceText("Entered Wimps Cave");
 	}
 	
+	public float baseNightgauntRate = 100;
 	int nightgauntCooldown = 0;
+	public void SpawnNightgaunt () {
+		var loc = Random.Range(0, 2) == 0 ? LeftmostRoom.tiles[0].transform.position.x - TILE_SZ * 6
+			: RightmostRoom.tiles[RightmostRoom.tiles.Count - 1].transform.position.x + TILE_SZ * 6;
+		var ng = Instantiate(spawnController.enemyNightgaunt);
+		ng.transform.position = new Vector3(loc, 0) + ng.transform.position;
+	}
 	void FixedUpdate () {
 		if (Depth < 25) return;
 		if (Acter.LivingActers.Count > 5) return;
 		if (Random.Range(0, nightgauntCooldown) == 0) {
-			nightgauntCooldown += (int)(100 * Mathf.Pow(Acter.LivingActers.FindAll(e => !e.friendly).Count, 1.5f)
+			nightgauntCooldown += (int)(baseNightgauntRate * Mathf.Pow(Acter.LivingActers.FindAll(e => !e.friendly).Count, 1.5f)
 											 / Mathf.Pow(Depth - 24, 2));
-			var loc = Random.Range(0, 2) == 0 ? LeftmostRoom.tiles[0].transform.position.x - TILE_SZ * 6
-					: RightmostRoom.tiles[RightmostRoom.tiles.Count - 1].transform.position.x + TILE_SZ * 6;
-			var ng = Instantiate(spawnController.enemyNightgaunt);
-			ng.transform.position = new Vector3(loc, 0) + ng.transform.position;
+			SpawnNightgaunt();
 		}
 		if (nightgauntCooldown > 1) nightgauntCooldown--;
 	}
 	
 	void CleanUp(int currentIndex) {
-		if (rooms.Count <= MAX_ROOMS) return;
+		if (rooms.Count <= maxRooms) return;
 		
 		System.Action<List<GameObject>, System.Func<GameObject, bool>> Spotless = (l, pred) => {
 			l.RemoveAll(i => i == null);
@@ -186,14 +190,14 @@ public class TerrainController : MonoBehaviour {
 			if (rval == D_THORNS && Depth < 1) continue;
 			if (rval == D_WATER && Depth < 2) continue;
 			if (rval == D_FOREST && Depth < 4) continue;
-			if (rval == D_TOMB && Depth < 5) continue;
+			if (rval == D_TOMB && Depth < 6) continue;
 			else break;
 		}
 		return rval;
 	}
 	
 	public string LevelFeeling (int type) {
-		if (PlayerController.Instance.IsTerrifying) {
+		if (PlayerController.Instance.IsSilent) {
 			return "   ...";
 		}
 		

@@ -18,17 +18,17 @@ public class TrinketController : ItemController {
 	bool hasGyppedPlayer = false;
 	bool friendless = false;
 	bool hasStrangledPlayer = false;
-	bool blindness = false;
-	const float BLIND_SCREEN_SIZE = 5;
+	bool leprosy = false;
+	bool hasSpawnedLeprosy = false;
 	
 	public void Forget () {
-		blindness = hasGyppedPlayer = hasStrangledPlayer = false;
+		hasSpawnedLeprosy = hasGyppedPlayer = hasStrangledPlayer = false;
 	}
 	
 	public TrinketController MakeAmulet (float depth) {
 		var rval = Instantiate(this);
 		
-		switch (Random.Range (0, 5)) {
+		switch (Random.Range (0, 6)) {
 			case 0:
 				if (!hasGyppedPlayer) {
 					hasGyppedPlayer = true;
@@ -45,8 +45,7 @@ public class TrinketController : ItemController {
 				if (!PlayerController.Instance.friendless) {
 					rval.friendless = true;
 					rval.OnPickup += a => {
-						PlayerController.Instance.friendless = true;
-						CameraController.Instance.AnnounceText("you are friendless\nyou murderer");
+						PlayerController.Instance.InflictCurse(PlayerController.CURSE_HATE);
 					};
 					return rval;
 				}
@@ -55,6 +54,16 @@ public class TrinketController : ItemController {
 				if (!hasStrangledPlayer && PlayerController.Instance.friendless) {
 					rval.regeneration = -Mathf.Pow(depth, .33f);
 					hasStrangledPlayer = true;
+					return rval;
+				}
+				break;
+			case 4:
+				if (!hasSpawnedLeprosy) {
+					rval.leprosy = true;
+					rval.OnPickup += a => {
+						PlayerController.Instance.InflictCurse(PlayerController.CURSE_LEPROSY);
+					};
+					hasSpawnedLeprosy = true;
 					return rval;
 				}
 				break;
@@ -85,7 +94,7 @@ public class TrinketController : ItemController {
 					rval.OnPickup += a => {
 						rval.buzzsaw = Instantiate(rval.buzzsaw);
 						rval.buzzsaw.weapon.thrownBy = PlayerController.Instance;
-						SpawnController.Instance.EnchantEquipment(rval.buzzsaw.weapon, depth);
+						SpawnController.Instance.EnchantEquipment(rval.buzzsaw.weapon, magnitude);
 					};
 					break;
 				default:
@@ -117,6 +126,7 @@ public class TrinketController : ItemController {
 		if (regeneration > 0) properties.Add(" regeneration+" + Abbreviate(regeneration));
 		if (regeneration < 0) properties.Add(" strangulation" + Abbreviate(regeneration));
 		if (buzzsaw != null) properties.Add(" slashing");
+		if (leprosy) properties.Add(" leprosy");
 			
 		if (properties.Count == 0) {
 			properties.Add(" adornment");

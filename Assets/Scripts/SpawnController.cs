@@ -30,6 +30,7 @@ public class SpawnController : MonoBehaviour {
 	public EnemyController enemyIronLich;
 	public EnemyController enemyShieldGolem;
 	public EnemyController enemyNightgaunt;
+	public EnemyController enemyMummy;
 	
 	public WeaponController itemBrick;
 	public WeaponController itemBow;
@@ -163,6 +164,7 @@ public class SpawnController : MonoBehaviour {
 				case TerrainController.D_TOMB:
 					bestMatches.Add(enemySuccubus);
 					bestMatches.Add(enemyGhoul);
+					bestMatches.Add(enemyMummy);					
 					break;
 				case TerrainController.D_FOREST:
 					bestMatches.Add(enemyTreant);
@@ -529,14 +531,15 @@ public class SpawnController : MonoBehaviour {
 		for (int lcv = 0; lcv < 3; ++lcv) {
 			if (Random.Range(0, stinginess) > 1) continue;
 			
-			var s = Random.Range(0, 12);
+			var range = 12;
+			var s = Random.Range(0, range);
 			if (s == 0) MakeTreasureChest(depth).transform.position = RandomLocation();
 			else if (s < 3 && !hasMadeSign) {
 				Instantiate(signPost).transform.position = RandomLocation();
 				hasMadeSign = true;
 			}
-			else if (s < 4) Instantiate(barrel).transform.position = RandomLocation();
-			else if (s < 11) MakeEquipmentBox(depth).transform.position = RandomLocation();
+			else if (s < 5) Instantiate(barrel).transform.position = RandomLocation();
+			else if (s < range - stinginess) MakeEquipmentBox(depth).transform.position = RandomLocation();
 		}
 		#region preventSpawn
 		if (preventSpawn && depth > 0) {
@@ -548,7 +551,7 @@ public class SpawnController : MonoBehaviour {
 //				var b = Instantiate(enemySnake);
 //				b.Equip(Instantiate(itemBow));
 //				var b = MakeEquipmentBox(depth);
-				var b = Instantiate(barrel);
+				var b = Instantiate(enemyMummy);
 //				var b = Instantiate(enemyShieldGolem);
 				b.transform.position = RandomLocation();
 //				b = Instantiate(enemyTroll);

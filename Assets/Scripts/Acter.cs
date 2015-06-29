@@ -77,6 +77,8 @@ public abstract class Acter : MonoBehaviour {
 				GainLevel(C_FIGHT);
 				level -= 3;
 				break;
+			case "mummy curse":
+				break;
 			default:
 				Debug.LogError("no such class: " + whichClass);
 				break;
@@ -150,7 +152,7 @@ public abstract class Acter : MonoBehaviour {
 	List<WeaponController> equipASAP = new List<WeaponController>();
 	public bool friendly = false;
 	Coroutine pendingSpell;
-	Coroutine attackFinishGuarantee;
+	protected Coroutine attackFinishGuarantee;
 	Coroutine decay;
 	public Action<Acter> OnHitEffects = other => {};
 	public Action OnFixedUpdate = () => {};
@@ -192,7 +194,7 @@ public abstract class Acter : MonoBehaviour {
 					if (w.name.Contains("fireball")) danger = true;
 				});
 			}
-			if (!PlayerController.Instance.IsTerrifying) {
+			if (!PlayerController.Instance.IsSilent) {
 				PlayerController.Instance.Speak(danger ? "if i blow you up\ni'm sorry" : "nice to meet you");
 			}
 		}
@@ -424,7 +426,6 @@ public abstract class Acter : MonoBehaviour {
 		rot.y = facingRight ? 180 : 0;
 		transform.rotation = rot;
 	}
-	
 	protected void Move(Vector3 direction)
 	{
 		if (direction.x > 0 && !facingRight) Flip ();
@@ -445,6 +446,7 @@ public abstract class Acter : MonoBehaviour {
 		
 		if (direction.y > 0) direction.y = 0;			// don't skateboard jump off of ramps
 		if (direction.y < -1) direction.y = -10;		// don't float off of ramps
+		
 		grappledBy.ForEach(e => {
 			if (!freeAction) direction /= e.meleeMultiplier;
 			if (Vector3.Distance(transform.position, e.transform.position) 

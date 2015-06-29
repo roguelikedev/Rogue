@@ -38,7 +38,7 @@ public class BroomController : WeaponController {
 				victim.transform.position = victim.transform.position + direction;
 			}
 		}
-		
+		else attackVictims.Clear();
 		
 		base._FixedUpdate ();
 	}

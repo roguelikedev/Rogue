@@ -19,6 +19,9 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 	TextMesh notesOutline;
 	TextMesh expMeter;
 	TextMesh statsDisplay;
+	TextMesh scoreText;
+	TextMesh scoreAmountText;
+	int scoreAmount;
 	bool shouldFadeIn;
 	bool shouldFadeOut;
 	const float fadeSpeed = 0.015f;
@@ -103,6 +106,16 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 		statsDisplay.text = mainStat + " " + Round(mainStatValue) + "  armor " + Round(armorClass);
 	}
 	
+	IEnumerator DecreaseScoreByTime () {
+		while (true) {
+			yield return new WaitForSeconds(1);
+			scoreAmount--;
+			UpdateScore();
+		}
+	}
+	void UpdateScore () {
+		scoreAmountText.text = "" + scoreAmount;
+	}
 	Vector3 offset;
 	// Use this for initialization
 	void Awake () {
@@ -112,6 +125,10 @@ public class CameraController : MonoBehaviour {		// FIXME: this class shouldn't 
 		notesOutline = GetComponentsInChildren<TextMesh>()[4];
 		expMeter = GetComponentsInChildren<TextMesh>()[2];
 		statsDisplay = GetComponentsInChildren<TextMesh>()[3];
+		scoreText = GetComponentsInChildren<TextMesh>()[6];
+		scoreAmountText = GetComponentsInChildren<TextMesh>()[5];
+		scoreAmountText.text = "0";
+		StartCoroutine(DecreaseScoreByTime());
 		notes.text = "";
 		notesOutline.text = "";
 		var color = announcement.color;

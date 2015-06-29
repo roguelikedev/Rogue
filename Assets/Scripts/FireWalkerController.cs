@@ -8,11 +8,7 @@ public class FireWalkerController : PlayerController {
 	public override void HasExploredNewRoom ()
 	{
 		var book = EquippedSecondaryWeapon;
-		print (book != null);
-		print ("pl " + (book.payload != null));
-		print ("fb " + book.payload.payload + (book.payload.payload is FireballController));
 		if (book != null && book.payload != null && book.payload.payload != null && book.payload.payload is FireballController) {
-			print ("fuck me!!!");
 			if (startingFireball == null) {
 				startingFireball = book.payload.payload as FireballController;
 				fireballBaseDamage = book.payload.payload.attackPower;

@@ -31,7 +31,7 @@ public class HealthBarController : MonoBehaviour {
 	}
 	
 	float prevHP = -1;
-	public void SetCurrentHP (float hp, float hpPerColor) {
+	public virtual void SetCurrentHP (float hp, float hpPerColor) {
 		if (player == null) return;
 		transform.position = player.transform.position + offset;
 		
