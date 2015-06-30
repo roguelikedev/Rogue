@@ -22,6 +22,7 @@ TagManager:
   - grapple zone
   - spell
   - slashing weapon
+  - namepicker
   layers:
   - Default
   - TransparentFX

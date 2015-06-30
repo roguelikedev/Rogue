@@ -25,6 +25,7 @@ public class PlayerController : Acter {
 	int lockOffHandCounter;
 	bool lockOffHand;
 	public bool starving;
+	public string userName = "";
 	
 	public bool IsJason { get {
 		var jasonMask = GetArmor(GetSlot("Head"));
@@ -45,6 +46,7 @@ public class PlayerController : Acter {
 				if (wand != null) wand.HasChangedRoom();
 			}
 		});
+		GameObject.FindObjectOfType<ScoreController>().PlayerEnteredRoom();
 	}
 	
 	public const int CURSE_HATE = 0, CURSE_LEPROSY = 1, CURSE_STARVE = 2, CURSE_DRAIN_CHARGE = 3, CURSE_TRAPS = 4
@@ -107,8 +109,15 @@ public class PlayerController : Acter {
 	#region munchkins
 	public void GainExperience (int quantity) {
 		xpToLevel -= quantity;
-		if (xpToLevel <= 0) GainLevel(MainClass);
+		if (xpToLevel <= 0) {
+			GainLevel(MainClass);
+		}
 		cameraController.ExpToLevelChanged(xpToLevel, level + 1);
+	}
+	public override void GainLevel (string whichClass)
+	{
+		base.GainLevel (whichClass);
+		GameObject.FindObjectOfType<ScoreController>().PlayerGainedLevel();		
 	}
 	public void SetClass(string which) {
 		if (which == "priest") mainClass = C_WIZARD;
@@ -251,7 +260,7 @@ public class PlayerController : Acter {
 		}
 		return base.WantsToEquip (w);
 	}
-
+	
 	IEnumerator wtfCmon () {			// this is necessary to stop editor locking up
 		yield return new WaitForSeconds(0.1f);
 		Application.LoadLevel("DefaultScene");
@@ -281,6 +290,7 @@ public class PlayerController : Acter {
 		SpeechBubble.color -= fade; 
 		SpeechBubble.GetComponentInChildren<SpriteRenderer>().color -= fade;
 		
+		if (ScoreController.Instance.playerName == "") return;
 		if (MainClass == "") return;
 		
 		var hbar = healthBar.GetComponent<PlayerHealthBarController>();
@@ -355,8 +365,10 @@ public class PlayerController : Acter {
 		}
 		if (Input.GetKeyDown ("tab"))
 		{
+//			PlayerPrefs.SetString("name", "");
 			damageAnnouncer.AnnounceDeath();
-			Speak("one more try...");		
+			CameraController.Instance.AnnounceDeath("debug");
+			Speak("one more try...");
 			infiniteHealth = !infiniteHealth;
 			spellpower *= infiniteHealth ? 10 : 0.1f;
 			speed *= infiniteHealth ? 4 : 0.25f;
@@ -405,6 +417,7 @@ public class PlayerController : Acter {
 		
 //		print ("should " + (shouldUseMainHand ? " attack " : "") + (shouldUseOffhand ? " shoot " : ""));
 		if (MainClass == "") return;
+		if (ScoreController.Instance.playerName == "") return;
 
 		Vector3 v = Vector3.zero;
 		v.x = Input.GetAxis ("Horizontal");

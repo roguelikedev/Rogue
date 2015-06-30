@@ -24,6 +24,7 @@ public class IronLichController : DemonController {
 		base.TakeDamage (quantity, type);
 		if (State == ST_DEAD) {
 			CameraController.Instance.AnnounceText("YOU HAVE WON\nrevenge is sweet");
+			GameObject.FindObjectOfType<ScoreController>().PlayerHasWon();
 		}
 	}
 }

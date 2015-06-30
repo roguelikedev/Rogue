@@ -39,7 +39,7 @@ public abstract class Acter : MonoBehaviour {
 			GainLevel(MainClass);
 		}
 	}
-	public void GainLevel(string whichClass) {
+	public virtual void GainLevel(string whichClass) {
 		switch (whichClass) {
 			case C_BRUTE: goto case C_FIGHT;
 			case C_FIGHT:
@@ -246,6 +246,8 @@ public abstract class Acter : MonoBehaviour {
 		GetComponent<Rigidbody>().useGravity = true;
 		GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotation;
 		state = ST_REST;
+		if (EquippedSecondaryWeapon) EquippedSecondaryWeapon.attackActive = false;
+		EquippedWeapon.attackActive = false;
 		if (attackFinishGuarantee != null) StopCoroutine(attackFinishGuarantee);
 		EnterStateAndAnimation(ST_REST);
 	}
@@ -1106,7 +1108,6 @@ public abstract class Acter : MonoBehaviour {
 		var qty = weaponController.attackPower;
 		if (!weaponController.IsProjectile || weapon.tag == "Throwable Weapon") {
 			qty *= meleeMultiplier;
-			if (weaponController.Name.Contains("iltless")) print (qty);
 		}
 		
 		var prevState = other.State;
@@ -1185,6 +1186,7 @@ public abstract class Acter : MonoBehaviour {
 		
 		OnFixedUpdate();
 		
+//		print (State);
 		if ((State == ST_HURT || State == ST_ATTACK || State == ST_CAKE) && attackFinishGuarantee == null) {
 			Debug.LogError (Name + " recovered from " + State + " coma");
 			attackFinishGuarantee = StartCoroutine(LeaveAttackStateGuarantee(1));
